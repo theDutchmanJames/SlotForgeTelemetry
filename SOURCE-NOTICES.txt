@@ -13,7 +13,9 @@ renderer/theme.js, renderer/themes.css and renderer/performance.css: unchanged.
 renderer/icons/*.svg and assets/icon.svg / icon.ico: original Paddock artwork.
 tests/performance.test.cjs: five calculation-only tests from Paddock's
 performance.test.cjs; collection/store integration tests are not included.
-LICENSE: original SlotForge Source-Available License, retained in full.
+LICENSE: SlotForge Source-Available License 1.0, with the scope naming
+SlotForge Telemetry. All licensing terms are retained from Paddock; the
+Paddock-derived code and artwork remain attributed above.
 
 Added for this standalone concept: Electron shell, input workspace, rim and
 radial tyre-thickness conversion, setup JSON format, local persistence,

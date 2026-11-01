@@ -1,5 +1,13 @@
 # Changelog
 
+## Licence wording correction — 1 November 2026
+
+- Corrected the licence scope to name SlotForge Telemetry. Permissions,
+  restrictions, copyright and Paddock attribution remain unchanged.
+- The original v0.6.2 packages contain the earlier Paddock-named text; the
+  corrected licence is supplied separately with that release and will be
+  embedded in subsequent builds.
+
 ## 0.6.2 — 1 November 2026
 
 ### Pre-release review fixes
