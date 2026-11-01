@@ -8,7 +8,9 @@ SlotForge Telemetry is a desktop calculator for slotcar gearing, motors, tyres a
 
 Start with gear tooth counts and tyre diameter. Add motor ratings, weight, ballast or measured lap times whenever you want to go further. **You only need to enter the information you have.**
 
-**Version 0.6.2.** The app works offline, with no account or timing hardware required.
+**Version 0.7.0.** The app works offline, with no account or timing hardware required.
+
+**New in 0.7.0:** Import reviewed race results from Paddock, analyze measured laps, compare runs and keep an offline race library. This feature requires a Paddock build with Telemetry result-download support. See [connecting to Paddock](docs/PADDOCK-RESULTS.md).
 
 **[Download SlotForge Telemetry](https://github.com/theDutchmanJames/SlotForgeTelemetry/releases/latest)** — choose your computer below. No coding, Terminal or Node.js is needed to use the packaged app.
 
@@ -24,10 +26,10 @@ Open the [latest release](https://github.com/theDutchmanJames/SlotForgeTelemetry
 
 | Your computer | Download | What to do |
 | --- | --- | --- |
-| **Windows, 64-bit Intel/AMD** | [Windows Portable.exe](https://github.com/theDutchmanJames/SlotForgeTelemetry/releases/download/v0.6.2/SlotForgeTelemetry-0.6.2-windows-x64-Portable.exe) | Save it, then double-click it. |
-| **Mac, Apple Silicon or Intel** | [Mac universal.dmg](https://github.com/theDutchmanJames/SlotForgeTelemetry/releases/download/v0.6.2/SlotForgeTelemetry-0.6.2-mac-universal.dmg) | Open it and drag the app into Applications. |
-| **Ubuntu, Debian or Mint, 64-bit Intel/AMD** | [Linux.deb](https://github.com/theDutchmanJames/SlotForgeTelemetry/releases/download/v0.6.2/SlotForgeTelemetry-0.6.2-linux-amd64.deb) | Open with your system's software installer. |
-| **Other Linux desktops, 64-bit Intel/AMD** | [Linux.AppImage](https://github.com/theDutchmanJames/SlotForgeTelemetry/releases/download/v0.6.2/SlotForgeTelemetry-0.6.2-linux-x86_64.AppImage) | Allow it to run as a program, then double-click it. |
+| **Windows, 64-bit Intel/AMD** | [Windows Portable.exe](https://github.com/theDutchmanJames/SlotForgeTelemetry/releases/download/v0.7.0/SlotForgeTelemetry-0.7.0-windows-x64-Portable.exe) | Save it, then double-click it. |
+| **Mac, Apple Silicon or Intel** | [Mac universal.dmg](https://github.com/theDutchmanJames/SlotForgeTelemetry/releases/download/v0.7.0/SlotForgeTelemetry-0.7.0-mac-universal.dmg) | Open it and drag the app into Applications. |
+| **Ubuntu, Debian or Mint, 64-bit Intel/AMD** | [Linux.deb](https://github.com/theDutchmanJames/SlotForgeTelemetry/releases/download/v0.7.0/SlotForgeTelemetry-0.7.0-linux-amd64.deb) | Open with your system's software installer. |
+| **Other Linux desktops, 64-bit Intel/AMD** | [Linux.AppImage](https://github.com/theDutchmanJames/SlotForgeTelemetry/releases/download/v0.7.0/SlotForgeTelemetry-0.7.0-linux-x86_64.AppImage) | Allow it to run as a program, then double-click it. |
 
 The Mac ZIP contains the same app as the DMG. The configured Linux release target is x64; the source builder supports an ARM64 Linux host.
 
@@ -37,7 +39,7 @@ The Mac ZIP contains the same app as the DMG. The configured Linux release targe
 
 1. Click **Windows Portable.exe** in the table above. Your browser normally saves it in **Downloads**.
 2. Move the file somewhere easy to find, such as a **SlotForge Telemetry** folder inside **Documents**.
-3. Double-click **SlotForgeTelemetry-0.6.2-windows-x64-Portable.exe**. There is no installation wizard.
+3. Double-click **SlotForgeTelemetry-0.7.0-windows-x64-Portable.exe**. There is no installation wizard.
 4. Try the included example. For easier access later, create a shortcut or pin the running app to your taskbar.
 
 The Windows build is unsigned, so Windows may show **unknown publisher** or **Windows protected your PC**. Check that you downloaded it from this repository. If you trust the download and Windows offers it, choose **More info → Run anyway**. On a managed work or school computer, ask your administrator if it is blocked. Do not turn off antivirus protection.
@@ -155,7 +157,7 @@ Telemetry combines exact arithmetic with simplified physical models. Use it to u
 - **Scale speed is a size-based conversion**, not equivalent full-size vehicle performance.
 - Unsupported/missing results show **—**. Entering test voltages does not rescale motor ratings.
 
-Telemetry is a standalone setup calculator. It does not currently provide live sensor readings, automatic lap timing or automatic synchronization with another SlotForge app.
+Telemetry does not provide live sensor readings or automatic lap timing. The Paddock integration imports reviewed Timing sessions through Paddock; it keeps measured laps separate from the setup calculator's theoretical estimates.
 
 ## Keep your setups safe
 

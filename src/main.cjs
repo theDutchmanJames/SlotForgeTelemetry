@@ -7,7 +7,7 @@ function createWindow() {
   const win = new BrowserWindow({
     width: 1440, height: 980, minWidth: 760, minHeight: 620,
     title: 'SlotForge Telemetry', backgroundColor: '#171b21', icon: path.join(__dirname, process.platform === 'win32' ? '../assets/icon.ico' : '../assets/icon.png'),
-    webPreferences: { contextIsolation: true, nodeIntegration: false, sandbox: true }
+    webPreferences: { contextIsolation: true, nodeIntegration: false, sandbox: true, preload: path.join(__dirname,'preload.cjs') }
   });
   win.webContents.setWindowOpenHandler(() => ({ action: 'deny' }));
   win.webContents.on('will-navigate', event => event.preventDefault());
@@ -22,6 +22,8 @@ app.on('second-instance', () => {
   if(win){if(win.isMinimized())win.restore();win.show();win.focus();}
 });
 app.whenReady().then(() => {
+  const paddock=require('./paddock-ipc.cjs').registerPaddock(app.getPath('userData'));
+  app.on('before-quit',()=>paddock.disconnect());
   session.defaultSession.setPermissionRequestHandler((_wc, _permission, callback) => callback(false));
   session.defaultSession.setPermissionCheckHandler(() => false);
   Menu.setApplicationMenu(Menu.buildFromTemplate([

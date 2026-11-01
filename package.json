@@ -1,6 +1,6 @@
 {
   "name": "slotforge-calculator",
-  "version": "0.6.2",
+  "version": "0.7.0",
   "description": "SlotForge Telemetry: gearing, motor performance, weight, tyres and lap calculations",
   "author": "theDutchmanJames",
   "private": true,
@@ -16,7 +16,8 @@
     "dist": "electron-builder --win portable",
     "dist:linux": "electron-builder --linux --config.directories.output=dist/linux",
     "dist:mac": "electron-builder --mac --config.directories.output=dist/mac",
-    "test:shell": "electron tests/shell-smoke.cjs"
+    "test:shell": "electron tests/shell-smoke.cjs",
+    "test:paddock-ui": "electron tests/race-ui-smoke.cjs"
   },
   "devDependencies": {
     "electron": "45.1.0",

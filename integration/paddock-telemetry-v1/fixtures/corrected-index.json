@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "databaseId": "paddock-demo",
+  "databaseRevision": 8,
+  "name": "Timing integration demo",
+  "changeToken": "fixture-8",
+  "entries": [
+    {
+      "sourceId": "timing-demo",
+      "sessionId": "session-normal",
+      "revision": 2,
+      "state": "active",
+      "contentHash": "12d2a64020341e4252a39be4c1d92be65d0c947eb3f285864aaaadca6a21315a"
+    }
+  ],
+  "nextOffset": null
+}

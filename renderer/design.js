@@ -26,8 +26,8 @@ function initializeDesign(){
   for(const button of document.querySelectorAll('[data-analysis-topic]')){
     const [tone,name]=topicStyle[button.dataset.analysisTopic];button.dataset.category=tone;button.insertAdjacentHTML('afterbegin',sfIcon(name));
   }
-  for(const link of document.querySelectorAll('[data-analysis-mode]')){link.dataset.category='motor';link.insertAdjacentHTML('afterbegin',sfIcon(link.dataset.analysisMode==='compare'?'transfer':'timer'));}
-  for(const link of document.querySelectorAll('.settings-nav a')){const help=link.hash.includes('calculations');link.dataset.category=help?'motor':'tyres';link.insertAdjacentHTML('afterbegin',sfIcon(help?'list':'palette'));}
+  for(const link of document.querySelectorAll('[data-analysis-mode]')){const mode=link.dataset.analysisMode;link.dataset.category=['compare','racecompare'].includes(mode)?'tyres':mode==='overview'?'gearing':mode==='records'?'speed':'motor';link.insertAdjacentHTML('afterbegin',sfIcon(['compare','racecompare'].includes(mode)?'transfer':mode==='records'?'list':'timer'));}
+  for(const link of document.querySelectorAll('.settings-nav a')){const help=link.hash.includes('calculations'),paddock=link.hash.includes('paddock');link.dataset.category=paddock?'weight':help?'motor':'tyres';link.insertAdjacentHTML('afterbegin',sfIcon(paddock?'transfer':help?'list':'palette'));}
   for(const panel of document.querySelectorAll('[data-analysis-panel]'))panel.dataset.category=topicStyle[panel.dataset.analysisPanel][0];
   document.querySelector('#settings-appearance').dataset.category='tyres';
   for(const button of document.querySelectorAll('[data-tone-choice]'))button.textContent=button.dataset.toneChoice==='light'?'Light':'Dark';

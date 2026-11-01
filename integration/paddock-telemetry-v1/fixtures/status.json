@@ -1,0 +1,26 @@
+{
+  "protocol": 2,
+  "id": "paddock-demo",
+  "revision": 7,
+  "name": "Timing integration demo",
+  "permissions": {
+    "browse": true,
+    "submit": true,
+    "timingResults": true,
+    "club": true
+  },
+  "capabilities": {
+    "telemetry": {
+      "version": 1,
+      "index": "/v1/telemetry/results",
+      "permission": "timingResults",
+      "changes": "/v1/telemetry/changes",
+      "filters": [
+        "carId",
+        "trackId",
+        "from",
+        "to"
+      ]
+    }
+  }
+}

@@ -133,6 +133,6 @@ $('#setup-file').onchange = async event => {
   } catch (error) { toast('Could not open setup: ' + error.message); }
   finally { event.target.value = ''; }
 };
-initializeDesign(); readWorkspace(); setupAppearance(); fillInputs(); initializeLibrary(); initializePages();
+RaceUI.init(); initializeDesign(); readWorkspace(); setupAppearance(); fillInputs(); initializeLibrary(); initializePages();
 $('#save-copy').onclick=()=>{openLibraryTask('save',activeLibraryId);libraryTask.asCopy=true;$('#library-editor-title').textContent='Save a new copy';$('#library-editor-confirm').textContent='Save new copy';$('#library-save-copy').hidden=true;};
 

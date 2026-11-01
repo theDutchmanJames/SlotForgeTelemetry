@@ -17,13 +17,14 @@ function renderRoute(){
   if(page==='analyze'){
     readLibrary();renderAnalysis();const compare=sub==='compare';
     $('#analysis-overview').hidden=compare;$('#analysis-compare').hidden=!compare;
-    for(const link of document.querySelectorAll('[data-analysis-mode]')){if((link.dataset.analysisMode==='compare')===compare)link.setAttribute('aria-current','page');else link.removeAttribute('aria-current');}
+    for(const link of document.querySelectorAll('[data-analysis-mode]')){if(link.dataset.analysisMode===(sub||'overview'))link.setAttribute('aria-current','page');else link.removeAttribute('aria-current');}
   }
   if(page==='settings'){
     const help=sub==='calculations';$('#settings-appearance').hidden=help;$('#settings-calculations').hidden=!help;
-    for(const link of document.querySelectorAll('.settings-nav a')){if(link.hash.includes('calculations')===help)link.setAttribute('aria-current','page');else link.removeAttribute('aria-current');}
+    for(const link of document.querySelectorAll('.settings-nav a')){if(link.hash.split('/')[1]===(sub||'appearance'))link.setAttribute('aria-current','page');else link.removeAttribute('aria-current');}
     if(help)renderHelp(topic);
   }
+  RaceUI.route(page,sub);
 }
 function setupOptions(id,selected){
   const select=$('#'+id);select.innerHTML=library.map(item=>`<option value="${item.id}">${esc(item.setup.name)}</option>`).join('');select.value=selected||'';

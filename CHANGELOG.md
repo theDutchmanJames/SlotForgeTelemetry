@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.7.0 — 1 November 2026
+
+- Added a sandboxed desktop connection to Paddock using existing Dealership or Timing credentials, local host discovery and manual addresses.
+- Added incremental, atomic result imports with offline caching, corrections, withdrawals, identity/hash checks, rate-limit handling and optional change notifications.
+- Added lap progression, pace/consistency metrics, best consecutive runs, captured configurations, graph-free run comparisons, scoped imported records and a separate Race results library/export.
+- Preserved measured lap durations separately from adjusted session classifications. Invalid/pit laps, withdrawn sessions and quarantined data do not create records.
+- Hardened imports against concurrent database edits and receipt-only changes; added correction notices, explicit comparison confirmation, chart continuity fixes and failed-reconnect recovery.
+- Added a versioned host handoff and artificial fixtures. Paddock owns the host implementation; a compatible host build is required. Includes Windows, Linux and macOS packages.
+
 ## Licence wording correction — 1 November 2026
 
 - Corrected the licence scope to name SlotForge Telemetry. Permissions,

@@ -28,6 +28,17 @@ SlotForge Track Builder commit 99c1caaed62864037d90a0e39911dcc3ba79d75f
 Their shared palette is already incorporated in Paddock's theme files.
 
 SlotForge Telemetry is the standalone application derived from these sources.
+
+Unreleased Paddock results integration (1 November 2026):
+src/paddock-schema.cjs, src/paddock-statistics.cjs and src/paddock-discovery.cjs
+are copied from SlotForge Paddock source revision 96e215d. The payload semantic
+validation in src/paddock-validation.cjs is adapted from its timing-integration.cjs.
+These files and the artificial Timing fixtures retain the same SlotForge
+Source-Available License 1.0 terms. Paddock owns its host API implementation;
+integration/paddock-telemetry-v1 contains the client notes and historical reference.
+Its host-handoff directory is copied unchanged from Paddock's completed
+integration-handoff/telemetry-v1 on 1 November 2026, including its LICENSE.
+The Paddock-owned contract supersedes the original prototype.
 Electron and Chromium remain under their respective third-party licenses;
 the packaged Electron distribution includes LICENSE.electron.txt and
 LICENSES.chromium.html. Development dependencies retain their own notices.
