@@ -52,3 +52,7 @@ Desktop tests and screenshots use only isolated profiles and example data under 
 3. **Distribution trust.** Windows remains unsigned. macOS is configured for ad-hoc signing without Developer ID/notarization. These are documented distribution limitations, not claims of completed native signing verification.
 
 Review scope does not include physical car measurements, every possible display/OS configuration, or a full accessibility certification. No release was created.
+
+## Follow-up resolution — 1 November 2026
+
+The build dependency advisory listed above has now been repaired in the working tree. electron-builder is pinned to 26.18.1, with tested dependency overrides for ASAR 4.3.1 (glob 14.0.3), universal 3.0.6, filelist 2.0.2 and minimatch 11.0.2. A clean installation reports zero npm audit vulnerabilities, API compatibility tests pass, and a fresh Windows portable package builds successfully. The old advisory paragraph records the earlier review state; it is no longer an open dependency finding. See [the follow-up review](LAPDATA-REVIEW.md) for current verification and platform limitations.

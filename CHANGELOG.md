@@ -1,5 +1,20 @@
 # Changelog
 
+## 0.8.0 — 1 November 2026 · Manual laps, deeper analysis and reports
+
+- Added manual lap sessions without Paddock: paste times or numbered columns, review parsed values, mark invalid/pit laps, and save with car, track, driver, source and optional setup details.
+- Added local manual-session editing, deletion, JSON backup/restore, and access to lap analysis, comparisons, Progress, records and reports. Manual provenance stays distinct from imported evidence; consecutive metrics require explicit sequence confirmation.
+- Added recorded-stint summaries and a lap-scope selector for focused charts, statistics and lap inspection.
+- Added opening/closing median pace within uninterrupted sequences of at least ten valid laps, with pit/invalid counts and explicit sample limits.
+- Added optional A/B lap-progression overlays with common axes, preserved gaps, unequal run lengths and a keyboard-accessible sequence inspector. The default comparison remains a simple table.
+- Added Progress history grouped by collection, source, car, track, lane, session type and recorded lane length, with minimum-lap filters and median/best/consistency charts.
+- Added selected/reference observations, captured technical and component differences, and links to detailed analysis/comparison.
+- Added descriptive run/comparison findings for pace, consistency, exclusions and sample limitations; conflicting best-lap and median changes remain explicit.
+- Added self-contained HTML comparison reports with captured setup differences, provenance, source revisions and separate classifications/adjustments.
+- Review repairs: retain pit/invalid flags when lap times are corrected; add safe recovery from manual backups; validate numeric setup details; keep rounded-zero comparisons neutral; clarify manual-data provenance.
+- Updated electron-builder to 26.18.1 and pinned compatible archive, universal, file-list and pattern-matching dependencies to resolve the earlier build-tool advisories. Clean install, compatibility tests and Windows portable packaging passed; npm audit reports zero vulnerabilities.
+- Uses existing offline imports; no Paddock host or API changes are required.
+
 ## 0.7.0 — 1 November 2026
 
 - Added a sandboxed desktop connection to Paddock using existing Dealership or Timing credentials, local host discovery and manual addresses.
