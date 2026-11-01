@@ -8,9 +8,9 @@ SlotForge Telemetry is a desktop calculator for slotcar gearing, motors, tyres a
 
 Start with gear tooth counts and tyre diameter. Add motor ratings, weight, ballast or measured lap times whenever you want to go further. **You only need to enter the information you have.**
 
-**Version 0.6.2 · First public release.** Works offline, with no account or timing hardware required. The ready-made downloads do not need Node.js, coding or Terminal commands.
+**Current source version: 0.6.2. No public release or ready-made downloads have been published yet.** The app works offline, with no account or timing hardware required. The installation guide below is prepared for future app downloads; it is not an announcement that those files are available.
 
-**[Download SlotForge Telemetry →](https://github.com/theDutchmanJames/SlotForgeTelemetry/releases/latest)**
+**Looking for an app you can just open?** Ready-made downloads are not available yet. You do not need to learn Terminal to use a future packaged release. For now, this repository contains the source and [build instructions](docs/BUILDING.md).
 
 [Install](#download-and-install) · [First setup](#your-first-setup-in-five-minutes) · [Features](#what-you-can-do) · [Backups and updates](#keep-your-setups-safe) · [Help](#questions-and-troubleshooting)
 
@@ -20,27 +20,27 @@ Start with gear tooth counts and tyre diameter. Add motor ratings, weight, balla
 
 ## Download and install
 
-Open the [release downloads](https://github.com/theDutchmanJames/SlotForgeTelemetry/releases/latest). Scroll down to **Assets**—GitHub's name for the downloadable files. Click **Assets** if the list is folded, then choose the file for your computer:
+**For a future release:** open [Releases](https://github.com/theDutchmanJames/SlotForgeTelemetry/releases). When an app release is published, scroll to **Assets**—GitHub's name for downloadable files. The table below describes the planned formats; these are not available downloads yet.
 
-| Your computer | Download for version 0.6.2 | What to do |
+| Your computer | Planned file type | What to do |
 | --- | --- | --- |
-| **Windows, 64-bit Intel/AMD** | [Windows Portable.exe](https://github.com/theDutchmanJames/SlotForgeTelemetry/releases/download/v0.6.2/SlotForgeTelemetry-0.6.2-windows-x64-Portable.exe) | Save it, then double-click it. |
-| **Mac, Apple Silicon or Intel** | [Mac universal.dmg](https://github.com/theDutchmanJames/SlotForgeTelemetry/releases/download/v0.6.2/SlotForgeTelemetry-0.6.2-mac-universal.dmg) | Open it and drag the app into Applications. |
-| **Ubuntu, Debian or Mint, 64-bit Intel/AMD** | [Linux.deb](https://github.com/theDutchmanJames/SlotForgeTelemetry/releases/download/v0.6.2/SlotForgeTelemetry-0.6.2-linux-x64.deb) | Open with your system's software installer. |
-| **Other Linux desktops, 64-bit Intel/AMD** | [Linux.AppImage](https://github.com/theDutchmanJames/SlotForgeTelemetry/releases/download/v0.6.2/SlotForgeTelemetry-0.6.2-linux-x64.AppImage) | Allow it to run as a program, then double-click it. |
+| **Windows, 64-bit Intel/AMD** | **Windows Portable.exe** | Save it, then double-click it. |
+| **Mac, Apple Silicon or Intel** | **Mac universal.dmg** | Open it and drag the app into Applications. |
+| **Ubuntu, Debian or Mint, 64-bit Intel/AMD** | **Linux.deb** | Open with your system's software installer. |
+| **Other Linux desktops, 64-bit Intel/AMD** | **Linux.AppImage** | Allow it to run as a program, then double-click it. |
 
-The Mac ZIP contains the same app as the DMG. Linux ARM64 downloads are not included in this release; the source builder supports an ARM64 Linux host.
+The Mac ZIP contains the same app as the DMG. The configured Linux release target is x64; the source builder supports an ARM64 Linux host.
 
 **Choose an app file from this table.** GitHub's **Source code (zip)**, **Source code (tar.gz)** and **Code → Download ZIP** contain the ingredients for making the app, rather than a ready-to-run program. You do not need them for normal use.
 
 ### Windows: download, save, open
 
-1. Click **Windows Portable.exe** above. Your browser normally saves it in **Downloads**.
+1. Once downloads are available, open **Releases** and choose the **Windows Portable.exe** asset. Your browser normally saves it in **Downloads**.
 2. Move the file somewhere easy to find, such as a **SlotForge Telemetry** folder inside **Documents**.
 3. Double-click **SlotForgeTelemetry-0.6.2-windows-x64-Portable.exe**. There is no installation wizard.
 4. Try the included example. For easier access later, create a shortcut or pin the running app to your taskbar.
 
-This release is unsigned, so Windows may show **unknown publisher** or **Windows protected your PC**. Check that you downloaded it from this repository. If you trust the download and Windows offers it, choose **More info → Run anyway**. On a managed work or school computer, ask your administrator if it is blocked. Do not turn off antivirus protection.
+The Windows build is unsigned, so Windows may show **unknown publisher** or **Windows protected your PC**. Check that you downloaded it from this repository. If you trust the download and Windows offers it, choose **More info → Run anyway**. On a managed work or school computer, ask your administrator if it is blocked. Do not turn off antivirus protection.
 
 **Portable means no installer is needed.** Setups are stored in your Windows user profile, separately from the executable. Copying the program onto a USB stick does not copy your library; use **Library → Export library** to take your setups with you.
 
@@ -52,7 +52,7 @@ This release is unsigned, so Windows may show **unknown publisher** or **Windows
 4. Open **Applications**, then open **SlotForge Telemetry**.
 5. Eject the mounted disk image in Finder after copying the app.
 
-This release is ad-hoc signed, but **not notarized or signed with an Apple Developer ID**. macOS may block its first launch. After trying to open it, use **System Settings → Privacy & Security → Open Anyway**, if offered and you trust this download. See [Apple's guidance on opening apps safely](https://support.apple.com/en-us/102445). Do not disable Gatekeeper.
+The Mac build is ad-hoc signed, but **not notarized or signed with an Apple Developer ID**. macOS may block its first launch. After trying to open it, use **System Settings → Privacy & Security → Open Anyway**, if offered and you trust this download. See [Apple's guidance on opening apps safely](https://support.apple.com/en-us/102445). Do not disable Gatekeeper.
 
 If you choose the ZIP, double-click it to extract **SlotForge Telemetry.app**, move that app into **Applications**, then open it there.
 
@@ -170,7 +170,7 @@ Imports **add copies**, so re-importing a backup creates additional entries. A l
 ### Update the app
 
 1. Export your library as a backup and close the running app.
-2. Download the newer version from [Releases](https://github.com/theDutchmanJames/SlotForgeTelemetry/releases/latest).
+2. Download the newer version from [Releases](https://github.com/theDutchmanJames/SlotForgeTelemetry/releases).
 3. On Windows, open the new executable. On Mac, replace the app in Applications. On Linux, install the newer DEB or replace the AppImage.
 4. Check your saved setups before removing the older program file.
 
@@ -178,7 +178,7 @@ Updates retain the existing user-data location. Earlier local builds were called
 
 ## Questions and troubleshooting
 
-**I downloaded a ZIP full of code.** Return to [Releases](https://github.com/theDutchmanJames/SlotForgeTelemetry/releases/latest), expand **Assets**, and choose the ready-made app for your system.
+**I downloaded a ZIP full of code.** Return to [Releases](https://github.com/theDutchmanJames/SlotForgeTelemetry/releases), expand **Assets**, and choose the ready-made app for your system.
 
 **Some values show a dash.** Add the missing inputs. For power curves, confirm brushed DC, stall torque and matching positive test voltages. Do not guess a torque type just to unlock a graph.
 

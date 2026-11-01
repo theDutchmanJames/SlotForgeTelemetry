@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.6.2 — First public release
+## 0.6.2 — Unreleased source
 
 - Standalone Telemetry workbench with live gearing, motor, tyre and weight calculations.
 - Analyze saved setups with motor curves, weight/ballast, tyre wear, clearance, gear finder and lap speed.
@@ -14,7 +14,7 @@
 - Calculation explanations, examples and model limitations.
 - SlotForge stopwatch desktop icon and Paddock's vector icon family.
 - Windows portable, Linux AppImage/DEB and universal macOS DMG/ZIP package targets.
-- Normal/quick local Linux and Mac builders, plus native GitHub release builds.
+- Normal/quick local Linux and Mac builders, plus native GitHub package builds.
 
 ### Limits
 
