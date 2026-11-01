@@ -12,6 +12,7 @@
 - Prevent simultaneous app instances from overwriting the same draft; restore the macOS application menu.
 - Recover invalid remembered theme modes, preserve the import icon, support Enter in setup-name dialogs and synchronize the displayed version.
 - Improve Windows source-launcher errors and use the actual architecture in Windows package names.
+- Match Linux download links and local-builder checks to native AppImage `x86_64` and DEB `amd64` filenames, confirmed by native CI builds.
 - Expand model, UI and main-process regression coverage; add the main-process check to the manual build workflow.
 
 See [the review report](docs/REVIEW.md) for validation and outstanding platform/dependency checks.

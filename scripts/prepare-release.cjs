@@ -2,7 +2,7 @@
 const fs=require('node:fs'),path=require('node:path'),crypto=require('node:crypto');
 const repository='theDutchmanJames/SlotForgeTelemetry';
 const version=require('../package.json').version,tag='v'+version;
-const names=[`SlotForgeTelemetry-${version}-windows-x64-Portable.exe`,`SlotForgeTelemetry-${version}-linux-x64.AppImage`,`SlotForgeTelemetry-${version}-linux-x64.deb`,`SlotForgeTelemetry-${version}-mac-universal.dmg`,`SlotForgeTelemetry-${version}-mac-universal.zip`];
+const names=[`SlotForgeTelemetry-${version}-windows-x64-Portable.exe`,`SlotForgeTelemetry-${version}-linux-x86_64.AppImage`,`SlotForgeTelemetry-${version}-linux-amd64.deb`,`SlotForgeTelemetry-${version}-mac-universal.dmg`,`SlotForgeTelemetry-${version}-mac-universal.zip`];
 const base='https://api.github.com/repos/'+repository;
 async function request(url,method='GET',body,raw=false){
   const response=await fetch(url,{method,headers:{Authorization:'Bearer '+process.env.GH_TOKEN,Accept:'application/vnd.github+json','X-GitHub-Api-Version':'2022-11-28',...(body?{'Content-Type':raw?'application/octet-stream':'application/json'}:{})},...(body?{body:raw?body:JSON.stringify(body)}:{})});

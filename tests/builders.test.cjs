@@ -3,6 +3,13 @@ const fs=require('node:fs'),path=require('node:path'),{spawnSync}=require('node:
 const root=path.resolve(__dirname,'..');
 const shell=process.env.SLOTFORGE_TEST_BASH||(process.platform==='win32'?null:'/bin/bash');
 const options={skip:!shell&&'Set SLOTFORGE_TEST_BASH to run shell workflows on Windows.'};
+test('Linux asset suffixes match the installed packager, including ARM64',()=>{
+  const {Arch,getArtifactArchName}=require('builder-util');
+  assert.equal(getArtifactArchName(Arch.x64,'AppImage'),'x86_64');
+  assert.equal(getArtifactArchName(Arch.x64,'deb'),'amd64');
+  assert.equal(getArtifactArchName(Arch.arm64,'AppImage'),'arm64');
+  assert.equal(getArtifactArchName(Arch.arm64,'deb'),'arm64');
+});
 function fixture(){
   const base=path.join(root,'test-results');fs.mkdirSync(base,{recursive:true});
   const dir=fs.mkdtempSync(path.join(base,'builder-'));
@@ -18,7 +25,7 @@ npm(){
   printf '%s\\n' "$*" >> calls.log
   [ "$*" != "$TEST_FAIL" ] || return 17
   case "$*" in
-    'run dist:linux -- --publish never') mkdir -p dist/linux; printf app > dist/linux/SlotForgeTelemetry-0.6.2-linux-x64.AppImage; printf deb > dist/linux/SlotForgeTelemetry-0.6.2-linux-x64.deb;;
+    'run dist:linux -- --publish never') mkdir -p dist/linux; printf app > dist/linux/SlotForgeTelemetry-0.6.2-linux-x86_64.AppImage; printf deb > dist/linux/SlotForgeTelemetry-0.6.2-linux-amd64.deb;;
     'run dist:mac -- --publish never') mkdir -p 'dist/mac/mac-universal/SlotForge Telemetry.app'; printf dmg > dist/mac/SlotForgeTelemetry-0.6.2-mac-universal.dmg; printf zip > dist/mac/SlotForgeTelemetry-0.6.2-mac-universal.zip;;
   esac
 }

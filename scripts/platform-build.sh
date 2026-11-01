@@ -92,8 +92,10 @@ if [ "$platform" = linux ]; then
   arch="$(node -p 'process.arch')"
   case "$arch" in x64|arm64) ;; *) fail 'The Linux builder supports x64 and arm64 hosts.' ;; esac
   output="$ROOT/dist/linux"
-  appimage="$output/SlotForgeTelemetry-$version-linux-$arch.AppImage"
-  deb="$output/SlotForgeTelemetry-$version-linux-$arch.deb"
+  appimage_arch="$arch"; deb_arch="$arch"
+  if [ "$arch" = x64 ]; then appimage_arch=x86_64; deb_arch=amd64; fi
+  appimage="$output/SlotForgeTelemetry-$version-linux-$appimage_arch.AppImage"
+  deb="$output/SlotForgeTelemetry-$version-linux-$deb_arch.deb"
   # Clear only these exact outputs so an earlier build cannot be reported as success.
   rm -f -- "$appimage" "$deb"
   npm run dist:linux -- --publish never

@@ -26,8 +26,8 @@ Open the [latest release](https://github.com/theDutchmanJames/SlotForgeTelemetry
 | --- | --- | --- |
 | **Windows, 64-bit Intel/AMD** | [Windows Portable.exe](https://github.com/theDutchmanJames/SlotForgeTelemetry/releases/download/v0.6.2/SlotForgeTelemetry-0.6.2-windows-x64-Portable.exe) | Save it, then double-click it. |
 | **Mac, Apple Silicon or Intel** | [Mac universal.dmg](https://github.com/theDutchmanJames/SlotForgeTelemetry/releases/download/v0.6.2/SlotForgeTelemetry-0.6.2-mac-universal.dmg) | Open it and drag the app into Applications. |
-| **Ubuntu, Debian or Mint, 64-bit Intel/AMD** | [Linux.deb](https://github.com/theDutchmanJames/SlotForgeTelemetry/releases/download/v0.6.2/SlotForgeTelemetry-0.6.2-linux-x64.deb) | Open with your system's software installer. |
-| **Other Linux desktops, 64-bit Intel/AMD** | [Linux.AppImage](https://github.com/theDutchmanJames/SlotForgeTelemetry/releases/download/v0.6.2/SlotForgeTelemetry-0.6.2-linux-x64.AppImage) | Allow it to run as a program, then double-click it. |
+| **Ubuntu, Debian or Mint, 64-bit Intel/AMD** | [Linux.deb](https://github.com/theDutchmanJames/SlotForgeTelemetry/releases/download/v0.6.2/SlotForgeTelemetry-0.6.2-linux-amd64.deb) | Open with your system's software installer. |
+| **Other Linux desktops, 64-bit Intel/AMD** | [Linux.AppImage](https://github.com/theDutchmanJames/SlotForgeTelemetry/releases/download/v0.6.2/SlotForgeTelemetry-0.6.2-linux-x86_64.AppImage) | Allow it to run as a program, then double-click it. |
 
 The Mac ZIP contains the same app as the DMG. The configured Linux release target is x64; the source builder supports an ARM64 Linux host.
 
