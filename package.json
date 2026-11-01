@@ -1,0 +1,90 @@
+{
+  "name": "slotforge-calculator",
+  "version": "0.6.2",
+  "description": "SlotForge Telemetry: gearing, motor performance, weight, tyres and lap calculations",
+  "author": "theDutchmanJames",
+  "private": true,
+  "main": "src/main.cjs",
+  "license": "SEE LICENSE IN LICENSE",
+  "scripts": {
+    "start": "electron .",
+    "test": "node --test tests/*.test.cjs",
+    "test:ui": "electron tests/pages-smoke.cjs",
+    "icons": "electron scripts/build-icon.cjs",
+    "check": "node scripts/check.cjs",
+    "pack": "electron-builder --dir",
+    "dist": "electron-builder --win portable",
+    "dist:linux": "electron-builder --linux --config.directories.output=dist/linux",
+    "dist:mac": "electron-builder --mac --config.directories.output=dist/mac"
+  },
+  "devDependencies": {
+    "electron": "45.1.0",
+    "electron-builder": "26.18.0"
+  },
+  "build": {
+    "appId": "nl.slotforge.calculator",
+    "productName": "SlotForge Telemetry",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "src/**/*",
+      "renderer/**/*",
+      "assets/**/*",
+      "package.json",
+      "LICENSE",
+      "SOURCE-NOTICES.txt"
+    ],
+    "win": {
+      "target": "portable",
+      "icon": "assets/icon.ico",
+      "signExecutable": false
+    },
+    "mac": {
+      "target": [
+        {
+          "target": "dmg",
+          "arch": [
+            "universal"
+          ]
+        },
+        {
+          "target": "zip",
+          "arch": [
+            "universal"
+          ]
+        }
+      ],
+      "category": "public.app-category.utilities",
+      "icon": "assets/icon.png",
+      "identity": "-",
+      "notarize": false,
+      "artifactName": "SlotForgeTelemetry-${version}-mac-${arch}.${ext}"
+    },
+    "linux": {
+      "target": [
+        "AppImage",
+        "deb"
+      ],
+      "icon": "assets/icon.png",
+      "category": "Utility",
+      "synopsis": "Slot car gearing and setup calculator",
+      "maintainer": "James <thedutchmanjames@gmail.com>",
+      "artifactName": "SlotForgeTelemetry-${version}-linux-${arch}.${ext}"
+    },
+    "portable": {
+      "artifactName": "SlotForgeTelemetry-${version}-windows-x64-Portable.${ext}"
+    }
+  },
+  "homepage": "https://github.com/theDutchmanJames/SlotForgeTelemetry",
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/theDutchmanJames/SlotForgeTelemetry.git"
+  },
+  "bugs": {
+    "url": "https://github.com/theDutchmanJames/SlotForgeTelemetry/issues"
+  }
+}

@@ -1,0 +1,65 @@
+SlotForge Calculator 0.1.0 — standalone concept
+Copyright (c) 2026 theDutchmanJames and contributors.
+
+Extracted from SlotForge Paddock:
+https://github.com/theDutchmanJames/SlotForgePaddock
+Source commit: 908916faf6572b0dd9a087fd6a813798081af0e7
+
+renderer/performance-model.js: original calculation engine, unchanged.
+renderer/performance-view.js: calculation cards, curves, readout and comparison
+extracted from renderer/performance.js, with standalone state adapters.
+renderer/theme.js, renderer/themes.css and renderer/performance.css: unchanged.
+renderer/icons/*.svg and assets/icon.svg / icon.ico: original Paddock artwork.
+tests/performance.test.cjs: five calculation-only tests from Paddock's
+performance.test.cjs; collection/store integration tests are not included.
+LICENSE: original SlotForge Source-Available License, retained in full.
+
+Added for this standalone concept: Electron shell, input workspace, rim and
+radial tyre-thickness conversion, setup JSON format, local persistence,
+appearance UI, responsive layout, tests, launch and packaging scripts.
+renderer/styles.css follows Paddock's palette, typography and control styling.
+
+Family references inspected:
+SlotForge Timing commit 34124924815c1a38607d89e0743da5d895602b50
+SlotForge Track Builder commit 99c1caaed62864037d90a0e39911dcc3ba79d75f
+Their shared palette is already incorporated in Paddock's theme files.
+
+SlotForge Telemetry is the standalone application derived from these sources.
+Electron and Chromium remain under their respective third-party licenses;
+the packaged Electron distribution includes LICENSE.electron.txt and
+LICENSES.chromium.html. Development dependencies retain their own notices.
+
+0.2.0: renamed the user-facing app to SlotForge Telemetry; added independent
+telemetry-model.js and telemetry-view.js for weight/ballast, distribution,
+acceleration, tyre wear, gear matching and measured lap/scale speed.
+The original Paddock performance-model.js remains unchanged.
+
+0.3.0: added local setup library with explicit save/update/copy, names and notes,
+search/sort, load/reference, rename/duplicate/delete/undo, validated backup
+import/export, storage failure handling and integration tests.
+
+0.4.0: four-page Telemetry / Analyze / Library / Settings redesign, saved-only
+analysis and comparisons, expanded calculation help and remembered light/dark
+themes. renderer/art/*.svg are native vector illustrations: gear and rim paths
+derive from renderer/icons/spur-gear.svg and wheel-rim.svg; motor geometry,
+shading and axle composition are new. Design mockups remain raster references.
+
+0.5.0: replaced the 0.4.x custom shaded artwork with unchanged Paddock SVG
+paths in renderer/paddock-icons.js, including the part, navigation and action
+icons. Source files fetched from theDutchmanJames/SlotForgePaddock on 2026-11-01:
+renderer/icon-art.js blob afdd61fa3b76aacdfa230bbe262fdb33267135ba
+renderer/interface.js blob bf3e7ab1385655f106c05094e3e114c14a368985
+renderer/app.js blob 4f12f0da160b47b8f804d55892f122f8df3f0b0d
+Category colours and 8/13/18 percent secondary navigation tints follow the
+approved preview and SlotForge Timing renderer/tabstyle.css. Chart geometry
+continues to be calculated from setup data, rather than decorative artwork.
+
+Linux/macOS local builder workflow inspired by SlotForge Timing build-linux.sh,
+build-mac.command and their quick variants (main, inspected 2026-11-01).
+Telemetry implements a shared locked-dependency builder and retains its own
+profile, stopwatch icon and package targets.
+
+0.6.2 public release: the desktop icon now uses the Paddock stopwatch paths
+from renderer/paddock-icons.js, rendered with the UI badge proportions by
+scripts/build-icon.cjs. Public documentation and native release automation
+were added for the SlotForgeTelemetry repository.
