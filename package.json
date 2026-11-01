@@ -15,7 +15,8 @@
     "pack": "electron-builder --dir",
     "dist": "electron-builder --win portable",
     "dist:linux": "electron-builder --linux --config.directories.output=dist/linux",
-    "dist:mac": "electron-builder --mac --config.directories.output=dist/mac"
+    "dist:mac": "electron-builder --mac --config.directories.output=dist/mac",
+    "test:shell": "electron tests/shell-smoke.cjs"
   },
   "devDependencies": {
     "electron": "45.1.0",
@@ -73,7 +74,7 @@
       "artifactName": "SlotForgeTelemetry-${version}-linux-${arch}.${ext}"
     },
     "portable": {
-      "artifactName": "SlotForgeTelemetry-${version}-windows-x64-Portable.${ext}"
+      "artifactName": "SlotForgeTelemetry-${version}-windows-${arch}-Portable.${ext}"
     }
   },
   "homepage": "https://github.com/theDutchmanJames/SlotForgeTelemetry",

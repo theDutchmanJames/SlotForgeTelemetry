@@ -32,6 +32,6 @@ test('partial input yields only supported calculations without NaN or infinity',
   const empty=P.calculate();for(const key of ['ratio','axleRpm','speedKmh','rollout','axleTorque','forceN','peakPowerW'])assert.equal(empty[key],null);
   const noTyre=P.calculate({...example(),rearDiameter:''});assert.ok(noTyre.axleRpm);assert.ok(noTyre.axleTorque);assert.equal(noTyre.forceN,null);assert.equal(noTyre.speedKmh,null);assert.equal(noTyre.rollout,null);
   const noGear=P.calculate({...example(),gear:''});assert.ok(noGear.peakPowerW);assert.equal(noGear.axleTorque,null);
-  for(const value of ['-1','Infinity','1e6','0','abc',null,NaN,{},'1'.repeat(40)])assert.equal(P.calculate({...example(),ratedRpm:value}).axleRpm,null);
+  for(const value of ['-1','Infinity','1e999','0','abc',null,NaN,{},'1'.repeat(40)])assert.equal(P.calculate({...example(),ratedRpm:value}).axleRpm,null);
 });
 

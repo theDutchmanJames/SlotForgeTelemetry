@@ -24,7 +24,7 @@
     for (const [key, max] of [['rimDiameter', 1000], ['tyreThickness', 500]]) {
       const value = data[key] ?? '';
       if (typeof value !== 'string' || value.length > 32 || (value !== '' && P.positive(value, max) === null)) throw Error('Enter a positive number for ' + (key === 'rimDiameter' ? 'rim diameter.' : 'tyre thickness.'));
-      out[key] = value;
+      out[key] = value === '' ? '' : String(P.positive(value, max));
     }
     if (out.tyreMode === 'rim' && out.rimDiameter && out.tyreThickness && diameter(out) === null) throw Error('Overall tyre diameter must be at most 1,000 mm.');
     return out;

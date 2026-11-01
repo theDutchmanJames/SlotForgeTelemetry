@@ -6,7 +6,12 @@ const performanceMetrics=[
   ['axleTorque','Rear-axle torque from rating','gf·cm',1,1/0.0000980665],['forceN','Driving force from rating','N',2,1],
   ['peakPowerW','Estimated peak mechanical power','W',2,1],['peakMotorRpm','Motor speed at peak power','RPM',0,1]
 ];
-function performanceNumber(n,d=2){return Number.isFinite(n)?n.toLocaleString('en-GB',{maximumFractionDigits:d}):'—';}
+function performanceNumber(n,d=2){
+  if(!Number.isFinite(n))return '—';
+  // A nonzero result must not look like zero just because its unit is small.
+  const options=n!==0&&Math.abs(n)<10**(-d)?{notation:'scientific',maximumFractionDigits:2}:{maximumFractionDigits:d};
+  return n.toLocaleString('en-GB',options);
+}
 function performanceValue(m,key,d,multiplier=1){return m[key]===null||m[key]===undefined?'—':performanceNumber(m[key]*multiplier,d);}
 function performanceStats(input){
   const m=PerformanceModel.calculate(input);

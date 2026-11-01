@@ -3,16 +3,21 @@
   const choices={motorType:['Unknown','Brushed DC','Brushless'],torqueType:['Unknown','Stall','Rated running']};
   const keys=[...Object.keys(numbers),...Object.keys(choices)];
   const blank=()=>Object.fromEntries(keys.map(k=>[k,choices[k]?'Unknown':'']));
-  function positive(value,max=Number.MAX_VALUE){
-    if(typeof value!=='string'||!/^\d*\.?\d+$/.test(value.trim()))return null;
-    const n=Number(value);return Number.isFinite(n)&&n>0&&n<=max?n:null;
+  // Match numeric inputs (including exponent notation), with the same bounds
+  // for typing, imported files and calculations. Never coerce blanks to zero.
+  function number(value,max=Number.MAX_VALUE,zero=false){
+    if(typeof value!=='string'||value.length>32||! /^[+-]?(?:\d+\.?\d*|\.\d+)(?:e[+-]?\d+)?$/i.test(value.trim()))return null;
+    const n=Number(value);return Number.isFinite(n)&&n<=max&&(zero?n>=0:n>=0.000001)?n:null;
   }
+  const positive=(value,max)=>number(value,max);
+  function teeth(value){const n=number(value,999999);return Number.isInteger(n)?n:null;}
   function clean(input){
     if(input===undefined)return blank();
     if(!input||typeof input!=='object'||Array.isArray(input))throw Error('Invalid performance inputs.');
     const out=blank();
     for(const key of keys){const value=input[key]===undefined?out[key]:input[key];if(typeof value!=='string'||value.length>32)throw Error('Invalid '+(numbers[key]?.[0]||key)+'.');out[key]=value.trim();
       if(numbers[key]&&out[key]!==''&&positive(out[key],numbers[key][1])===null)throw Error('Enter a positive number for '+numbers[key][0]+'.');
+      if(numbers[key]&&out[key]!=='')out[key]=String(Number(out[key]));
       if(choices[key]&&!choices[key].includes(out[key]))throw Error('Choose a valid '+(key==='motorType'?'motor type.':'torque type.'));
     }
     return out;
@@ -20,14 +25,13 @@
   function baseline(input){
     if(input==null)return null;
     const out=clean(input);
-    for(const key of ['pinion','gear']){const v=input[key];if(typeof v!=='string'||v.length>16||(v!==''&&(!/^\d+$/.test(v)||!Number.isSafeInteger(Number(v))||Number(v)<1)))throw Error('Invalid comparison tooth count.');out[key]=v;}
+    for(const key of ['pinion','gear']){const v=input[key];if(typeof v!=='string'||v.length>32||(v!==''&&teeth(v)===null))throw Error('Enter a whole tooth count from 1 to 999,999 for '+key+'.');out[key]=v===''?'':String(teeth(v));}
     return out;
   }
   const finite=value=>Number.isFinite(value)?value:null;
   function calculate(input={}){
     const v=Object.fromEntries(Object.entries(numbers).map(([k,[,max]])=>[k,positive(input[k],max)]));
-    const teeth=k=>typeof input[k]==='string'&&/^\d+$/.test(input[k])&&Number.isSafeInteger(Number(input[k]))&&Number(input[k])>0?Number(input[k]):null;
-    const p=teeth('pinion'),g=teeth('gear'),ratio=p&&g?g/p:null;
+    const p=teeth(input.pinion),g=teeth(input.gear),ratio=p&&g?g/p:null;
     const rpm=v.ratedRpm,torqueNm=v.motorTorque===null?null:v.motorTorque*0.0000980665,radius=v.rearDiameter===null?null:v.rearDiameter/2000;
     const knownTorque=['Stall','Rated running'].includes(input.torqueType),axleRpm=rpm&&ratio?finite(rpm/ratio):null;
     const axleTorque=knownTorque&&torqueNm&&ratio?finite(torqueNm*ratio):null;
@@ -51,7 +55,7 @@
     const rpm=m.ratedRpm*percent/100,torqueNm=m.torqueNm*(1-percent/100);
     return {rpm,torqueGfCm:torqueNm/0.0000980665,powerW:torqueNm*rpm*2*Math.PI/60,axleRpm:m.ratio?rpm/m.ratio:null,forceN:m.ratio&&m.rearDiameter?finite(torqueNm*m.ratio/(m.rearDiameter/2000)):null,speedKmh:m.ratio&&m.rearDiameter?rpm/m.ratio*Math.PI*m.rearDiameter*60/1000000:null};
   }
-  const api={numbers,choices,keys,blank,positive,clean,baseline,calculate,point};
+  const api={numbers,choices,keys,blank,number,positive,teeth,clean,baseline,calculate,point};
   if(typeof module==='object'&&module.exports)module.exports=api;else root.PerformanceModel=api;
 })(globalThis);
 

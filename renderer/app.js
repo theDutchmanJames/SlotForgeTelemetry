@@ -6,6 +6,7 @@ const APPEARANCE = 'slotforge.calculator.appearance.v1';
 const state = { setup: { ...CalculatorModel.EXAMPLE }, reference: null, theme: 'dark', customColors: { ...Theme.DEFAULT } };
 let toastTimer;
 let preferredThemes={light:'light',dark:'dark'};
+const themeTone=theme=>(theme==='custom'?Theme.isLight(state.customColors.panel):['light','ocean'].includes(theme))?'light':'dark';
 function toast(message) {
   $('#toast').textContent = message; $('#toast').hidden = false;
   clearTimeout(toastTimer); toastTimer = setTimeout(() => { $('#toast').hidden = true; }, 4500);
@@ -27,7 +28,7 @@ function readWorkspace() {
     const appearance = JSON.parse(localStorage.getItem(APPEARANCE) || '{}');
     if (Theme.THEMES.some(([key]) => key === appearance.theme)) state.theme = appearance.theme;
     state.customColors = Theme.customOf(appearance);
-    for(const tone of ['light','dark'])if(Theme.THEMES.some(([key])=>key===appearance.preferredThemes?.[tone]))preferredThemes[tone]=appearance.preferredThemes[tone];
+    for(const tone of ['light','dark'])if(Theme.THEMES.some(([key])=>key===appearance.preferredThemes?.[tone])&&themeTone(appearance.preferredThemes[tone])===tone)preferredThemes[tone]=appearance.preferredThemes[tone];
   } catch { /* Keep the default appearance if browser storage is unavailable. */ }
 }
 function fillInputs() {
@@ -86,7 +87,7 @@ function applyTheme() {
     for (const [key, value] of Object.entries(state.customColors)) root.style.setProperty('--' + key, value);
     root.style.setProperty('--on-accent', Theme.onAccent(state.customColors.accent));
   }
-  root.dataset.tone = (state.theme === 'custom' ? Theme.isLight(state.customColors.panel) : ['light', 'ocean'].includes(state.theme)) ? 'light' : 'dark';
+  root.dataset.tone = themeTone(state.theme);
   for (const button of document.querySelectorAll('[data-theme-choice]')) button.setAttribute('aria-pressed', String(button.dataset.themeChoice === state.theme));
   preferredThemes[root.dataset.tone]=state.theme;
   for(const button of document.querySelectorAll('[data-tone-choice]'))button.setAttribute('aria-pressed',String(button.dataset.toneChoice===root.dataset.tone));
@@ -108,8 +109,19 @@ document.addEventListener('input', event => {
   state.setup[el.name] = el.validity.badInput ? 'invalid' : el.value;
   refresh(); persist();
 });
-$('#new-setup').onclick = () => { state.setup = CalculatorModel.blank(); bindLibrary(null); fillInputs(); persist(); $('[name=name]').focus(); };
-$('#load-example').onclick = () => { state.setup = { ...CalculatorModel.EXAMPLE }; bindLibrary(null); fillInputs(); persist(); toast('Example loaded: 21,500 RPM, 9:27 gears, 20 mm tyres.'); };
+function replaceWorkbench(next,label) {
+  const saved=library.find(item=>item.id===activeLibraryId);
+  let unchanged=false;
+  try{const current=JSON.stringify(CalculatorModel.cleanSetup(state.setup));unchanged=[saved?.setup,CalculatorModel.blank(),CalculatorModel.EXAMPLE].filter(Boolean).some(s=>JSON.stringify(CalculatorModel.cleanSetup(s))===current);}catch{/* Invalid edits still need discard confirmation. */}
+  if(unchanged){applyWorkbench(next);return;}
+  openLibraryTask('replace-workbench');libraryTask.next=next;
+  $('#library-editor-title').textContent=label;
+  $('#library-editor-description').textContent='This replaces your current workbench draft, including changes that have not been saved to the library. Cancel to save or export them first.';
+  $('#library-editor-confirm').textContent='Replace draft';
+}
+function applyWorkbench(next){Object.assign(state,next);bindLibrary(null);fillInputs();persist();$('[name=name]').focus();}
+$('#new-setup').onclick = () => replaceWorkbench({setup:CalculatorModel.blank(),reference:null},'Start a new setup?');
+$('#load-example').onclick = () => replaceWorkbench({setup:{...CalculatorModel.EXAMPLE},reference:null},'Load the example?');
 $('#save-setup').onclick = downloadSetup;
 $('#open-setup').onclick = () => $('#setup-file').click();
 $('#setup-file').onchange = async event => {
@@ -117,7 +129,7 @@ $('#setup-file').onchange = async event => {
   try {
     if (file.size > 100000) throw Error('Choose a setup file smaller than 100 KB.');
     const next = CalculatorModel.decode(await file.text());
-    Object.assign(state, next); bindLibrary(null); fillInputs(); persist(); toast('Setup opened.');
+    replaceWorkbench(next,'Open this setup file?');
   } catch (error) { toast('Could not open setup: ' + error.message); }
   finally { event.target.value = ''; }
 };

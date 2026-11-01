@@ -8,9 +8,9 @@ SlotForge Telemetry is a desktop calculator for slotcar gearing, motors, tyres a
 
 Start with gear tooth counts and tyre diameter. Add motor ratings, weight, ballast or measured lap times whenever you want to go further. **You only need to enter the information you have.**
 
-**Current source version: 0.6.2. No public release or ready-made downloads have been published yet.** The app works offline, with no account or timing hardware required. The installation guide below is prepared for future app downloads; it is not an announcement that those files are available.
+**Version 0.6.2.** The app works offline, with no account or timing hardware required.
 
-**Looking for an app you can just open?** Ready-made downloads are not available yet. You do not need to learn Terminal to use a future packaged release. For now, this repository contains the source and [build instructions](docs/BUILDING.md).
+**[Download SlotForge Telemetry](https://github.com/theDutchmanJames/SlotForgeTelemetry/releases/latest)** — choose your computer below. No coding, Terminal or Node.js is needed to use the packaged app.
 
 [Install](#download-and-install) · [First setup](#your-first-setup-in-five-minutes) · [Features](#what-you-can-do) · [Backups and updates](#keep-your-setups-safe) · [Help](#questions-and-troubleshooting)
 
@@ -20,14 +20,14 @@ Start with gear tooth counts and tyre diameter. Add motor ratings, weight, balla
 
 ## Download and install
 
-**For a future release:** open [Releases](https://github.com/theDutchmanJames/SlotForgeTelemetry/releases). When an app release is published, scroll to **Assets**—GitHub's name for downloadable files. The table below describes the planned formats; these are not available downloads yet.
+Open the [latest release](https://github.com/theDutchmanJames/SlotForgeTelemetry/releases/latest) and scroll to **Assets**—GitHub's name for downloadable files—or use the direct links below.
 
-| Your computer | Planned file type | What to do |
+| Your computer | Download | What to do |
 | --- | --- | --- |
-| **Windows, 64-bit Intel/AMD** | **Windows Portable.exe** | Save it, then double-click it. |
-| **Mac, Apple Silicon or Intel** | **Mac universal.dmg** | Open it and drag the app into Applications. |
-| **Ubuntu, Debian or Mint, 64-bit Intel/AMD** | **Linux.deb** | Open with your system's software installer. |
-| **Other Linux desktops, 64-bit Intel/AMD** | **Linux.AppImage** | Allow it to run as a program, then double-click it. |
+| **Windows, 64-bit Intel/AMD** | [Windows Portable.exe](https://github.com/theDutchmanJames/SlotForgeTelemetry/releases/download/v0.6.2/SlotForgeTelemetry-0.6.2-windows-x64-Portable.exe) | Save it, then double-click it. |
+| **Mac, Apple Silicon or Intel** | [Mac universal.dmg](https://github.com/theDutchmanJames/SlotForgeTelemetry/releases/download/v0.6.2/SlotForgeTelemetry-0.6.2-mac-universal.dmg) | Open it and drag the app into Applications. |
+| **Ubuntu, Debian or Mint, 64-bit Intel/AMD** | [Linux.deb](https://github.com/theDutchmanJames/SlotForgeTelemetry/releases/download/v0.6.2/SlotForgeTelemetry-0.6.2-linux-x64.deb) | Open with your system's software installer. |
+| **Other Linux desktops, 64-bit Intel/AMD** | [Linux.AppImage](https://github.com/theDutchmanJames/SlotForgeTelemetry/releases/download/v0.6.2/SlotForgeTelemetry-0.6.2-linux-x64.AppImage) | Allow it to run as a program, then double-click it. |
 
 The Mac ZIP contains the same app as the DMG. The configured Linux release target is x64; the source builder supports an ARM64 Linux host.
 
@@ -35,7 +35,7 @@ The Mac ZIP contains the same app as the DMG. The configured Linux release targe
 
 ### Windows: download, save, open
 
-1. Once downloads are available, open **Releases** and choose the **Windows Portable.exe** asset. Your browser normally saves it in **Downloads**.
+1. Click **Windows Portable.exe** in the table above. Your browser normally saves it in **Downloads**.
 2. Move the file somewhere easy to find, such as a **SlotForge Telemetry** folder inside **Documents**.
 3. Double-click **SlotForgeTelemetry-0.6.2-windows-x64-Portable.exe**. There is no installation wizard.
 4. Try the included example. For easier access later, create a shortcut or pin the running app to your taskbar.
@@ -167,6 +167,8 @@ Telemetry is a standalone setup calculator. It does not currently provide live s
 
 Imports **add copies**, so re-importing a backup creates additional entries. A library backup includes saved setups and notes, but not your unsaved working draft or appearance settings. Save the draft first to include it. There is no cloud sync.
 
+If the app reports an unreadable library, use **Library → Export unreadable data** to keep a copy, then **Restore library backup**. A valid backup is checked before the app asks permission to replace the unreadable data. Your workbench draft stays unchanged.
+
 ### Update the app
 
 1. Export your library as a backup and close the running app.
@@ -178,7 +180,7 @@ Updates retain the existing user-data location. Earlier local builds were called
 
 ## Questions and troubleshooting
 
-**I downloaded a ZIP full of code.** Return to [Releases](https://github.com/theDutchmanJames/SlotForgeTelemetry/releases), expand **Assets**, and choose the ready-made app for your system.
+**I downloaded a ZIP full of code.** Open the [latest release](https://github.com/theDutchmanJames/SlotForgeTelemetry/releases/latest), expand **Assets**, and choose the app for your computer.
 
 **Some values show a dash.** Add the missing inputs. For power curves, confirm brushed DC, stall torque and matching positive test voltages. Do not guess a torque type just to unlock a graph.
 
@@ -200,9 +202,9 @@ The original motor/gearing engine and vector icons come from Paddock. The colour
 
 ## Building and contributing
 
-The app downloads are the simplest starting point. For source builds, see [build instructions](docs/BUILDING.md). The repository includes Linux/macOS normal and quick builders, model tests, isolated desktop checks and native release-build jobs.
+Ready-made downloads are the simplest starting point. For source builds, see [build instructions](docs/BUILDING.md). The repository includes Linux/macOS normal and quick builders, model tests, isolated desktop checks and manual native package-build jobs.
 
-See the [changelog](CHANGELOG.md) for features and limitations. Native automation verifies packaging; it does not replace testing on every operating-system configuration.
+See the [changelog](CHANGELOG.md) for features and limitations. The manually started package workflow verifies builds and prepares a draft release. Publication is a separate step; native packaging does not replace testing on each operating system.
 
 ## Licence
 

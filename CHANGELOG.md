@@ -1,6 +1,22 @@
 # Changelog
 
-## 0.6.2 — Unreleased source
+## 0.6.2 — 1 November 2026
+
+### Pre-release review fixes
+
+- Unified numeric bounds across typing, calculations and imports; normalize imported numbers for the native input fields.
+- Preserve small nonzero results with scientific notation instead of rounding them to zero.
+- Confirm replacement of unsaved drafts by New setup, Load example and Open file.
+- Export unreadable library data and restore a validated backup with explicit confirmation and write-failure protection.
+- Open the current saved setup in Analyze; clear stale legacy references on library loads.
+- Prevent simultaneous app instances from overwriting the same draft; restore the macOS application menu.
+- Recover invalid remembered theme modes, preserve the import icon, support Enter in setup-name dialogs and synchronize the displayed version.
+- Improve Windows source-launcher errors and use the actual architecture in Windows package names.
+- Expand model, UI and main-process regression coverage; add the main-process check to the manual build workflow.
+
+See [the review report](docs/REVIEW.md) for validation and outstanding platform/dependency checks.
+
+### Features
 
 - Standalone Telemetry workbench with live gearing, motor, tyre and weight calculations.
 - Analyze saved setups with motor curves, weight/ballast, tyre wear, clearance, gear finder and lap speed.

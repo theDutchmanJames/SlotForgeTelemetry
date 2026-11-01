@@ -1,11 +1,12 @@
-SlotForge Calculator 0.1.0 — standalone concept
+SlotForge Telemetry — source provenance
 Copyright (c) 2026 theDutchmanJames and contributors.
 
 Extracted from SlotForge Paddock:
 https://github.com/theDutchmanJames/SlotForgePaddock
 Source commit: 908916faf6572b0dd9a087fd6a813798081af0e7
 
-renderer/performance-model.js: original calculation engine, unchanged.
+renderer/performance-model.js: calculation engine derived from Paddock.
+Input parsing and validation were strengthened during the pre-release review.
 renderer/performance-view.js: calculation cards, curves, readout and comparison
 extracted from renderer/performance.js, with standalone state adapters.
 renderer/theme.js, renderer/themes.css and renderer/performance.css: unchanged.
@@ -59,7 +60,7 @@ build-mac.command and their quick variants (main, inspected 2026-11-01).
 Telemetry implements a shared locked-dependency builder and retains its own
 profile, stopwatch icon and package targets.
 
-0.6.2 public release: the desktop icon now uses the Paddock stopwatch paths
+0.6.2 source preparation: the desktop icon now uses the Paddock stopwatch paths
 from renderer/paddock-icons.js, rendered with the UI badge proportions by
-scripts/build-icon.cjs. Public documentation and native release automation
+scripts/build-icon.cjs. Public documentation and native package-build automation
 were added for the SlotForgeTelemetry repository.

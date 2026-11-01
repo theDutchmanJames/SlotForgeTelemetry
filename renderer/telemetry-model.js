@@ -13,16 +13,13 @@
     trackLength:['Lap distance (m)',100000,false,''], lapTime:['Lap time (s)',100000,false,''], scaleFactor:['Scale denominator (e.g. 32)',1000,false,'']
   };
   const defaults = () => Object.fromEntries(Object.entries(fields).map(([k,s])=>[k,s[3]]));
-  function number(v,max=Number.MAX_VALUE,zero=false) {
-    if(typeof v!=='string'||!/^\d*\.?\d+$/.test(v.trim()))return null;
-    const n=Number(v);return Number.isFinite(n)&&n<=max&&(zero?n>=0:n>0)?n:null;
-  }
+  const number=P.number;
   function clean(input) {
     const out={};
     for(const [key,[label,max,zero,fallback]] of Object.entries(fields)) {
       const value=input[key]===undefined?fallback:input[key],n=number(value,max,zero);
       if(typeof value!=='string'||value.length>32||(value!==''&&(n===null||(/^(pinion|gear)(Min|Max)$/.test(key)&&!Number.isInteger(n)))))throw Error('Check '+label+'.');
-      out[key]=value.trim();
+      out[key]=value===''?'':String(n);
     }
     for(const key of ['pinion','gear'])if(out[key+'Min']&&out[key+'Max']&&+out[key+'Min']>+out[key+'Max'])throw Error(key+' range must run from low to high.');
     if(out.wheelbase&&out.ballastPosition!==''&&+out.ballastPosition>+out.wheelbase)throw Error('Ballast position must be between the front and rear axles (0 to wheelbase).');

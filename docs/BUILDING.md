@@ -4,7 +4,7 @@ An offline desktop workbench for the SlotForge family. Version 0.6.2 adds static
 
 ## Open the app
 
-On Windows, open `dist/SlotForgeTelemetry-0.6.2-windows-x64-Portable.exe`. This portable build needs no Node.js installation. It is unsigned.
+After building on Windows, open `dist/SlotForgeTelemetry-0.6.2-windows-x64-Portable.exe`. This portable build needs no Node.js installation. It is unsigned. Ready-made downloads are available from the repository’s Releases page.
 
 For development, run `npm ci` and `npm start` with Node.js 22.12 or newer, or use `Start SlotForge Telemetry.cmd`. The renderer also works directly in a modern browser; browser and desktop storage are separate.
 
@@ -19,7 +19,7 @@ The interface and drivetrain icons use Paddock's original SVG paths, bundled in 
 
 ## Saved data and compatibility
 
-The draft autosaves independently from the library. Editing it never changes saved analysis until you explicitly save. Loading a library entry asks before replacing the draft. Export file/Open file preserve the existing individual setup JSON format. A legacy reference field remains round-trippable for compatibility; the new comparison view uses full library entries.
+The draft autosaves independently from the library. Editing it never changes saved analysis until you explicitly save. Loading a library entry asks before replacing the draft. New setup, Load example and Open file also confirm before discarding unsaved work. Export file/Open file preserve the existing individual setup JSON format, normalizing numeric strings to display safely in native inputs. A legacy reference field remains round-trippable for compatibility; the new comparison view uses full library entries.
 
 Library backups are validated completely before import; imports create copies. Limits are 500 entries, 2 MB and 2,000 characters per note. Invalid stored libraries are left untouched, and failed writes never report success. Export a backup before clearing app data or moving devices.
 
@@ -72,4 +72,6 @@ Engineering references: [Pololu motor and gearing principles](https://www.pololu
 
 ## GitHub package builds
 
-Run **Actions → Build app packages → Run workflow** on the intended commit. Native Windows, Linux x64 and macOS runners install locked dependencies, run checks and produce downloadable workflow artifacts. Windows also runs the isolated desktop checks. This workflow does not create tags, GitHub releases or release drafts, and it does not publish anything to Releases. The Mac app is ad-hoc signed, not Developer ID signed or notarized.
+Run `npm run check`, `npm test`, `npm run test:ui` and `npm run test:shell` for local validation. Desktop tests use profiles under `test-results`, separate from the user's app data. Unix builder tests use Bash on Linux/macOS; on Windows, set `SLOTFORGE_TEST_BASH` to a Bash executable and add its companion utility directory to PATH. These shell tests simulate packaging commands, not native installation or runtime behavior.
+
+Run **Actions → Build release packages → Run workflow** on the intended main-branch commit. Native Windows, Linux x64 and macOS runners install locked dependencies, run checks and produce workflow artifacts. Windows also runs isolated desktop and main-process checks. After all builds succeed, a separate job prepares a draft release with five app packages and SHA-256 checksums. Verify its commit, assets and checksums before publishing. The Mac app is ad-hoc signed, not Developer ID signed or notarized.

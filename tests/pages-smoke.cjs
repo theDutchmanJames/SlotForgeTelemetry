@@ -76,7 +76,7 @@ app.whenReady().then(async()=>{
   await set('pinion','-1');assert.equal(await run(`document.querySelector('#save-library').disabled`),true);await set('pinion','10');
   const exported=await download('#save-setup','setup-v4.json');assert.equal(require('../renderer/calculator-model.js').decode(exported).setup.pinion,'10');
   await importFile('#setup-file','{}');assert.equal(await run(`state.setup.pinion`),'10');
-  await set('pinion','12');await importFile('#setup-file',exported);assert.equal(await run(`state.setup.pinion`),'10');
+  await set('pinion','12');await importFile('#setup-file',exported);assert.equal(await run(`state.setup.pinion`),'12');await click('#library-editor-cancel');assert.equal(await run(`state.setup.pinion`),'12');await importFile('#setup-file',exported);await click('#library-editor-confirm');assert.equal(await run(`state.setup.pinion`),'10');
   await route('settings');await click('[data-theme-choice=midnight]');await click('[data-tone-choice=light]');await click('[data-theme-choice=ocean]');await click('[data-tone-choice=dark]');assert.equal(await run('document.documentElement.dataset.theme'),'midnight');
   await reload();await click('[data-tone-choice=light]');assert.equal(await run('document.documentElement.dataset.theme'),'ocean');
   await route('settings');await click('[data-theme-choice=custom]');await value('[data-color=accent]','#00ff00');assert.equal(await run(`getComputedStyle(document.documentElement).getPropertyValue('--accent').trim()`),'#00ff00');
@@ -92,6 +92,35 @@ app.whenReady().then(async()=>{
   const valid=await run(`localStorage.getItem('slotforge.telemetry.library.v1')`);
   await run(`localStorage.setItem('slotforge.telemetry.library.v1','broken')`);await reload();assert.equal(await run(`document.querySelector('#save-library').disabled`),true);assert.equal(await run(`localStorage.getItem('slotforge.telemetry.library.v1')`),'broken');
   await run(`localStorage.setItem('slotforge.telemetry.library.v1',${JSON.stringify(valid)})`);await reload();
+  // Review regressions: notation, bounds, correct Analyze destination and draft protection.
+  await route('telemetry');await set('ratedRpm','2.15e4');await set('pinion','1e1');assert.equal(await run("document.querySelector('#input-error').hidden"),true);
+  await set('pinion','1000000');assert.equal(await run("document.querySelector('#save-library').disabled"),true);await set('pinion','10');
+  const numericImport=JSON.stringify({format:'slotforge-calculator',version:1,setup:{...require('../renderer/calculator-model.js').EXAMPLE,pinion:'+9',gear:'27.',ratedRpm:'+21500',rearDiameter:'20.',tyreMode:'rim',rimDiameter:'16.',tyreThickness:'+2',totalWeight:'+80',ballast:'-0'}});
+  await importFile('#setup-file',numericImport);if(await run("document.querySelector('#library-editor').open"))await click('#library-editor-confirm');
+  for(const [field,expected] of [['pinion','9'],['gear','27'],['ratedRpm','21500'],['rimDiameter','16'],['tyreThickness','2'],['totalWeight','80'],['ballast','0']])assert.equal(await run('document.querySelector('+JSON.stringify('[name='+field+']')+').value'),expected);
+  assert.match(await text('#flow-tyre'),/20 mm/);assert.equal(await run("document.querySelector('#input-error').hidden"),true);
+  await save('Review setup');const reviewId=await run('activeLibraryId');
+  await run('analysisId=library.find(e=>e.id!==activeLibraryId).id;void 0;');await click('.next-step a');await pause();assert.equal(await run('analysisId'),reviewId);
+  await route('telemetry');await set('pinion','11');await click('#new-setup');await click('#library-editor-cancel');assert.equal(await run('state.setup.pinion'),'11');
+  await click('#load-example');await click('#library-editor-cancel');assert.equal(await run('state.setup.pinion'),'11');
+  await click('#new-setup');await click('#library-editor-confirm');assert.equal(await run('state.setup.pinion'),'');await click('#load-example');
+  // Failed or cancelled recovery never destroys the original unreadable bytes.
+  await run("localStorage.setItem('slotforge.telemetry.library.v1','damaged-data')");await reload();await route('library');
+  assert.equal(await run('library.length'),0);assert.equal(await download('#library-recover-export','unreadable-library.txt'),'damaged-data');
+  await importFile('#library-file','{}');assert.equal(await run("localStorage.getItem('slotforge.telemetry.library.v1')"),'damaged-data');
+  await importFile('#library-file',valid);await click('#library-editor-cancel');assert.equal(await run("localStorage.getItem('slotforge.telemetry.library.v1')"),'damaged-data');
+  await importFile('#library-file',valid);
+  await run("window.originalSet=Storage.prototype.setItem;Storage.prototype.setItem=function(k,v){if(k==='slotforge.telemetry.library.v1')throw new DOMException('Full','QuotaExceededError');return window.originalSet.call(this,k,v);};void 0;");
+  await click('#library-editor-confirm');assert.match(await text('#library-editor-error'),/Could not save/);assert.equal(await run("localStorage.getItem('slotforge.telemetry.library.v1')"),'damaged-data');
+  await run('Storage.prototype.setItem=window.originalSet;void 0;');await click('#library-editor-confirm');assert.equal((await data()).length,6);assert.equal(await run('libraryError'),'');
+  // A concurrently replaced library is reloaded, never overwritten from a stale dialog.
+  await route('telemetry');await click('#save-library');await value('#library-entry-name','Concurrent write');
+  await run("localStorage.setItem('slotforge.telemetry.library.v1',JSON.stringify({format:'slotforge-telemetry-library',version:1,entries:[]}))");
+  await click('#library-editor-confirm');assert.match(await text('#library-editor-error'),/changed/);assert.equal((await data()).length,0);await click('#library-editor-cancel');
+  await run('localStorage.setItem("slotforge.telemetry.library.v1",'+JSON.stringify(valid)+')');await reload();
+  // Invalid remembered modes cannot trap the Light/Dark switch in the wrong tone.
+  await run("localStorage.setItem('slotforge.calculator.appearance.v1',JSON.stringify({theme:'light',preferredThemes:{dark:'ocean',light:'dark'}}))");await reload();
+  await click('[data-tone-choice=dark]');assert.equal(await run('document.documentElement.dataset.tone'),'dark');await click('[data-tone-choice=light]');assert.equal(await run('document.documentElement.dataset.tone'),'light');
   win.setContentSize(390,844);
   for(const page of ['telemetry','analyze','analyze/compare','library','settings','settings/calculations/weight']){await route(page);assert.ok(await run('document.documentElement.scrollWidth<=window.innerWidth'),page+' overflows');}
   await route('analyze');for(const topic of ['weight','wear']){await click('[data-analysis-topic='+topic+']');assert.ok(await run('document.documentElement.scrollWidth<=window.innerWidth'),topic+' overflows');}

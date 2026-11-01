@@ -60,6 +60,7 @@ function focusSetupInput(name){
 }
 function initializePages(){
   window.addEventListener('hashchange',renderRoute);
+  $('.next-step a').onclick=event=>{event.preventDefault();if(activeLibraryId&&library.some(e=>e.id===activeLibraryId))showSavedAnalysis(activeLibraryId);else navigate('analyze');};
   $('#analysis-setup').onchange=e=>{analysisId=e.target.value;renderAnalysis();};
   $('#analysis-edit').onclick=()=>openLibraryTask('load',analysisId);
   for(const button of document.querySelectorAll('[data-edit-inputs]'))button.onclick=()=>{openLibraryTask('load',analysisId);libraryTask.focus=button.dataset.editInputs;};

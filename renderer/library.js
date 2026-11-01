@@ -2,8 +2,9 @@
 const LIBRARY_KEY='slotforge.telemetry.library.v1',ACTIVE_KEY='slotforge.telemetry.library.active.v1';
 let library=[],libraryRaw=null,libraryError='',activeLibraryId=null,libraryTask=null,deletedEntry=null;
 function readLibrary() {
+  libraryRaw=null;
   try {libraryRaw=localStorage.getItem(LIBRARY_KEY);library=libraryRaw===null?[]:LibraryModel.decode(libraryRaw);libraryError='';}
-  catch {libraryError='The library could not be read. Its stored data has been left untouched. You can still export your current setup.';}
+  catch {library=[];libraryError='The library could not be read. Its stored data has been left untouched. Export the unreadable data for safekeeping, then restore a valid library backup.';}
 }
 function bindLibrary(id) {
   activeLibraryId=id;
@@ -18,14 +19,14 @@ function updateLibraryStatus() {
   $('#library-workspace-status').textContent=libraryError?'Library unavailable':item?`${item.setup.name} · ${changed?'unsaved library changes':'saved in library'}`:'Workbench draft · not linked to a library setup';
   $('#library-workspace-status').dataset.saveStatus=libraryError?'error':item&&!changed?'saved':'draft';
   $('#library-count').textContent=library.length;
-  $('#save-library').disabled=!!libraryError||!$('#input-error').hidden;
+  for(const id of ['save-library','save-copy'])$('#'+id).disabled=!!libraryError||!$('#input-error').hidden;
 }
-function commitLibrary(next) {
-  if(libraryError)throw Error(libraryError);
+function commitLibrary(next,{recover=false}={}) {
+  if(libraryError&&!recover)throw Error(libraryError);
   if(localStorage.getItem(LIBRARY_KEY)!==libraryRaw){readLibrary();renderLibrary();throw Error('The library changed in another window. Review it and try again.');}
   const text=LibraryModel.encode(next);
   localStorage.setItem(LIBRARY_KEY,text); // Commit before updating memory or reporting success.
-  library=next;libraryRaw=text;renderLibrary();updateLibraryStatus();
+  library=next;libraryRaw=text;libraryError='';renderLibrary();updateLibraryStatus();
 }
 function libraryFailure(error) {return ['QuotaExceededError','SecurityError'].includes(error.name)?'Could not save the library on this device. Your saved entries are unchanged; export your setup as a file.':error.message;}
 function libraryNotice(message) {$('#library-message').textContent=message;}
@@ -39,7 +40,10 @@ function renderLibraryTable(entries){
 }
 function renderLibrary() {
   $('#library-error').textContent=libraryError;$('#library-error').hidden=!libraryError;
-  $('#library-backup').disabled=!!libraryError||!library.length;$('#library-import').disabled=!!libraryError;
+  $('#library-backup').disabled=!!libraryError||!library.length;
+  $('#library-import').disabled=!!libraryError&&libraryRaw===null;
+  $('#library-import').innerHTML=sfIcon('download')+(libraryError?'Restore library backup':'Import library');
+  $('#library-recover-export').hidden=!libraryError||libraryRaw===null;
   const entries=LibraryModel.search(library,$('#library-search').value,$('#library-sort').value);
   renderLibraryTable(entries);
   $('#library-undo').hidden=!deletedEntry;
@@ -50,7 +54,7 @@ function openLibraryTask(kind,id=null) {
   libraryTask={kind,id,raw:libraryRaw};
   const save=kind==='save',rename=kind==='rename',deleting=kind==='delete';
   $('#library-editor-title').textContent=save?(item?'Save changes to library':'Save a setup'):rename?'Rename saved setup':deleting?'Delete saved setup?':'Load saved setup?';
-  $('#library-editor-description').textContent=save?'Library entries change only when you save them. Analyze and comparisons use these saved snapshots.':rename?'This changes the library name. Current workbench inputs stay as they are.':deleting?`Delete “${item.setup.name}” from the library? The current workbench will stay open. You can undo this deletion here.`:`Load “${item.setup.name}”? This replaces the current workbench inputs. Save any changes you want to keep first.`;
+  $('#library-editor-description').textContent=save?'Library entries change only when you save them. Analyze and comparisons use these saved snapshots.':rename?'This changes the library name. Current workbench inputs stay as they are.':['restore','replace-workbench'].includes(kind)?'':deleting?`Delete “${item.setup.name}” from the library? The current workbench will stay open. You can undo this deletion here.`:`Load “${item.setup.name}”? This replaces the current workbench inputs. Save any changes you want to keep first.`;
   $('#library-name-field').hidden=!(save||rename);$('#library-notes-field').hidden=!save;
   $('#library-entry-name').value=save?state.setup.name:item?.setup.name||'';
   $('#library-entry-notes').value=save?(item?.notes||''):'';
@@ -61,20 +65,23 @@ function openLibraryTask(kind,id=null) {
 function completeLibraryTask(asCopy=false) {
   const task=libraryTask;if(!task)return;
   try {
+    if(task.kind==='replace-workbench'){applyWorkbench(task.next);$('#library-editor').close();return;}
     if(task.raw!==libraryRaw||localStorage.getItem(LIBRARY_KEY)!==task.raw){readLibrary();renderLibrary();throw Error('The library changed. Close this dialog and try again.');}
     const now=new Date().toISOString(),item=library.find(e=>e.id===task.id);
     if(task.kind==='save') {
       const setup=CalculatorModel.cleanSetup({...state.setup,name:LibraryModel.name($('#library-entry-name').value)}),id=asCopy||task.asCopy?null:task.id,newId=crypto.randomUUID();
       commitLibrary(LibraryModel.save(library,{id,setup,notes:$('#library-entry-notes').value,now,newId}));
-      state.setup.name=setup.name;bindLibrary(id||newId);fillInputs();persist();libraryNotice('Setup saved to your library.');toast('Setup saved to library.');
+      state.setup.name=setup.name;bindLibrary(id||newId);analysisId=id||newId;fillInputs();persist();libraryNotice('Setup saved to your library.');toast('Setup saved to library.');
     } else if(task.kind==='rename') {
       commitLibrary(LibraryModel.rename(library,task.id,$('#library-entry-name').value,now));libraryNotice('Saved setup renamed.');
     } else if(task.kind==='delete') {
       commitLibrary(LibraryModel.remove(library,task.id));deletedEntry=item;
       if(activeLibraryId===task.id)bindLibrary(null);libraryNotice('Setup deleted. Undo is available until another deletion or app restart.');
+    } else if(task.kind==='restore') {
+      commitLibrary(task.entries,{recover:true});deletedEntry=null;bindLibrary(null);libraryNotice('Library restored from backup. Your workbench draft was kept.');
     } else {
       if(!item)throw Error('This saved setup no longer exists.');
-      state.setup=CalculatorModel.cleanSetup({...item.setup,...task.gearing});bindLibrary(item.id);fillInputs();persist();navigate('telemetry');toast('Loaded '+item.setup.name+'.');
+      state.setup=CalculatorModel.cleanSetup({...item.setup,...task.gearing});state.reference=null;bindLibrary(item.id);fillInputs();persist();navigate('telemetry');toast('Loaded '+item.setup.name+'.');
     }
     renderLibrary();$('#library-editor').close();
     if(task.focus)focusSetupInput(task.focus);
@@ -88,6 +95,7 @@ function initializeLibrary() {
   $('#library-search').oninput=renderLibrary;$('#library-sort').onchange=renderLibrary;
   $('#library-editor-cancel').onclick=()=>$('#library-editor').close();
   $('#library-editor-confirm').onclick=()=>completeLibraryTask();$('#library-save-copy').onclick=()=>completeLibraryTask(true);
+  $('#library-entry-name').onkeydown=event=>{if(event.key==='Enter'&&!event.isComposing){event.preventDefault();completeLibraryTask();}};
   for(const container of [$('#library-list'),$('#library-detail')])container.onclick=event=>{
     const button=event.target.closest('[data-library-action]');if(!button)return;
     const {libraryAction:action,libraryId:id}=button.dataset,item=library.find(e=>e.id===id);if(!item)return;
@@ -100,10 +108,20 @@ function initializeLibrary() {
   };
   $('#library-undo').onclick=()=>{try{if(deletedEntry){commitLibrary(LibraryModel.clean([...library,deletedEntry]));deletedEntry=null;renderLibrary();libraryNotice('Deleted setup restored.');}}catch(error){libraryNotice(libraryFailure(error));}};
   $('#library-backup').onclick=()=>{try{const url=URL.createObjectURL(new Blob([LibraryModel.encode(library)],{type:'application/json'})),a=document.createElement('a');a.href=url;a.download='SlotForge-Telemetry-library.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),10000);}catch(error){libraryNotice(error.message);}};
+  $('#library-recover-export').onclick=()=>{try{if(libraryRaw===null)return;const url=URL.createObjectURL(new Blob([libraryRaw],{type:'application/octet-stream'})),a=document.createElement('a');a.href=url;a.download='SlotForge-Telemetry-unreadable-library.txt';a.click();setTimeout(()=>URL.revokeObjectURL(url),10000);}catch(error){libraryNotice(error.message);}};
   $('#library-import').onclick=()=>$('#library-file').click();
   $('#library-file').onchange=async event=>{
     const file=event.target.files[0];if(!file)return;
-    try{if(file.size>LibraryModel.MAX_BYTES)throw Error('Choose a library backup smaller than 2 MB.');const incoming=LibraryModel.decode(await file.text());commitLibrary(LibraryModel.merge(library,incoming,()=>crypto.randomUUID()));libraryNotice(`Imported ${incoming.length} setups as new copies. Existing entries were kept.`);}
+    try{
+      if(file.size>LibraryModel.MAX_BYTES)throw Error('Choose a library backup smaller than 2 MB.');
+      const incoming=LibraryModel.decode(await file.text());
+      if(libraryError){
+        openLibraryTask('restore');libraryTask.entries=incoming;
+        $('#library-editor-title').textContent='Restore library from backup?';
+        $('#library-editor-description').textContent=`Replace the unreadable library with ${incoming.length} saved setups from this backup? Cancel to export the unreadable data first. Your workbench draft stays unchanged.`;
+        $('#library-editor-confirm').textContent='Replace unreadable library';
+      }else{commitLibrary(LibraryModel.merge(library,incoming,()=>crypto.randomUUID()));libraryNotice(`Imported ${incoming.length} setups as new copies. Existing entries were kept.`);}
+    }
     catch(error){libraryNotice(libraryFailure(error));}finally{event.target.value='';}
   };
   window.addEventListener('storage',event=>{if(event.key===LIBRARY_KEY||event.key===null){readLibrary();renderLibrary();updateLibraryStatus();if(location.hash.startsWith('#analyze'))renderAnalysis();}});
