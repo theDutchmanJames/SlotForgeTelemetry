@@ -200,11 +200,15 @@ Updates retain the existing user-data location. Earlier local builds were called
 
 **How do I report a problem?** [Open an issue](https://github.com/theDutchmanJames/SlotForgeTelemetry/issues) with the app version, operating system, steps taken, expected result and actual result. Screenshots and a small example setup help; remove personal notes before sharing files publicly.
 
-## Part of the SlotForge family
+## SlotForge App Collection
+
+Telemetry is part of the SlotForge App Collection. Explore the other apps:
 
 - [SlotForge Timing](https://github.com/theDutchmanJames/SlotForgeTiming) — lap timing and race management.
 - [SlotForge Paddock](https://github.com/theDutchmanJames/SlotForgePaddock) — your slotcar collection and workshop.
-- [SlotForge Track Builder](https://github.com/theDutchmanJames/SlotForgeTrackBuilder) — track design.
+- [SlotForge Livery](https://github.com/theDutchmanJames/SlotForgeLivery) — plan colour schemes, stripes and decals on editable car templates.
+- [SlotForge Decals](https://github.com/theDutchmanJames/SlotForgeDecals) — size artwork and arrange decal sheets ready to print.
+- [SlotForge Circuit](https://github.com/theDutchmanJames/SlotForgeTrackBuilder) — design slotcar tracks, including routed layouts and FreeForm drawings.
 
 The original motor/gearing engine and vector icons come from Paddock. The colours and navigation follow the family. See [source notices](SOURCE-NOTICES.txt).
 
