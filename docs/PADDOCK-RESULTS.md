@@ -22,7 +22,7 @@ Passwords stay in memory only. Disconnecting or closing Telemetry forgets them. 
 - Classified race results already include race adjustments. These remain separate from measured lap durations. A classification belongs to the whole session/car, not just the selected lane/driver.
 - **Records** means best eligible laps in the imported data, grouped by Paddock database, Timing source, track, lane and car. It is not a copy of Timing's entire official track-record or personal-best database. Older undelivered sessions, independent Timing installations and missing measurements can make it incomplete.
 
-## Next phase (unreleased source changes)
+## Stints, progress and reports
 
 **Lap analysis → Lap scope** focuses the chart, metrics and recorded-lap table on one recorded stint. The **Stint analysis** table below the chart shows each recorded period for the selected lane and driver, including empty periods, heat names and session-relative start/end times. Select a stint there to focus the analysis above.
 
