@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.8.1 — 2 November 2026 · Gear & dial identity
+
+- Replaced the stopwatch app icon with the approved Gear & dial design, combining a gear outline with a speedometer needle and scale.
+- Use the same SVG in the app header and favicon, with matching PNG and multi-size Windows ICO exports for desktop packages and the README.
+- Added the SlotForge App Collection brand logo and links to Timing, Paddock, Livery, Decals and Circuit in the README.
+- Calculations, saved data and Paddock integration are unchanged.
+
 ## 0.8.0 — 1 November 2026 · Manual laps, deeper analysis and reports
 
 - Added manual lap sessions without Paddock: paste times or numbered columns, review parsed values, mark invalid/pit laps, and save with car, track, driver, source and optional setup details.

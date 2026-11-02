@@ -10,7 +10,9 @@ Input parsing and validation were strengthened during the pre-release review.
 renderer/performance-view.js: calculation cards, curves, readout and comparison
 extracted from renderer/performance.js, with standalone state adapters.
 renderer/theme.js, renderer/themes.css and renderer/performance.css: unchanged.
-renderer/icons/*.svg and assets/icon.svg / icon.ico: original Paddock artwork.
+renderer/icons/*.svg: original Paddock artwork.
+assets/icon.svg: original SlotForge Telemetry Gear & dial artwork, introduced
+in 0.8.1. assets/icon.png and assets/icon.ico are exports of that SVG.
 tests/performance.test.cjs: five calculation-only tests from Paddock's
 performance.test.cjs; collection/store integration tests are not included.
 LICENSE: SlotForge Source-Available License 1.0, with the scope naming

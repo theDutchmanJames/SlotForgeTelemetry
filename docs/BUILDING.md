@@ -75,3 +75,7 @@ Engineering references: [Pololu motor and gearing principles](https://www.pololu
 Run `npm run check`, `npm test`, `npm run test:ui` and `npm run test:shell` for local validation. Desktop tests use profiles under `test-results`, separate from the user's app data. Unix builder tests use Bash on Linux/macOS; on Windows, set `SLOTFORGE_TEST_BASH` to a Bash executable and add its companion utility directory to PATH. These shell tests simulate packaging commands, not native installation or runtime behavior.
 
 Run **Actions → Build release packages → Run workflow** on the intended main-branch commit. Native Windows, Linux x64 and macOS runners install locked dependencies, run checks and produce workflow artifacts. Windows also runs isolated desktop and main-process checks. After all builds succeed, a separate job prepares a draft release with five app packages and SHA-256 checksums. Verify its commit, assets and checksums before publishing. The Mac app is ad-hoc signed, not Developer ID signed or notarized.
+
+## App icon
+
+The canonical Gear & dial artwork is assets/icon.svg, also used by the app header and favicon. After editing it, run npm run icons to regenerate the 1024 px PNG and the Windows ICO containing 16–256 px sizes. Commit all three assets together.

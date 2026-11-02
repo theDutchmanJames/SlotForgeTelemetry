@@ -74,7 +74,7 @@ fi
 
 command -v node >/dev/null 2>&1 && command -v npm >/dev/null 2>&1 || fail 'Install Node.js 22.12+ and npm, then run this builder again.'
 node -e 'const [m,n]=process.versions.node.split(".").map(Number);process.exit(m>22||(m===22&&n>=12)?0:1)' || fail 'Node.js 22.12 or newer is required.'
-[ -f assets/icon.png ] || fail 'Missing assets/icon.png. Restore the bundled stopwatch icon.'
+[ -f assets/icon.png ] || fail 'Missing assets/icon.png. Restore the bundled Telemetry icon.'
 printf '\nBuilding %s for %s\n' "$APP_NAME" "$platform"
 if [ "$quick" = 1 ] && node -e 'const fs=require("fs");require.resolve("electron-builder/cli.js");if(!fs.existsSync(require("electron")))process.exit(1)' >/dev/null 2>&1; then
   printf 'Quick mode: reusing installed dependencies.\n'

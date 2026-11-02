@@ -3,7 +3,7 @@ function initializeDesign(){
   const homeHead=document.querySelector('[data-page=telemetry] .page-head'),setupPanel=document.querySelector('.setup-panel');
   homeHead.classList.add('workbench-toolbar');homeHead.firstElementChild.replaceChildren(setupPanel);
   const decorate=(selector,name)=>{for(const el of document.querySelectorAll(selector))el.insertAdjacentHTML('afterbegin',sfIcon(name));};
-  document.querySelector('.brand-mark').innerHTML=sfIcon('timer');
+  document.querySelector('.brand-mark').innerHTML='<img src="../assets/icon.svg" alt="" width="42" height="42">';
   for(const [route,name] of Object.entries({telemetry:'setup',analyze:'timer',library:'library',settings:'settings'})){
     const link=document.querySelector(`[data-route="${route}"]`);link.querySelector('svg')?.remove();link.insertAdjacentHTML('afterbegin',sfIcon(name));
   }
