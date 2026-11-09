@@ -18,3 +18,49 @@ main{padding:24px 28px}.page-head{margin-bottom:20px}.page-head h1{font-size:27p
 
 /* Keep the canonical app badge square at every responsive header size. */
 .brand-mark{height:auto;aspect-ratio:1;flex-shrink:0;background:none;border-radius:0}.brand-mark img{display:block;width:100%;height:auto}
+
+/* Reserve the original word's width and baseline so adjacent text never moves. */
+.brand-wordmark{display:inline-block;position:relative;vertical-align:baseline}
+.brand-wordmark-size{visibility:hidden}
+.brand-wordmark img{position:absolute;left:0;top:50%;transform:translateY(-50%);display:block;width:100%;height:auto}
+.brand-wordmark .brand-wordmark-light{display:none}
+[data-tone="light"] .brand-wordmark-light{display:block}
+[data-tone="light"] .brand-wordmark-dark{display:none}
+
+/* Small collection signature, selected by the app's active theme tone. */
+footer{align-items:center}
+.footer-brand{margin-left:auto;flex-shrink:0;width:120px}
+.footer-brand img{display:block;width:120px;height:auto}
+.footer-brand .footer-brand-light{display:none}
+[data-tone="light"] .footer-brand-light{display:block}
+[data-tone="light"] .footer-brand-dark{display:none}
+@media(max-width:700px){footer{flex-direction:row;flex-wrap:wrap}}
+
+/* Magnetic measurements use the existing motor category and theme palette. */
+.magnetic-inputs textarea{font:inherit;line-height:1.6;background:var(--bg);color:var(--ink);border:1px solid var(--line);border-radius:6px;padding:10px;width:100%;max-width:100%;min-height:76px;resize:vertical}
+.magnetic-inputs textarea:focus{outline:2px solid var(--cat-motor);outline-offset:2px}
+.magnetic-inputs>.field,.magnetic-inputs>.form-grid{margin-bottom:14px}
+.magnetic-inputs h3,.magnetic-result h3{margin-top:24px;margin-bottom:14px}
+.magnetic-result h3:first-child{margin-top:0}
+.magnetic-result{margin-top:16px;overflow-wrap:anywhere}
+.magnetic-result caption{text-align:left;padding:12px 0;color:var(--muted)}
+.magnetic-chart{color:var(--ink);margin:18px 0}
+.magnetic-inputs input:disabled{opacity:.55}
+.magnetic-inputs textarea[aria-invalid=true]{border-color:var(--accent)}
+.magnetic-result h3{display:flex;align-items:center;gap:8px}
+.magnetic-result h3>.sf-icon{color:var(--cat-motor)}
+/* Optional measurement tools share the established category colours and panels. */
+.workshop-inputs h3,.workshop-result h3{display:flex;align-items:center;gap:8px}
+.workshop-inputs h3 svg,.workshop-result h3 svg{width:24px;height:24px;flex:none}
+.workshop-inputs textarea{width:100%;min-height:100px;resize:vertical;box-sizing:border-box;font:inherit;background:var(--bg);color:var(--ink);border:1px solid var(--line);border-radius:6px;padding:10px}
+.workshop-inputs textarea::placeholder{color:var(--muted)}
+.workshop-inputs textarea[aria-invalid=true]{border-color:var(--amber)}
+.workshop-recorded{margin-top:20px;padding-top:16px;border-top:1px solid var(--line)}
+.workshop-provenance{white-space:pre-wrap;overflow-wrap:anywhere}
+.workshop-inputs .field{margin-block:12px}
+.workshop-result{margin-block:16px;min-width:0}
+.workshop-result .table-wrap{max-width:100%;overflow:auto}
+.workshop-result td,.workshop-result th{overflow-wrap:anywhere}
+.workshop-result caption{text-align:left;padding-block:8px;color:var(--muted)}
+.workshop-chart{max-width:700px;margin-inline:auto}
+[data-analysis-panel=workshop]>.field{max-width:460px;margin-block:16px}

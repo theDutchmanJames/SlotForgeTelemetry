@@ -73,6 +73,14 @@ The original motor/gearing engine and vector icons come from Paddock. The colour
 
 ## Features and functionality
 
+### Magnetic downforce
+
+Record motor magnetic pull in gram-force (gf), including repeated measurements and the tester, rails and motor mounting used. Telemetry calculates mean pull, force in newtons, observed range, pull relative to actual car weight and total static support load. Optional club limits show margins to both the mean and the highest reading.
+
+Build a measured clearance curve in **Analyze → Magnetic downforce**, with a graph, exact values and sensitivity between points. Connect it to tyre wear using measured worn clearance or an explicitly selected rear-axle approximation. Estimates stay within the measured range; actual mass, power-to-weight and acceleration remain unchanged. All measurements travel with saved setups and library backups.
+
+[Read the measurement and calculation guide](docs/MAGNETIC-DOWNFORCE.md).
+
 ### Build a setup and see the numbers change
 
 **Try a change before reaching for the tools.** The Telemetry workbench updates its results as you enter gear teeth, rear tyre size, motor ratings and weight. Start with a pinion, driven gear and fitted tyre diameter; add the motor and other measurements when available.
@@ -99,6 +107,24 @@ Save a setup, then open **Analyze → Setup analysis**. Torque and power curves 
 **Compare setups** puts two saved configurations side by side in a simple table. See absolute and percentage changes, with colour highlights for selected performance metrics. Gearing, rollout, mass and measured lap averages remain neutral tradeoffs: a higher theoretical top speed does not automatically mean a faster car around your track.
 
 For example, save your current 9-tooth pinion setup, change it to 10 teeth and choose **Save as copy**. Compare the speed, torque and rollout of both configurations before testing the change on the track.
+
+### Testing, preparation and race planning
+
+Open **Testing & planning** from Telemetry's setup-input navigation for eleven optional tools:
+
+- **Tyre preparation & life:** target diameter, gear-clearance limits, left/right matching and remaining-life estimates from measured wear.
+- **Electrical losses:** loaded voltage drop, effective resistance and power loss using confirmed steady-DC measurements.
+- **Motor test records:** keep individual motor measurements, calculate torque from a force/arm reading and calculate power or efficiency from suitable simultaneous loaded measurements.
+- **Race strategy:** explore race duration, incident losses, pit-stop costs and the laps needed to recover an additional stop.
+- **Ballast planning:** plan multiple added or removed parts, choose axle or guide support, and solve for a target rear-weight share.
+- **Controlled A–B–A tests:** compare chronological test runs and baseline drift. Enter laps directly or copy a labelled snapshot from your manual/Paddock lap library.
+- **Class limits:** record numerical requirements and check measurement margins against your entered limits.
+- **Compound gears & geometry:** calculate multi-stage ratios and standard external spur-gear dimensions.
+- **Rotating mass:** explore equivalent inertia mass using explicitly simplified component geometry.
+- **Braking & coast-down:** analyse measured speed/time traces, distance and deceleration.
+- **Measurement ranges:** see how entered measurement bounds affect calculated outputs.
+
+Save the inputs with a setup, then open **Analyze → Testing & planning** for tables and available graphs. Every tool has a formula guide and worked example under Settings. Unknown values stay blank; estimates are labelled and do not claim to predict grip or lap times. See the [measurement guide](docs/TESTING-AND-PLANNING.md) for input formats and assumptions.
 
 ### Plan ballast, tyre wear and gear choices
 

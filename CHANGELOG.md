@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.9.0 — 9 November 2026 · Measurements, testing & planning
+
+- Added measured magnetic downforce, repeated readings, force/load conversions, clearance curves, bounded interpolation, tyre-wear scenarios and entered club-limit margins. Actual mass and motor calculations remain independent.
+- Added eleven Testing & planning tools: tyre preparation/life, electrical losses, motor records, race strategy, multi-part ballast planning, controlled A–B–A tests, class limits, compound gears/geometry, rotating mass, braking/coast-down and measurement ranges.
+- Integrated optional inputs with live results, saved-only analysis, measured-data graphs, setup/library exports and detailed calculation help. Older setups receive blank defaults.
+- Added read-only lap snapshots from manual and Paddock runs for controlled tests, retaining source identity/date and explicit conditions confirmation. Original lap records are unchanged.
+- Added theme-aware SlotForge header and footer wordmarks while preserving the existing text alignment.
+- Expanded the README and measurement documentation; repaired validation, finite-result, consistency-spread, provenance and theme issues found during review.
+- Added regression coverage for measurements and desktop workflows, including release-pipeline checks.
+
 ## 0.8.1 — 2 November 2026 · Gear & dial identity
 
 - Replaced the stopwatch app icon with the approved Gear & dial design, combining a gear outline with a speedometer needle and scale.

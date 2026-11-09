@@ -1,0 +1,50 @@
+// Real renderer workflows in a disposable profile; never opens the user's library.
+const {app,BrowserWindow}=require('electron'),fs=require('node:fs'),path=require('node:path'),assert=require('node:assert/strict');
+const output=path.join(__dirname,'../test-results');fs.mkdirSync(output,{recursive:true});
+app.setPath('userData',fs.mkdtempSync(path.join(output,'magnetic-profile-')));app.disableHardwareAcceleration();
+app.whenReady().then(async()=>{
+ const win=new BrowserWindow({show:false,width:1440,height:1100,webPreferences:{sandbox:true,contextIsolation:true,nodeIntegration:false,backgroundThrottling:false}});
+ const errors=[];win.webContents.on('console-message',e=>{if(e.level==='error')errors.push(e.message);});
+ const run=s=>win.webContents.executeJavaScript(s,true),pause=()=>new Promise(r=>setTimeout(r,120));
+ const click=s=>run(`document.querySelector(${JSON.stringify(s)}).click()`);
+ const set=(name,value)=>run(`(()=>{const e=document.querySelector('[name='+${JSON.stringify(name)}+']');e.value=${JSON.stringify(value)};e.dispatchEvent(new Event('input',{bubbles:true}));})()`);
+ const route=async h=>{await run(`navigate(${JSON.stringify(h)})`);await pause();};
+ const capture=async(name,selector)=>{await run(`document.querySelector('#toast').hidden=true;document.querySelector(${JSON.stringify(selector)}).scrollIntoView({block:'start',behavior:'instant'})`);await new Promise(r=>setTimeout(r,600));fs.writeFileSync(path.join(output,name+'.png'),(await win.webContents.capturePage()).toPNG());};
+ try{
+  await win.loadFile(path.join(__dirname,'../renderer/index.html'));await new Promise(r=>setTimeout(r,1400));
+  await click('[data-input-jump=magneticReadings]');assert.equal(await run('document.activeElement.name'),'magneticReadings');
+  for(const [k,v] of Object.entries({totalWeight:'80',magneticReadings:'19,20,21',magneticClearance:'1.1',magneticLimit:'20',magneticCurve:'0.8,30\n1,24\n1.2,20',wornDiameter:'19.6',magneticWearMode:'axle',magneticTester:'<b>Tester</b>',magneticRails:'Steel',magneticOrientation:'Inline',magneticExtra:'none',magneticCondition:'off'}))await set(k,v);
+  assert.equal(await run(`document.querySelector('[name=magneticWornClearance]').disabled`),true);
+  assert.match(await run(`document.querySelector('#stats [data-magnetic=worn-estimate]').textContent`),/27 gf/);
+  assert.match(await run(`document.querySelector('#stats [data-magnetic=limit]').textContent`),/exceeds/);
+  assert.equal(await run('document.activeElement.name'),'magneticReadings');
+  await click('#save-library');await run(`document.querySelector('#library-entry-name').value='Magnetic test';`);await click('#library-editor-confirm');
+  const saved=await run(`localStorage.getItem('slotforge.telemetry.library.v1')`);assert.match(saved,/19,20,21/);
+  await route('analyze');await click('[data-analysis-topic=magnetic]');
+  assert.equal(await run(`document.querySelector('#magnetic-results').closest('section[data-analysis-panel]').hidden`),false);
+  assert.equal(await run(`document.querySelectorAll('#magnetic-results .magnetic-chart circle').length`),3);
+  assert.equal(await run(`document.querySelector('#magnetic-results').textContent.includes('<b>Tester</b>')`),true);
+  assert.equal(await run(`document.querySelectorAll('#magnetic-results b').length`),0);
+  await capture('magnetic-analysis-dark','#magnetic-results');
+  await click('[data-tone-choice=light]');await capture('magnetic-analysis-light','#magnetic-results');
+  await route('settings/calculations/magnetic');assert.match(await run(`document.querySelector('#help-content').textContent`),/0.00980665/);
+  await click('#help-try');await pause();assert.equal(await run('document.activeElement.name'),'magneticReadings');
+  await set('magneticCurve','1,20\n1,25');assert.equal(await run(`document.querySelector('#save-library').disabled`),true);
+  assert.match(await run(`document.querySelector('#input-error').textContent`),/one curve point/);
+  assert.equal(await run(`document.querySelector('[name=magneticCurve]').getAttribute('aria-invalid')`),'true');
+  assert.equal(await run(`document.querySelector('#magnetic-input-error').hidden`),false);
+  assert.equal(await run(`localStorage.getItem('slotforge.telemetry.library.v1')`),saved);
+  await win.loadFile(path.join(__dirname,'../renderer/index.html'));await pause();
+  assert.equal(await run(`document.querySelector('[name=magneticCurve]').value`),'0.8,30\n1,24\n1.2,20');
+  await set('magneticWearMode','measured');await set('magneticWornClearance','2');assert.match(await run(`document.querySelector('#stats').textContent`),/outside the measured curve/);
+  await set('magneticReadings','0');assert.match(await run(`document.querySelector('#stats .magnetic-result').textContent`),/0 gf/);
+  await set('magneticReadings','19,20,21');await set('magneticWornClearance','.9');
+  await capture('magnetic-inputs-light','.magnetic-inputs');
+  win.setSize(760,980);await pause();await capture('magnetic-inputs-760','.magnetic-inputs');
+  assert.equal(await run('document.documentElement.scrollWidth<=innerWidth'),true);
+  await route('analyze');await click('[data-analysis-topic=magnetic]');assert.equal(await run('document.documentElement.scrollWidth<=innerWidth'),true);
+  await route('analyze/compare');assert.equal(await run(`document.querySelector('[data-compare-metric=magneticMean] td:last-child').className`),'neutral');
+  assert.deepEqual(errors,[]);console.log('Magnetic UI passed: live calculations, navigation, saved analysis, themes, escaped text, draft recovery, help, comparison and 760px layout.');
+  win.destroy();app.quit();
+ }catch(e){console.error(e);win.destroy();app.exit(1);}
+});

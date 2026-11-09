@@ -60,7 +60,12 @@ jobs:
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           npm run test:manual-laps-ui
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          npm run test:magnetic-ui
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          npm run test:workshop-ui
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           npm run test:race-progress-ui
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
       - name: Build native packages
         run: ${{ matrix.command }}
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4

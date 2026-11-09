@@ -12,10 +12,10 @@ function initializeDesign(){
     panel.querySelector('.step')?.remove();panel.querySelector('h2').insertAdjacentHTML('afterbegin',`<i class="icon-tile">${sfIcon(name)}</i>`);
   }
   document.querySelector('.motor-details').open=true;
-  const inputSections=[['pinion','Gearing','gearing'],['ratedRpm','Motor','motor'],['tyreMode','Tyres & clearance','tyres'],['totalWeight','Weight & ballast','weight'],['targetRollout','Gear finder','gears'],['trackLength','Lap speed','laps']];
+  const inputSections=[['pinion','Gearing','gearing'],['ratedRpm','Motor','motor'],['tyreMode','Tyres & clearance','tyres'],['totalWeight','Weight & ballast','weight'],['targetRollout','Gear finder','gears'],['trackLength','Lap speed','laps'],['magneticReadings','Magnetic downforce','magnetic'],['workshop-tool','Testing & planning','workshop']];
   document.querySelector('#setup-sections').innerHTML='<span class="input-nav-label">Setup inputs</span>'+inputSections.map(([field,label,topic])=>`<button type="button" data-input-jump="${field}" data-category="${topicStyle[topic][0]}">${sfIcon(topicStyle[topic][1])}${label}</button>`).join('');
-  for(const button of document.querySelectorAll('[data-input-jump]'))button.onclick=()=>focusSetupInput(button.dataset.inputJump);
-  for(const [topic,field,label] of [['performance','ratedRpm','Motor & gearing'],['weight','totalWeight','Weight & ballast'],['wear','wornDiameter','Tyre wear & clearance'],['gears','targetRollout','Gear finder'],['laps','trackLength','Lap speed']]){
+  for(const button of document.querySelectorAll('[data-input-jump]'))button.onclick=()=>{if(button.dataset.inputJump==='workshop-tool'){document.querySelector('#workshop-tool').focus();document.querySelector('.workshop-inputs').scrollIntoView({block:'start'});}else focusSetupInput(button.dataset.inputJump);};
+  for(const [topic,field,label] of [['performance','ratedRpm','Motor & gearing'],['weight','totalWeight','Weight & ballast'],['wear','wornDiameter','Tyre wear & clearance'],['gears','targetRollout','Gear finder'],['laps','trackLength','Lap speed'],['magnetic','magneticReadings','Magnetic downforce']]){
     const panel=document.querySelector('[data-analysis-panel="'+topic+'"]');
     panel.insertAdjacentHTML('afterbegin',`<div class="analysis-input-link"><span>${label} · inputs saved with this setup</span><button class="btn small" data-edit-inputs="${field}">${sfIcon('edit')}Edit these inputs</button></div>`);
   }

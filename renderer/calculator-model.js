@@ -1,9 +1,11 @@
 (function(root) {
   const P = typeof module === 'object' && module.exports ? require('./performance-model.js') : root.PerformanceModel;
   const T = typeof module === 'object' && module.exports ? require('./telemetry-model.js') : root.TelemetryModel;
+  const M = typeof module === 'object' && module.exports ? require('./magnetic-model.js') : root.MagneticModel;
+  const W = typeof module === 'object' && module.exports ? require('./workshop-model.js') : root.WorkshopModel;
   const EXAMPLE = { name: 'Example · 21,500 RPM / 9:27', pinion: '9', gear: '27', ratedRpm: '21500', ratedVoltage: '12', motorTorque: '285', torqueVoltage: '12', torqueType: 'Stall', motorType: 'Brushed DC', rearDiameter: '20', tyreMode: 'diameter', rimDiameter: '16', tyreThickness: '2' };
-  Object.assign(EXAMPLE, T.defaults());
-  const blank = () => ({ ...P.blank(), ...T.defaults(), name: '', pinion: '', gear: '', tyreMode: 'diameter', rimDiameter: '', tyreThickness: '' });
+  Object.assign(EXAMPLE, T.defaults(), M.defaults(), W.defaults());
+  const blank = () => ({ ...P.blank(), ...T.defaults(), ...M.defaults(), ...W.defaults(), name: '', pinion: '', gear: '', tyreMode: 'diameter', rimDiameter: '', tyreThickness: '' });
   function diameter(input) {
     if (input.tyreMode !== 'rim') return P.positive(input.rearDiameter, 1000);
     const rim = P.positive(input.rimDiameter, 1000), thickness = P.positive(input.tyreThickness, 500);
@@ -16,7 +18,7 @@
   }
   function cleanSetup(data) {
     if (!data || typeof data !== 'object' || Array.isArray(data)) throw Error('This setup is not valid.');
-    const out = { ...blank(), ...P.baseline({ ...P.blank(), ...data }), ...T.clean(data) };
+    const out = { ...blank(), ...P.baseline({ ...P.blank(), ...data }), ...T.clean(data), ...M.clean(data), ...W.clean(data) };
     if (typeof data.name !== 'string' || data.name.length > 100) throw Error('Setup name must be at most 100 characters.');
     out.name = data.name;
     if (!['diameter', 'rim'].includes(data.tyreMode)) throw Error('Choose a tyre measurement method.');
@@ -27,6 +29,8 @@
       out[key] = value === '' ? '' : String(P.positive(value, max));
     }
     if (out.tyreMode === 'rim' && out.rimDiameter && out.tyreThickness && diameter(out) === null) throw Error('Overall tyre diameter must be at most 1,000 mm.');
+    const workshopInput=inputOf(out);
+    for(const key of Object.keys(W.tools)){const result=W.calculate(workshopInput,key);if(result.error)throw Error(W.tools[key].title+': '+result.error);}
     return out;
   }
   function decode(text) {
