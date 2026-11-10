@@ -83,7 +83,8 @@ function completeLibraryTask(asCopy=false) {
       if(!item)throw Error('This saved setup no longer exists.');
       state.setup=CalculatorModel.cleanSetup({...item.setup,...task.gearing});state.reference=null;bindLibrary(item.id);fillInputs();persist();navigate('telemetry');toast('Loaded '+item.setup.name+'.');
     }
-    renderLibrary();$('#library-editor').close();
+      renderLibrary();$('#library-editor').close();
+      if(task.afterRoute)navigate(task.afterRoute);
     if(task.focus)focusSetupInput(task.focus);
   } catch(error){$('#library-editor-error').textContent=libraryFailure(error);}
 }

@@ -22,7 +22,7 @@ app.whenReady().then(async()=>{
   assert.equal(await text('#ratio-inline'),'3.000:1');assert.match(await text('#stats'),/27.02/);
   assert.equal(await run(`document.querySelectorAll('[data-page=telemetry] .performance-curve').length`),0);
   assert.equal(await run(`document.querySelectorAll('.main-nav a').length`),4);
-  assert.equal(await run(`document.querySelectorAll('[data-input-jump]').length`),8);
+  assert.equal(await run(`document.querySelectorAll('[data-input-jump]').length`),9);
   assert.equal(await run(`document.querySelector('[name=wheelbase]').closest('details')`),null);
   assert.equal(await run(`document.querySelector('[name=gearDiameter]').closest('.input-column')!==null`),true);
   await click('[data-input-jump=trackLength]');assert.equal(await run('document.activeElement.name'),'trackLength');
@@ -59,7 +59,7 @@ app.whenReady().then(async()=>{
   assert.equal((await data()).length,2);await route('analyze/compare');
   assert.equal(await run(`document.querySelectorAll('#analysis-compare svg').length`),0);
   assert.equal(await run(`document.querySelector('[data-compare-metric=speedKmh] td:last-child').className`),'good');
-  assert.equal(await run(`document.querySelector('[data-compare-metric=forceN] td:last-child').className`),'bad');
+  assert.equal(await run(`document.querySelector('[data-compare-metric=forceN] td:last-child').className`),'neutral');
   await capture('compare-v4');await route('library');await capture('library-v4');
   await click('[data-library-action=duplicate]');assert.equal((await data()).length,3);
   await click('[data-library-action=rename]');await value('#library-entry-name','<b>Race trim</b>');await click('#library-editor-confirm');assert.match(await text('#library-list'),/<b>Race trim<\/b>/);assert.equal(await run(`document.querySelectorAll('#library-list b').length`),0);

@@ -14,7 +14,14 @@ app.whenReady().then(async()=>{
   await restore('bad-json');assert.equal(fs.readFileSync(path.join(profile,'manual-laps-v1.json'),'utf8'),'damaged-original');
   dialog.showMessageBox=async()=>({response:1});await restore(recovery);assert.ok(fs.readdirSync(profile).some(f=>f.includes('.unreadable-')));assert.equal(await run("document.getElementById('manual-import').textContent"),'Restore backup');
   await route('analyze/races');assert.equal(await run("document.getElementById('race-empty').hidden"),false);
-  await click('[data-manual-add]');await set('manual-name','Notebook <b>practice</b>');await set('manual-car','Porsche');await set('manual-track','Club');await set('manual-source','Handwritten');await set('manual-text','10.235\nnope');await click('#manual-review');assert.match(await run("document.getElementById('manual-message').textContent"),/Line 2/);assert.equal(await run("document.getElementById('manual-save').disabled"),true);
+  await click('[data-manual-add]');
+  assert.equal(await run("document.getElementById('manual-text').value"),'');
+  assert.match(await run("document.querySelector('#input-help-manual-text').textContent"),/Not entered/);
+  await set('manual-unit','milliseconds');await set('manual-format','numbered');
+  assert.equal(await run("document.querySelector('#input-help-manual-text code').textContent"),'1;10235\n2;10187\n3;62345');
+  assert.equal(await run("document.getElementById('manual-text').value"),'');
+  await set('manual-unit','seconds');await set('manual-format','times');
+  await set('manual-name','Notebook <b>practice</b>');await set('manual-car','Porsche');await set('manual-track','Club');await set('manual-source','Handwritten');await set('manual-text','10.235\nnope');await click('#manual-review');assert.match(await run("document.getElementById('manual-message').textContent"),/Line 2/);assert.equal(await run("document.getElementById('manual-save').disabled"),true);
   await set('manual-text','10.235\n10,200\n9.900\n9.850\n10.000\n9.700\n9.650\n9.600\n9.550\n9.500');await click('#manual-review');assert.equal(await run("document.querySelectorAll('#manual-preview-rows tr').length"),10);
   await run("document.querySelector('[data-manual-status=\"1\"]').value='pit';document.querySelector('[data-manual-status=\"1\"]').dispatchEvent(new Event('change',{bubbles:true}))");
   await run("document.getElementById('manual-preview').scrollIntoView({block:'center'})");await pause();fs.writeFileSync(path.join(output,'manual-laps-preview.png'),(await win.webContents.capturePage()).toPNG());

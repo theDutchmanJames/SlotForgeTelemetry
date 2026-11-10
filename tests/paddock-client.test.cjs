@@ -61,7 +61,7 @@ test('model separates measured pace, record flags and classification',()=>{
  const other={...run,sourceId:'another-source',id:'different'};assert.equal(model.comparable(run,other),false);assert.equal(model.records([run,other]).length,2);
 });
 test('sustained runs never bridge pit laps, missing laps or driver stints',()=>{
- const run={laps:Array.from({length:7},(_,i)=>({id:String(i),number:i+1,durationMs:1000+i*10,valid:true,pit:false,recordEligible:true,stintId:'one',heatId:'h'}))};assert.equal(model.statistics(run).bestRun.mean,1020);run.laps[3].pit=true;assert.equal(model.statistics(run).bestRun,null);run.laps[3].pit=false;run.laps[3].stintId='two';assert.equal(model.statistics(run).bestRun,null);run.laps[3].stintId='one';run.laps[3].number=40;assert.equal(model.statistics(run).bestRun,null);
+ const run={laps:Array.from({length:7},(_,i)=>({id:String(i),number:i+1,durationMs:1000+i*10,endedAtMs:(i+1)*1000+5*i*(i+1),valid:true,pit:false,recordEligible:true,stintId:'one',heatId:'h'}))};assert.equal(model.statistics(run).bestRun.mean,1020);run.laps[3].pit=true;assert.equal(model.statistics(run).bestRun,null);run.laps[3].pit=false;run.laps[3].stintId='two';assert.equal(model.statistics(run).bestRun,null);run.laps[3].stintId='one';run.laps[3].number=40;assert.equal(model.statistics(run).bestRun,null);
 });
 test('cross-heat overlaps are quarantined even if historical receipt claimed inclusion',()=>{
  const d=read('original-detail'),p=d.payload;p.participants[0].laps[1].endedAtMs=15000;const data={hosts:[{id:p.databaseId,results:[d]}]};assert.equal(model.unsafe(p),true);assert.equal(model.runs(data).length,0);

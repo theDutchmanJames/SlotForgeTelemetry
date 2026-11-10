@@ -1,10 +1,10 @@
 # Building SlotForge Telemetry
 
-An offline desktop workbench for the SlotForge family. Version 0.6.2 adds static ballast placement, longitudinal centre of gravity, driven-gear clearance and clearer theoretical result labels.
+An offline desktop workbench for slotcar calculations, measured lap analysis, chassis and ballast planning, and optional setup guidance.
 
 ## Open the app
 
-After building on Windows, open `dist/SlotForgeTelemetry-0.6.2-windows-x64-Portable.exe`. This portable build needs no Node.js installation. It is unsigned. Ready-made downloads are available from the repository’s Releases page.
+After building on Windows, open `dist/SlotForgeTelemetry-0.10.0-windows-x64-Portable.exe`. This portable build needs no Node.js installation. It is unsigned. Ready-made downloads are available from the repository’s Releases page.
 
 For development, run `npm ci` and `npm start` with Node.js 22.12 or newer, or use `Start SlotForge Telemetry.cmd`. The renderer also works directly in a modern browser; browser and desktop storage are separate.
 
@@ -33,7 +33,7 @@ Speed uses fitted outside tyre diameter. In rim mode, diameter = rim + twice rad
 
 Motor curves require Brushed DC, confirmed stall torque and matching RPM/torque test voltages. They use a linear ideal motor model. Voltage entries describe measurement conditions; they do not rescale RPM. Stall force applies at zero speed. Peak mechanical power is not a continuous rating.
 
-Weight calculations use total mass or the sum of both axle readings. Acceleration uses curve force, an explicit efficiency assumption and mass; it excludes traction limits, rotational inertia and drag. Ballast placement uses wheelbase, a position between the axles and level axle scale readings to calculate static load shares and longitudinal centre of gravity; the guide must be clear and magnetic pull absent. Driven-gear clearance uses measured outside diameter and fitted/worn tyre diameter, with warnings at zero or negative clearance. Estimated wheel force and power apply the assumed drivetrain efficiency at the saved motor operating point. Tyre wear reruns speed, rollout and force at a smaller diameter and estimates rear axle height change. Gear finder ranks up to 20 integer combinations by target rollout; real parts compatibility must be checked separately. Applying a candidate creates a draft change, requiring an explicit save.
+Weight calculations use total mass or the sum of both axle readings. Acceleration uses curve force, an explicit efficiency assumption and mass; it excludes traction limits, rotational inertia and drag. Ballast placement uses wheelbase, a position between the axles and level axle scale readings to calculate static load shares and longitudinal centre of gravity; the guide must be clear and magnetic pull absent. Driven-gear clearance uses measured outside diameter and fitted/worn tyre diameter, with contact or protrusion represented separately from a clear gap. Estimated wheel force and power apply the assumed drivetrain efficiency at the saved motor operating point. Tyre wear reruns speed, rollout and force at a smaller diameter and estimates rear axle height change. Gear finder ranks up to 20 integer combinations by target rollout; real parts compatibility must be checked separately. Applying a candidate creates a draft change, requiring an explicit save.
 
 Lap average uses measured lane distance and time. Scale speed is a simple size conversion, not full-size vehicle physics. Settings contains detailed formulas and examples for these calculations.
 

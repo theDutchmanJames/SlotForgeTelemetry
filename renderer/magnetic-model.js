@@ -60,12 +60,13 @@
     const values=readings(c.magneticReadings),points=curve(c.magneticCurve),count=values.length;
     const mean=count?values.reduce((a,b)=>a+b,0)/count:null,min=count?Math.min(...values):null,max=count?Math.max(...values):null;
     const height=P.number(c.magneticClearance,1000,true),limit=P.number(c.magneticLimit,100000,true);
-    const wornHeight=c.magneticWearMode==='axle'?(height!==null&&rideHeightChange!==null?height+rideHeightChange:null):P.number(c.magneticWornClearance,1000,true);
+    const rawWornHeight=c.magneticWearMode==='axle'?(height!==null&&rideHeightChange!==null?height+rideHeightChange:null):P.number(c.magneticWornClearance,1000,true);
+    const wornContact=rawWornHeight!==null&&rawWornHeight<0,wornHeight=wornContact?null:rawWornHeight;
     const estimate=interpolate(points,height),wornEstimate=interpolate(points,wornHeight);
     const hasMass=Number.isFinite(massG)&&massG>0;
     return {error:'',count,mean,min,max,range:count?max-min:null,forceN:mean===null?null:mean*GF_TO_N,
       loadPercent:mean!==null&&hasMass?mean/massG*100:null,supportN:mean!==null&&hasMass?(massG+mean)*GF_TO_N:null,
-      supportGf:mean!==null&&hasMass?massG+mean:null,massG:hasMass?massG:null,height,wornHeight,estimate,wornEstimate,
+      supportGf:mean!==null&&hasMass?massG+mean:null,massG:hasMass?massG:null,height,wornHeight,wornContact,estimate,wornEstimate,
       estimateChange:estimate!==null&&wornEstimate!==null?wornEstimate-estimate:null,
       limit,margin:mean!==null&&limit!==null?limit-mean:null,minMargin:max!==null&&limit!==null?limit-max:null,
       points,segments:points.slice(1).map((p,i)=>({from:points[i].height,to:p.height,slope:(p.pull-points[i].pull)/(p.height-points[i].height)})),

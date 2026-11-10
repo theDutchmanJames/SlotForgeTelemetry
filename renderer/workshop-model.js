@@ -1,18 +1,19 @@
 (function(root){
   'use strict';
   const P=typeof module==='object'&&module.exports?require('./performance-model.js'):root.PerformanceModel;
+  const Fit=typeof module==='object'&&module.exports?require('./fit-model.js'):root.FitModel;
   const num=(label,max=100000,zero=true)=>({label,type:'number',max,min:zero?0:0.000001});
   const signed=label=>({...num(label),min:-100000});
   const text=(label,max=500)=>({label,type:'text',max});
   const lines=(label,example)=>({label,type:'textarea',max:6000,example});
   const choice=(label,options)=>({label,type:'select',options});
   const fields={
-    tyreSet:text('Tyre set / compound / track / conditions'),
-    tyreMinimum:num('Minimum usable tyre diameter · mm',1000,false),
-    tyreRequiredGap:num('Required gear clearance · mm',1000),
-    tyreLeft:num('Left tyre diameter · mm',1000,false),tyreRight:num('Right tyre diameter · mm',1000,false),
-    tyreSamples:lines('Diameters measured around one tyre · mm','20.01, 20.02, 20.00'),
-    tyreHistory:lines('Wear history · cumulative laps, diameter mm','0, 20.4\n500, 20.2\n1000, 20.0'),
+    tyreSet:{...text('Tyre set / compound / track / conditions'),help:'Saved notes only; these words do not change the calculations or assign a grip value.'},
+    tyreMinimum:{...num('Minimum usable tyre diameter · mm',1000,false),inputMin:8,inputMax:30,help:'Smallest usable fitted diameter for this tyre and class. Leave blank if unknown. The current gear clearance is calculated separately from your fitted tyre and gear.'},
+    tyreRequiredGap:{...num('Minimum permitted gear-to-track gap · mm (optional)',1000),inputMax:3,help:'Only for a class or clearance requirement, usually a fraction of a millimetre. Leave blank to see the actual gap without setting a target. This input accepts 0–3 mm for 1:32 setup planning.'},
+    tyreLeft:{...num('Left tyre diameter · mm',1000,false),inputMin:8,inputMax:30},tyreRight:{...num('Right tyre diameter · mm',1000,false),inputMin:8,inputMax:30},
+    tyreSamples:{...lines('Diameters measured around one tyre · mm','20.01, 20.02, 20.00'),help:'Measure the same tyre at different positions at one point in time. Two or more readings show diameter spread, not wear over laps.'},
+    tyreHistory:{...lines('Wear history · cumulative laps, diameter mm','0, 20.4\n500, 20.2\n1000, 20.0'),help:'One row per measurement: cumulative lap count, then fitted outside diameter in mm. At least two rows at different lap counts are needed for wear rate. Use the same tyre set; start again after truing or replacement. Current left/right diameter readings do not provide a wear history.'},
     electricalMode:choice('Electrical measurement',['unknown|Choose measurement type','dc|Steady DC under load','pulsed|Digital / pulsed / PWM']),
     electricalNotes:text('Load / meter / lane / test conditions'),
     electricalRows:lines('Location | supply V | rail V | measured A','Lane 1 start | 12 | 11.4 | 2\nLane 1 far end | 12 | 11.2 | 2'),
@@ -48,7 +49,7 @@
   const tools={
     tyres:{title:'Tyre preparation & life',category:'tyres',icon:'wheel-tyre-set',keys:['tyreSet','tyreMinimum','tyreRequiredGap','tyreLeft','tyreRight','tyreSamples','tyreHistory'],
       intro:'Uses fitted tyre diameter, gear outside diameter and target rollout from your setup. Record one tyre set under comparable conditions. Start a new history after truing, replacement or a compound change.',
-      formula:'Gear-limited minimum diameter = gear outside diameter + 2 × required gap. Target diameter = target rollout × ratio ÷ π. Wear rate = diameter loss ÷ laps. Remaining laps = (latest diameter − minimum) ÷ measured wear rate. Circumference mismatch = π × |left diameter − right diameter|.',
+      formula:'Minimum tyre diameter for required gear gap = gear outside diameter + 2 × required gap. Target diameter = target rollout × ratio ÷ π. Wear rate = diameter loss ÷ laps. Remaining laps = (latest diameter − minimum) ÷ measured wear rate. Circumference mismatch = π × |left diameter − right diameter|.',
       limits:'Wear forecasts assume future wear resembles this history. The range uses the slowest and fastest measured intervals, not statistical confidence. Gear clearance alone cannot establish chassis or motor clearance. Diameter spread around a tyre is not dial-indicator radial runout (TIR).',example:'20.4 → 20.2 mm over 500 laps loses 0.04 mm per 100 laps. At 20.2 mm with a 19.8 mm minimum, the same rate suggests 1,000 more laps.'},
     electrical:{title:'Electrical losses',category:'power',icon:'motor-tester',keys:['electricalMode','electricalNotes','electricalRows'],
       intro:'Measure supply and rail voltage under the same steady load, plus actual current. Separate locations with new lines. The power supply current rating is not a current measurement.',
@@ -142,16 +143,22 @@
     const table=(headers,rows)=>{result.headers=headers;result.rows=rows;};
     try{switch(tool){
       case 'tyres':{
-        const history=data(c,'tyreHistory'),samples=data(c,'tyreSamples'),gap=n('tyreRequiredGap'),min=n('tyreMinimum'),gear=P.positive(input.gearDiameter,1000),target=P.positive(input.targetRollout,10000);
-        const gearMin=gap!==null&&gear!==null?gear+2*gap:null,limit=min===null?gearMin:gearMin===null?min:Math.max(min,gearMin);
-        metric('Gear-limited minimum diameter',gearMin,'mm');metric('Diameter for target rollout',target!==null&&m.ratio!==null?target*m.ratio/Math.PI:null,'mm');metric('Available diameter above entered limits',limit!==null&&m.rearDiameter!==null?m.rearDiameter-limit:null,'mm');
-        const l=n('tyreLeft'),r=n('tyreRight'),delta=l!==null&&r!==null?Math.abs(l-r):null;
+        const enteredHistory=data(c,'tyreHistory'),enteredSamples=data(c,'tyreSamples'),gap=n('tyreRequiredGap'),min=n('tyreMinimum'),gear=P.positive(input.gearDiameter,1000),target=P.positive(input.targetRollout,10000);
+        const history=enteredHistory.every(p=>Fit.diameter(p[1])!==null)?enteredHistory:[],samples=enteredSamples.every(d=>Fit.diameter(d)!==null)?enteredSamples:[];
+        const plan=Fit.tyrePlan({fitted:m.rearDiameter,gear,requiredGap:gap,minimum:min,targetDiameter:target!==null&&m.ratio!==null?target*m.ratio/Math.PI:null});
+        result.tyrePlan=plan;
+        metric('Current gap below driven gear',plan.current.gap,'mm');
+        if(plan.current.state==='interference')metric('Gear protrusion below tyre contact plane',plan.current.interference,'mm');
+        metric('Minimum tyre diameter for required gear gap',plan.gearMinimum,'mm');metric('Diameter for target rollout',plan.targetDiameter,'mm');metric('Usable tyre diameter before minimum',plan.remaining,'mm');
+        if(plan.shortfall>0)metric('Tyre diameter below minimum',plan.shortfall,'mm');
+        const l=Fit.diameter(n('tyreLeft')),r=Fit.diameter(n('tyreRight')),delta=l!==null&&r!==null?Math.abs(l-r):null;
         metric('Left/right diameter mismatch',delta,'mm');metric('Circumference mismatch per axle revolution',delta===null?null:Math.PI*delta,'mm');metric('Measured diameter spread (not TIR)',samples.length>1?Math.max(...samples)-Math.min(...samples):null,'mm');
         const rates=history.slice(1).map((p,i)=>(history[i][1]-p[1])/(p[0]-history[i][0])),last=history.at(-1),rate=history.length>1?(history[0][1]-last[1])/(last[0]-history[0][0]):null;
-        const remaining=last&&limit!==null?Math.max(0,last[1]-limit):null,life=remaining===null?null:remaining===0?0:rate>0?remaining/rate:null;
+        const limit=plan.limit,current=m.rearDiameter??last?.[1]??null;
+        const remaining=current!==null&&limit!==null?Math.max(0,current-limit):null,life=remaining===null?null:remaining===0?0:rate>0?remaining/rate:null;
         metric('Observed wear',rate===null?null:rate*100,'mm / 100 laps',4);metric('Estimated remaining laps',life,'laps',0);
         if(rates.length&&remaining!==null){const fastest=Math.max(...rates),slowest=Math.min(...rates);metric('Remaining laps at fastest measured wear',remaining===0?0:fastest>0?remaining/fastest:null,'laps',0);metric('Remaining laps at slowest measured wear',remaining===0?0:slowest>0?remaining/slowest:null,'laps',0);if(slowest===0&&remaining>0)result.notes.push('A zero-wear interval gives no finite upper life estimate.');}
-        if(limit!==null)result.notes.push(`Life uses minimum ${limit} mm and the last history measurement, not the fitted diameter. Check every other clearance separately.`);
+        if(limit!==null)result.notes.push(`Wear budget uses minimum ${limit} mm and ${m.rearDiameter!==null?'the currently fitted tyre':'the latest history measurement'}. Remaining laps use the measured history wear rate.`);
         table(['Cumulative laps','Diameter · mm'],history);result.plot={x:'Cumulative laps',y:'Diameter · mm',points:history};break;
       }
       case 'electrical':{
@@ -170,12 +177,14 @@
       }
       case 'balance':{
         const rows=data(c,'balanceChanges'),span=n('balanceSpan'),front=n('balanceFront'),rear=n('balanceRear');if(span===null||front===null||rear===null){result.notes.push('Enter both support readings and their separation.');break;}if(front+rear<=0)throw Error('Original measured mass must be positive.');
+        if(rows.filter(r=>r.mass<0).reduce((s,r)=>s-r.mass,0)>front+rear)throw Error('Removed component mass exceeds the original car mass.');
         const mass=front+rear+rows.reduce((s,r)=>s+r.mass,0),back=rear+rows.reduce((s,r)=>s+r.mass*r.x/span,0),fore=mass-back;
         if(mass<=0||fore<0||back<0)throw Error('This plan gives non-positive mass or a negative support load. Check removed parts and positions.');
         metric('Planned mass',mass,'g');metric(c.balanceSupport==='guide'?'Guide support load':'Front axle support load',fore,'g');metric('Rear support load',back,'g');metric('Rear share',back/mass*100,'%');metric('CG behind front support',span*back/mass,'mm');
         const target=n('balanceTarget'),x=n('balanceTargetX');let add=null;
         if(target!==null&&x!==null){const numerator=target/100*mass-back,denominator=x/span-target/100;if(Math.abs(numerator)<1e-9)add=0;else if(Math.abs(denominator)<1e-12)result.notes.push('That target cannot be reached by adding ballast at this position.');else {add=numerator/denominator;if(add<0){add=null;result.notes.push('Reaching this target here requires removal, not added ballast.');}}}
-        metric('Additional ballast for target',add,'g');metric('Mass including target ballast',add===null?null:mass+add,'g');const max=n('balanceMax');metric('Mass margin after target (or current plan)',max===null?null:max-mass-(add??0),'g');table(['Part','Mass change · g','Position x · mm'],rows.map(r=>[r.name,r.mass,r.x]));break;
+        const max=n('balanceMax');if(add!==null&&!Fit.additionFits(add,mass,max)){add=null;result.notes.push('No ballast addition within this plan’s mass budget reaches that target. Move existing mass or choose another position.');}
+        metric('Additional ballast for target',add,'g');metric('Mass including target ballast',add===null?null:mass+add,'g');metric('Mass margin after target (or current plan)',max===null?null:max-mass-(add??0),'g');table(['Part','Mass change · g','Position x · mm'],rows.map(r=>[r.name,r.mass,r.x]));break;
       }
       case 'experiment':{
         const rows=data(c,'experimentRows'),runs=rows.map(r=>({...r,mean:mean(r.times),median:quantile(r.times,.5),spread:r.times.length>1?quantile(r.times,.75)-quantile(r.times,.25):null})),a=runs.filter(r=>r.setup==='A'),b=runs.filter(r=>r.setup==='B');
@@ -190,7 +199,7 @@
       case 'gears':{
         const rows=data(c,'gearStages'),ratio=rows.length?rows.reduce((a,[driver,driven])=>a*driven/driver,1):null;
         metric('Compound ratio',ratio,':1',4);metric('Compound rollout',ratio!==null&&m.rearDiameter!==null?Math.PI*m.rearDiameter/ratio:null,'mm / motor rev');metric('Compound no-load axle speed',ratio!==null&&m.ratedRpm!==null?m.ratedRpm/ratio:null,'RPM');
-        const pitch=n('gearPitch'),mod=pitch===null?null:c.gearPitchMode==='dp'?25.4/pitch:pitch,driver=n('gearDriver'),driven=n('gearDriven');metric('Module',mod,'mm');metric('Diametral pitch',mod===null?null:25.4/mod,'teeth/in');metric('Driving pitch diameter',mod!==null&&driver!==null?mod*driver:null,'mm');metric('Driven pitch diameter',mod!==null&&driven!==null?mod*driven:null,'mm');metric('Standard centre distance',mod!==null&&driver!==null&&driven!==null?mod*(driver+driven)/2:null,'mm');table(['Driving teeth','Driven teeth'],rows);break;
+        const pitch=n('gearPitch'),mod=pitch===null?null:c.gearPitchMode==='dp'?25.4/pitch:pitch,driver=n('gearDriver'),driven=n('gearDriven');metric('Module',mod,'mm');metric('Diametral pitch',mod===null?null:25.4/mod,'teeth/in');const driving=mod!==null&&driver!==null?Fit.gearDiameter(mod*driver):null,drivenDiameter=mod!==null&&driven!==null?Fit.gearDiameter(mod*driven):null;metric('Driving pitch diameter',driving,'mm');metric('Driven pitch diameter',drivenDiameter,'mm');metric('Standard centre distance',driving!==null&&drivenDiameter!==null?(driving+drivenDiameter)/2:null,'mm');table(['Driving teeth','Driven teeth'],rows);break;
       }
       case 'inertia':{
         const rows=data(c,'inertiaRows'),mass=P.positive(input.totalWeight,100000),radius=m.rearDiameter===null?null:m.rearDiameter/2000;
@@ -205,7 +214,7 @@
       case 'ranges':{
         const dd=n('rangeDiameter'),dr=n('rangeRpm'),df=n('rangePull'),d=m.rearDiameter,rpm=m.ratedRpm,gear=P.positive(input.gearDiameter,1000),meanPull=(()=>{try{const raw=input.magneticReadings||'';return raw.trim()?mean(raw.trim().split(/[\s,;]+/).map(v=>value(v,0,100000))):null;}catch{return null;}})();
         if((d!==null&&dd!==null&&d-dd<=0)||(rpm!==null&&dr!==null&&rpm-dr<0)||(meanPull!==null&&df!==null&&meanPull-df<0))throw Error('Measurement bounds cross an impossible negative value (or zero tyre diameter). Check the bounds; they are not silently clipped.');
-        const rows=[];if(d!==null&&dd!==null){rows.push(['Tyre diameter',d-dd,d+dd,'mm']);if(m.ratio!==null)rows.push(['Rollout',Math.PI*(d-dd)/m.ratio,Math.PI*(d+dd)/m.ratio,'mm / motor rev']);if(gear!==null)rows.push(['Nominal gear clearance',(d-dd-gear)/2,(d+dd-gear)/2,'mm']);if(rpm!==null&&dr!==null&&m.ratio!==null)rows.push(['No-load speed',(d-dd)*(rpm-dr)*Math.PI/m.ratio*60/1e6,(d+dd)*(rpm+dr)*Math.PI/m.ratio*60/1e6,'km/h']);}
+        const rows=[];if(d!==null&&dd!==null&&Fit.diameter(d-dd)!==null&&Fit.diameter(d+dd)!==null){rows.push(['Tyre diameter',d-dd,d+dd,'mm']);if(m.ratio!==null)rows.push(['Rollout',Math.PI*(d-dd)/m.ratio,Math.PI*(d+dd)/m.ratio,'mm / motor rev']);if(Fit.gearDiameter(gear)!==null){const low=(d-dd-gear)/2,high=(d+dd-gear)/2;if(low>=0)rows.push(['Gap below driven gear',low,high,'mm']);else if(high<0)rows.push(['Gear protrusion below tyre contact plane',-high,-low,'mm']);else {rows.push(['Possible gear gap',0,high,'mm']);rows.push(['Possible gear protrusion',0,-low,'mm']);}};if(rpm!==null&&dr!==null&&m.ratio!==null)rows.push(['No-load speed',(d-dd)*(rpm-dr)*Math.PI/m.ratio*60/1e6,(d+dd)*(rpm+dr)*Math.PI/m.ratio*60/1e6,'km/h']);}
         if(meanPull!==null&&df!==null)rows.push(['Magnetic force',(meanPull-df)*.00980665,(meanPull+df)*.00980665,'N']);table(['Quantity','Lower bound','Upper bound','Unit'],rows);break;
       }
     }}catch(e){return {error:e.message};}

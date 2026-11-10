@@ -1,5 +1,26 @@
 # Changelog
 
+## 0.10.0 — 10 November 2026 · Setup guidance & chassis planning
+
+- Moved examples outside input fields and clarified entered, missing and partial measurement records throughout the app. Predicted Performance reuses current workbench data and requests only relevant missing inputs or confirmations. Manual-lap examples follow the selected format and units.
+
+- Audited calculations and their presentation for 1:32 setups. Actual gear clearance is independent of optional targets; unusable targets cannot produce oversized tyre recommendations or negative wear allowances. Tyre-life estimates now start at the fitted diameter.
+- Separated gear protrusion from a clear gap, bounded automatic ballast suggestions, rejected impossible part moves and below-track motor-clearance scenarios, and corrected comparison goals and incompatible-rating deltas.
+- Made assistant input sources visible, identified note-only fields, added targeted optional-input guidance and removed empty calculated-result tables.
+- Corrected uninterrupted lap statistics and chart segments to respect timestamp gaps as well as excluded laps, numbering and stint boundaries.
+
+- Added Analyze → Predicted Performance: optional symptom-led guidance, six calculation areas, context questions and practical tests, usable without a saved setup or measurements.
+- Added independent what-if comparisons for ballast height/addition, gearing and matched motor pull; component CG/inertia estimates, static support-edge geometry and bounded magnetic angle interpolation.
+- Saved observations, methods and proposals with setups; expanded new A–B–A captures to freeze drivetrain, workshop and prediction inputs while retaining legacy snapshots.
+- Added help, source documentation and regression coverage for optional inputs, measurement gates, persistence, navigation and both themes.
+
+- Added chassis geometry, scaled guide/rear-contact diagrams, explicit weighing modes, repeat readings, horizontal CG calculations and optional measurement bounds.
+- Added two-dimensional ballast add/remove/move planning, rear-share target suggestions, mass-limit margins, saved analysis and neutral setup comparisons.
+- Added frozen chassis setup evidence for controlled A–B–A runs, including manual and Paddock lap snapshots; changed run rows detach their prior evidence.
+- Preserved legacy axle/guide ballast tools, with an explicit copy action into the new planner. Planned ballast never changes the main measured car mass.
+- Applied the approved light/dark Telemetry SVG wordmark above the slogan, beside the existing app icon, and the small SlotForge SVG footer logo.
+- Added calculation, persistence, desktop and responsive regression coverage; setup import/export now applies the same UTF-8 byte limit.
+
 ## 0.9.0 — 9 November 2026 · Measurements, testing & planning
 
 - Added measured magnetic downforce, repeated readings, force/load conversions, clearance curves, bounded interpolation, tyre-wear scenarios and entered club-limit margins. Actual mass and motor calculations remain independent.

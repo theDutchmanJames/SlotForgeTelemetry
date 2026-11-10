@@ -6,7 +6,7 @@ function evidence(label,count,offset){
  const d=structuredClone(require('../integration/paddock-telemetry-v1/fixtures/original-detail.json')),p=d.payload,entry=p.participants[0];
  p.sessionId='stint-test-'+label;p.name='Test '+label;p.endedAt=new Date(Date.parse(p.startedAt)+360000).toISOString();p.heats[0].endedAtMs=360000;p.heats[0].name='Heat <b>one</b>';
  entry.stints=[{...entry.stints[0],id:'s1',endedAtMs:180000},{...entry.stints[0],id:'s2',startedAtMs:180000,endedAtMs:360000},{...entry.stints[0],id:'empty',startedAtMs:360000,endedAtMs:360000}];
- const template=entry.laps[0];entry.laps=Array.from({length:count},(_,i)=>({...template,id:label+'-'+i,stintId:i<15?'s1':'s2',number:i+1,endedAtMs:(i+1)*12000,durationMs:11000-(i%15)*70+offset}));
+ let elapsed=0;const template=entry.laps[0];entry.laps=Array.from({length:count},(_,i)=>({...template,id:label+'-'+i,stintId:i<15?'s1':'s2',number:i+1,endedAtMs:elapsed=(i===15?180000:elapsed)+11000-(i%15)*70+offset,durationMs:11000-(i%15)*70+offset}));
  if(count>19){entry.laps[18].pit=true;entry.laps[18].recordEligible=false;entry.laps[18].reason='Pit lane';}
  p.standings[0].classifiedLaps=count;p.standings[0].classifiedElapsedMs=count*12000;
  d.receipt.sessionId=p.sessionId;d.receipt.contentHash=hash(p);d.receipt.summaries=summaries(p);return {payload:p,receipt:d.receipt};

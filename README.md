@@ -73,6 +73,30 @@ The original motor/gearing engine and vector icons come from Paddock. The colour
 
 ## Features and functionality
 
+### Get help with how your car behaves
+
+Open **Analyze → Predicted Performance**, or choose **Help me with my car** on the workbench. Start with “my car tips over”, excessive sliding, sudden recovery, guide lift, hopping, weak acceleration, braking or inconsistent laps. **Every input is optional; no saved setup or measuring equipment is required.**
+
+- Get practical checks, possible explanations, changes to explore, trade-offs and a suggested test. Optional questions distinguish corner entry/exit, braking/coasting and one-corner or left/right problems.
+- Include workbench numbers only when you choose. Inspect handling, drivetrain, tyres, power/braking, race consistency and evidence, with links to every measurement tool.
+- See which numbers are included and what each area can calculate now. Targeted optional-input links explain what would make the advice more specific; free-text track, tyre and controller notes are clearly distinguished from calculation inputs.
+- Compare vertical ballast moves, added ballast, gearing or comparable-RPM motor magnetic pull without changing the baseline. Optional component inventories estimate CG and yaw/roll inertia; angle/pull measurements interpolate only within the measured range.
+- Keep observations, measurement methods and proposals with your saved setup and exports. Use the existing A–B–A tool for handwritten laps or manual/Paddock run snapshots, with frozen setup evidence.
+
+Advice is conditional, not a diagnosis or a guaranteed lap-time prediction. Static support geometry does not establish a safe cornering speed; unknown grip, force distribution and transient handling remain unknown. [Read the calculation scope and sources](docs/predicted-performance.md).
+
+### Chassis geometry & three-point balance
+
+Measure the **guide-to-rear-axle triangle**, see it drawn to scale, and calculate its angle, proportions and guide position relative to the front axle. Enter rear tyre contact centre spacing directly, or estimate it from overall rear width and individual tyre widths.
+
+Choose front/rear axle weighing, guide/rear axle weighing, or **guide plus individual rear tyres**. Guided instructions keep the weighing support distinct from the guide pivot. Repeat readings show load distribution and calculated horizontal centre of gravity; optional absolute bounds and an independent total-mass reading help check the measurements.
+
+**Plan ballast before moving it.** Add, remove or relocate parts with longitudinal and lateral positions. Compare measured and planned support loads, CG movement and mass-limit margins. An optional rear-share target suggests additional ballast at a chosen position. Plans remain separate from measured car mass.
+
+Save the setup for **Analyze → Chassis geometry & balance**, with diagrams, load charts and detailed tables. Setup comparison keeps geometry and balance differences neutral. In **Testing & planning → Controlled A–B–A tests**, attach a frozen copy of a saved chassis setup to manually entered or imported lap runs. Later library edits cannot change those captured inputs; edited run rows mark their previous evidence as detached.
+
+These are static geometry and balance tools, not predictions of grip, cornering speed or deslot limits. [Read the measurement guide and worked examples](docs/chassis-geometry.md).
+
 ### Magnetic downforce
 
 Record motor magnetic pull in gram-force (gf), including repeated measurements and the tester, rails and motor mounting used. Telemetry calculates mean pull, force in newtons, observed range, pull relative to actual car weight and total static support load. Optional club limits show margins to both the mean and the highest reading.
@@ -85,7 +109,7 @@ Build a measured clearance curve in **Analyze → Magnetic downforce**, with a g
 
 **Try a change before reaching for the tools.** The Telemetry workbench updates its results as you enter gear teeth, rear tyre size, motor ratings and weight. Start with a pinion, driven gear and fitted tyre diameter; add the motor and other measurements when available.
 
-Use a measured tyre diameter or calculate it from rim diameter and radial tyre thickness. The **Setup inputs** shortcuts take you directly to Gearing, Motor, Tyres & clearance, Weight & ballast, Gear finder and Lap speed.
+Use a measured tyre diameter or calculate it from rim diameter and radial tyre thickness. The **Setup inputs** shortcuts take you directly to Gearing, Motor, Tyres & clearance, Weight & ballast, Chassis geometry & balance, Gear finder, Lap speed, Magnetic downforce and Testing & planning.
 
 | Calculation | What it helps you understand |
 | --- | --- |
@@ -97,6 +121,8 @@ Use a measured tyre diameter or calculate it from rim diameter and radial tyre t
 | **Weight and ballast** | Power per kilogram and ideal acceleration before and after adding weight. |
 | **Drivetrain efficiency** | Estimated wheel power and force at a chosen operating point, using your assumed losses. |
 | **Measured lap speed** | Average speed from lane length and lap time, with an optional scale-equivalent conversion. |
+
+Tyre calculations are scoped to **1:32 road/track setups**, with fitted diameters of 8–30 mm and optional gear-gap requirements of 0–3 mm. These supported ranges are not class regulations or guarantees that a part fits your car.
 
 Motor torque is entered in **gf·cm**—gram-force centimetres. Power curves require a brushed DC motor, confirmed **stall torque**, and matching positive RPM/torque test voltages. Leave uncertain inputs blank or marked **Unknown**; unavailable results show a dash.
 
@@ -112,7 +138,7 @@ For example, save your current 9-tooth pinion setup, change it to 10 teeth and c
 
 Open **Testing & planning** from Telemetry's setup-input navigation for eleven optional tools:
 
-- **Tyre preparation & life:** target diameter, gear-clearance limits, left/right matching and remaining-life estimates from measured wear.
+- **Tyre preparation & life:** actual gear-to-track gap, optional clearance requirements, left/right matching and usable wear remaining. Life estimates start at the fitted diameter and use your measured wear rate. For example, a 19 mm tyre around an 18 mm gear gives a 0.5 mm gap.
 - **Electrical losses:** loaded voltage drop, effective resistance and power loss using confirmed steady-DC measurements.
 - **Motor test records:** keep individual motor measurements, calculate torque from a force/arm reading and calculate power or efficiency from suitable simultaneous loaded measurements.
 - **Race strategy:** explore race duration, incident losses, pit-stop costs and the laps needed to recover an additional stop.
@@ -169,7 +195,7 @@ Pit and invalid laps stay available for inspection but are excluded from pace st
 
 ### Compare runs, follow Progress and share reports
 
-**Compare runs** starts with a straightforward numerical comparison. Optional **Lap progression** overlays two runs on the same time scale, with solid/dashed traces and gaps for excluded laps. This compares recorded lap sequences; it is not a live race gap or sector analysis.
+**Compare runs** starts with a straightforward numerical comparison. Optional **Lap progression** overlays two runs on the same lap-sequence axis, with solid/dashed traces and gaps for excluded laps. This compares recorded lap sequences; it is not a live race gap or sector analysis.
 
 Benefit colours require compatible runs and your confirmation that the driver and conditions are comparable. Track, lane, source and known session/length differences matter. The app's observations explain changes in best lap, median pace, consistency and sample size without claiming that a setup change caused the difference.
 

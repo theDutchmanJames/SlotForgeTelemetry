@@ -1,5 +1,5 @@
 const test=require('node:test'),assert=require('node:assert/strict'),model=require('../renderer/race-model.js');
-const laps=(count,start=1)=>Array.from({length:count},(_,i)=>({id:'lap-'+(start+i),number:start+i,stintId:'s1',heatId:'h1',endedAtMs:(start+i)*12000,durationMs:11000-i*100,valid:true,pit:false,recordEligible:true}));
+const laps=(count,start=1)=>{let elapsed=(start-1)*12000;return Array.from({length:count},(_,i)=>({id:'lap-'+(start+i),number:start+i,stintId:'s1',heatId:'h1',endedAtMs:elapsed+=11000-i*100,durationMs:11000-i*100,valid:true,pit:false,recordEligible:true}));};
 test('stints retain heat metadata, time boundaries and empty recorded periods',()=>{
  const d=require('../integration/paddock-telemetry-v1/host-handoff/fixtures/normal-result.json'),copy=structuredClone(d);
  copy.payload.participants[0].stints.push({...copy.payload.participants[0].stints[0],id:'empty',startedAtMs:60000,endedAtMs:60000});
@@ -13,6 +13,14 @@ test('pace windows never bridge pit, invalid, missing lap, heat or stint boundar
  for(const mutate of [l=>l.pit=true,l=>l.valid=false,l=>l.number=99,l=>l.heatId='h2',l=>l.stintId='s2']){
   const rows=laps(12);mutate(rows[5]);assert.ok(model.stintAnalysis({laps:rows}).every(s=>s.pace===null));
  }
+});
+test('timestamp pauses break pace, best-five and chart windows without altering individual lap statistics',()=>{
+ const rows=laps(10),before=model.statistics({laps:rows});
+ for(let i=4;i<rows.length;i++)rows[i].endedAtMs+=2000;
+ const after=model.statistics({laps:rows});assert.equal(after.mean,before.mean);assert.equal(after.median,before.median);
+ assert.equal(after.bestRun.laps[0].number,6);assert.equal(model.stintAnalysis({laps:rows})[0].pace,null);
+ const points=model.chartPoints(rows,'',false);assert.notEqual(points[3].segment,points[4].segment);assert.equal(points[4].median,null);
+ const five=laps(5);five[4].endedAtMs++;assert.equal(model.statistics({laps:five}).bestRun,null);
 });
 test('longest uninterrupted sequence supplies pace; pit and other-invalid counts do not overlap',()=>{
  const rows=laps(25);rows[10].pit=true;rows[10].valid=false;rows[24].valid=false;

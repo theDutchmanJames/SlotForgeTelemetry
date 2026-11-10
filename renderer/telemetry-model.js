@@ -1,4 +1,5 @@
 (function(root) {
+  const Fit=typeof module==='object'&&module.exports?require('./fit-model.js'):root.FitModel;
   const P = typeof module === 'object' && module.exports ? require('./performance-model.js') : root.PerformanceModel;
   // Label, upper bound, zero allowed, default. Units are explicit in labels.
   const fields = {
@@ -32,7 +33,7 @@
     const massG=n.totalWeight??axleTotal,loadedG=massG!==null&&n.ballast!==null?massG+n.ballast:null;
     const force=point?.forceN!=null&&n.efficiency!==null?point.forceN*n.efficiency/100:null;
     const perMass=(v,g)=>v!==null&&g>0?v/(g/1000):null;
-    const worn=n.wornDiameter!==null&&motor.rearDiameter!==null&&n.wornDiameter<=motor.rearDiameter?P.calculate({...input,rearDiameter:String(n.wornDiameter)}):null;
+    const worn=Fit.diameter(n.wornDiameter)!==null&&motor.rearDiameter!==null&&n.wornDiameter<=motor.rearDiameter?P.calculate({...input,rearDiameter:String(n.wornDiameter)}):null;
     const lapSpeed=n.trackLength!==null&&n.lapTime!==null?n.trackLength/n.lapTime*3.6:null;
     // Static two-support balance: x is measured behind the front axle.
     const positionValid=n.wheelbase!==null&&n.ballastPosition!==null&&n.ballastPosition<=n.wheelbase;
@@ -41,12 +42,12 @@
     const rearAdded=placementReady?(n.ballast===0?0:n.ballast*n.ballastPosition/n.wheelbase):null;
     const ballastFront=placementReady?n.frontWeight+n.ballast-rearAdded:null,ballastRear=placementReady?n.rearWeight+rearAdded:null;
     const balanceMass=placementReady?axleTotal+n.ballast:null;
-    const clearance=motor.rearDiameter!==null&&n.gearDiameter!==null?(motor.rearDiameter-n.gearDiameter)/2:null;
-    const wornClearance=worn&&n.gearDiameter!==null?(worn.rearDiameter-n.gearDiameter)/2:null;
+    const gearFit=Fit.clearance(motor.rearDiameter,n.gearDiameter),wornGearFit=Fit.clearance(worn?.rearDiameter,n.gearDiameter);
+    const clearance=gearFit.gap,wornClearance=wornGearFit.gap;
     return {...n,motor,point,massG,loadedG,axleTotal,massMismatch:axleTotal!==null&&n.totalWeight!==null&&Math.abs(axleTotal-n.totalWeight)>0.01,
       cg,ballastFront,ballastRear,ballastFrontPercent:placementReady?ballastFront/balanceMass*100:null,ballastRearPercent:placementReady?ballastRear/balanceMass*100:null,
       ballastCg:placementReady?n.wheelbase*ballastRear/balanceMass:null,positionInvalid:n.wheelbase!==null&&n.ballastPosition!==null&&!positionValid,
-      clearance,wornClearance,wheelForce:force,wheelPower:point?.powerW!=null&&n.efficiency!==null?point.powerW*n.efficiency/100:null,
+      clearance,wornClearance,gearFit,wornGearFit,wheelForce:force,wheelPower:point?.powerW!=null&&n.efficiency!==null?point.powerW*n.efficiency/100:null,
       frontPercent:axleTotal!==null?n.frontWeight/axleTotal*100:null,rearPercent:axleTotal!==null?n.rearWeight/axleTotal*100:null,
       powerToWeight:perMass(motor.peakPowerW,massG),loadedPowerToWeight:perMass(motor.peakPowerW,loadedG),
       acceleration:perMass(force,massG),loadedAcceleration:perMass(force,loadedG),worn,rideHeightChange:worn?(n.wornDiameter-motor.rearDiameter)/2:null,

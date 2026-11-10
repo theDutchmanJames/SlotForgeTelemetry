@@ -62,11 +62,11 @@ test('ballast placement conserves total load and moments, including axle endpoin
   assert.equal(T.calculate({...s,ballastPosition:'81'}).positionInvalid,true);
 });
 
-test('gear clearance preserves signed interference and requires actual diameters',()=>{
+test('gear clearance separates physical gap from protrusion and requires actual diameters',()=>{
   const s={...example(),gearDiameter:'18',wornDiameter:'19'},m=T.calculate(s);
   close(m.clearance,1);close(m.wornClearance,0.5);
   close(T.calculate({...s,rearDiameter:'18',wornDiameter:''}).clearance,0);
-  close(T.calculate({...s,rearDiameter:'17',wornDiameter:''}).clearance,-0.5);
+  const clash=T.calculate({...s,rearDiameter:'17',wornDiameter:''});assert.equal(clash.clearance,null);close(clash.gearFit.interference,0.5);
   assert.equal(T.calculate({...s,gearDiameter:''}).clearance,null);
   assert.equal(T.calculate({...s,rearDiameter:''}).clearance,null);
   assert.equal(T.calculate({...s,wornDiameter:'21'}).wornClearance,null);

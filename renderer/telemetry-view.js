@@ -2,7 +2,7 @@
 function telemetryFields(keys) {
   return '<div class="form-grid">'+keys.map(key=>{
     const [label,max,zero]=TelemetryModel.fields[key],integer=/^(pinion|gear)(Min|Max)$/.test(key);
-    return `<label class="field">${label}<input name="${key}" type="number" min="${zero?0:integer?1:0.000001}" max="${max}" step="${integer?1:'any'}" inputmode="decimal"></label>`;
+    return `<label class="field">${label}<input name="${key}" type="number" min="${key==='wornDiameter'?8:zero?0:integer?1:0.000001}" max="${['wornDiameter','gearDiameter'].includes(key)?30:max}" step="${integer?1:'any'}" inputmode="decimal"></label>`;
   }).join('')+'</div>';
 }
 for(const [id,title,keys,note] of [
@@ -40,10 +40,9 @@ function balanceResults(m) {
     <p class="hint">Enter both axle readings and wheelbase for centre of gravity; add ballast and its position for the second scenario. Position describes the centre of the added ballast. This is a static two-axle model: weigh level, with the guide clear and no magnetic pull on the scales. It does not predict grip, dynamic load transfer or centre-of-gravity height.</p></section>`;
 }
 function clearanceResults(m) {
-  const warning=(value)=>value===null?'':value<0?'Gear extends below the tyre contact plane.':value===0?'Gear touches the track plane; there is no clearance.':'';
+  const value=fit=>fit.state==='interference'?`No clearance · gear protrudes ${telemetryValue(fit.interference,'mm',3)} below the tyre contact plane`:fit.state==='touching'?'0 mm · no clearance (gear touches the track plane)':telemetryValue(fit.gap,'mm',3);
   return `<section class="panel calculation-detail" data-category="tyres"><h3>${sfIcon('wheel-tyre-set')}Driven gear clearance</h3>
-    <div class="table-wrap"><table><thead><tr><th>Nominal clearance</th><th>Current tyre</th><th>Worn tyre</th></tr></thead><tbody><tr><th>Gear tooth tips above track</th><td data-telemetry="clearance">${telemetryValue(m.clearance,'mm',3)}</td><td data-telemetry="worn-clearance">${telemetryValue(m.wornClearance,'mm',3)}</td></tr></tbody></table></div>
-    ${warning(m.clearance)?`<p class="note">Current tyre: ${warning(m.clearance)}</p>`:''}${warning(m.wornClearance)?`<p class="note">Worn tyre: ${warning(m.wornClearance)}</p>`:''}
+    <div class="table-wrap"><table><thead><tr><th>Nominal clearance</th><th>Current tyre</th><th>Worn tyre</th></tr></thead><tbody><tr><th>Gap below driven gear</th><td data-telemetry="clearance">${value(m.gearFit)}</td><td data-telemetry="worn-clearance">${value(m.wornGearFit)}</td></tr></tbody></table></div>
     <p class="hint">(Tyre diameter − measured driven gear outside diameter) ÷ 2. Requires a gear concentric with the rear axle and equal rear tyres on a flat track. Nominal geometry only: tyre compression, gear runout and track irregularities reduce usable clearance. Positive clearance does not confirm chassis clearance or gear compatibility.</p></section>`;
 }
 function accelerationCurve(input,m) {

@@ -4,7 +4,7 @@ const output=path.join(__dirname,'../test-results'),profile=path.join(output,'pr
 function evidence(id,day,count,duration,lane=1){
  const d=structuredClone(require('../integration/paddock-telemetry-v1/fixtures/original-detail.json')),p=d.payload,e=p.participants[0];
  p.sessionId=id;p.name='History '+id;p.startedAt=`2026-10-${String(day).padStart(2,'0')}T12:00:00.000Z`;p.endedAt=new Date(Date.parse(p.startedAt)+60000).toISOString();e.stints[0].lane=lane;
- e.laps=Array.from({length:count},(_,i)=>({...e.laps[0],id:id+i,number:i+1,durationMs:duration,endedAtMs:(i+1)*10000,recordEligible:count>1}));
+ e.laps=Array.from({length:count},(_,i)=>({...e.laps[0],id:id+i,number:i+1,durationMs:duration,endedAtMs:(i+1)*duration,recordEligible:count>1}));
  if(id==='B'){e.configuration.technical.gear='28';e.configuration.components=[{partId:'wheel',name:'Wheel <b>test</b>',quantity:2,field:'rearWheels',position:'rear',assemblyId:null}];}
  p.standings[0].classifiedLaps=count;p.standings[0].classifiedElapsedMs=count*10000;d.receipt.sessionId=id;d.receipt.contentHash=hash(p);d.receipt.summaries=summaries(p);return {payload:p,receipt:d.receipt};
 }

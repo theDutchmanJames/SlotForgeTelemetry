@@ -9,7 +9,7 @@ test('all eleven tools accept an empty legacy setup without inventing measuremen
   assert.equal(Object.keys(W.tools).length,11);
 });
 test('tyre preparation solves target diameter, observed wear life and mismatch',()=>{
-  const r=calc('tyres');assert.equal(r.error,'');near(metric(r,'Gear-limited minimum diameter'),19);near(metric(r,'Diameter for target rollout'),20);near(metric(r,'Observed wear'),.04);near(metric(r,'Estimated remaining laps'),1000);near(metric(r,'Circumference mismatch per axle revolution'),Math.PI*.2);near(metric(r,'Measured diameter spread (not TIR)'),.02);
+  const r=calc('tyres');assert.equal(r.error,'');near(metric(r,'Minimum tyre diameter for required gear gap'),19);near(metric(r,'Diameter for target rollout'),20);near(metric(r,'Observed wear'),.04);near(metric(r,'Estimated remaining laps'),500);near(metric(r,'Circumference mismatch per axle revolution'),Math.PI*.2);near(metric(r,'Measured diameter spread (not TIR)'),.02);
   assert.equal(metric(calc('tyres',{tyreHistory:'0,20\n500,20'}),'Estimated remaining laps'),null);
   assert.equal(metric(calc('tyres',{tyreMinimum:'20.2'}),'Estimated remaining laps'),0);
   assert.match(calc('tyres',{tyreHistory:'0,20\n500,21'}).error,/non-increasing/);
@@ -20,6 +20,15 @@ test('electrical calculations require measured steady DC and reject inconsistent
   assert.equal(calc('electrical',{electricalMode:'pulsed'}).rows.length,0);
   assert.match(calc('electrical',{electricalRows:'Rail | 12 | 13 | 2'}).error,/exceeds/);
   assert.match(calc('electrical',{electricalRows:'Rail | 12 | 11 | 0'}).error,/between/);
+});
+test('tyre clearance stays physical when a legacy clearance target is outside the supported range',()=>{
+ const r=calc('tyres',{rearDiameter:'19',gearDiameter:'18',tyreRequiredGap:'17',tyreMinimum:'19'});
+ assert.equal(metric(r,'Minimum tyre diameter for required gear gap'),null);assert.equal(metric(r,'Usable tyre diameter before minimum'),null);
+ near(metric(r,'Current gap below driven gear'),0.5);
+ assert.ok(r.tyrePlan.invalidGap);assert.doesNotMatch(JSON.stringify(r),/52|\-33/);
+ const valid=calc('tyres',{rearDiameter:'19',gearDiameter:'18',tyreRequiredGap:'0.5',tyreMinimum:'19'});near(metric(valid,'Usable tyre diameter before minimum'),0);assert.doesNotMatch(valid.notes.join(' '),/Check entered limits/);
+ const noTarget=calc('tyres',{rearDiameter:'19',gearDiameter:'18',tyreRequiredGap:'',tyreMinimum:''});near(metric(noTarget,'Current gap below driven gear'),0.5);assert.equal(metric(noTarget,'Minimum tyre diameter for required gear gap'),null);
+ assert.match(W.fields.tyreRequiredGap.help,/0–3 mm/);
 });
 test('motor tests keep no-load, stall and simultaneous loaded power distinct',()=>{
   const r=calc('motor');assert.equal(r.error,'');assert.equal(r.rows[0][7],null);near(r.rows[1][5],100);near(r.rows[1][7],10.269499865892516);near(r.rows[1][8],85.57916554910431);assert.equal(r.rows[2][7],0);
@@ -72,7 +81,7 @@ test('braking integrates measured samples only and identifies incomplete stops',
   assert.deepEqual(r.rows[0].slice(2,4),[18,12]);
 });
 test('measurement bounds propagate endpoint intervals without silent clipping',()=>{
-  const r=calc('ranges');const clearance=r.rows.find(r=>r[0]==='Nominal gear clearance');near(clearance[1],.975);near(clearance[2],1.025);const force=r.rows.find(r=>r[0]==='Magnetic force');near(force[1],19*.00980665);near(force[2],21*.00980665);
+  const r=calc('ranges');const clearance=r.rows.find(r=>r[0]==='Gap below driven gear');near(clearance[1],.975);near(clearance[2],1.025);const force=r.rows.find(r=>r[0]==='Magnetic force');near(force[1],19*.00980665);near(force[2],21*.00980665);
   assert.match(calc('ranges',{rangeDiameter:'20'}).error,/impossible/);
   assert.equal(calc('ranges',{rangeDiameter:''}).rows.some(r=>r[0]==='No-load speed'),false);
 });

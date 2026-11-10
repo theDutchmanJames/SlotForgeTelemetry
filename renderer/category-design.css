@@ -17,12 +17,13 @@ main{padding:24px 28px}.page-head{margin-bottom:20px}.page-head h1{font-size:27p
 .setup-sections{margin:0 0 20px;display:flex;align-items:center}.input-nav-label{font-size:12px;color:var(--muted);margin-right:6px}.setup-input-group{margin-top:18px;padding-top:18px;border-top:1px solid var(--line)}.setup-input-group.panel{margin-top:0;border-top:2px solid var(--category)}.setup-input-group h3{display:flex;align-items:center;gap:10px}.setup-input-group h3 .sf-icon{color:var(--category);width:25px;height:25px}.input-column .panel{scroll-margin-top:18px}.analysis-input-link{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:0 0 16px;font-size:12px;color:var(--muted)}.analysis-input-link .btn{border-color:var(--category);flex-shrink:0}.analysis-input-link .sf-icon{color:var(--category);margin-right:7px}@media(max-width:760px){.analysis-input-link{flex-wrap:wrap}.setup-sections .input-nav-label{width:100%}}
 
 /* Keep the canonical app badge square at every responsive header size. */
-.brand-mark{height:auto;aspect-ratio:1;flex-shrink:0;background:none;border-radius:0}.brand-mark img{display:block;width:100%;height:auto}
+.brand-mark{width:42px;height:42px;aspect-ratio:1;flex-shrink:0;background:none;border-radius:0}.brand-mark img{display:block;width:100%;height:auto}
 
-/* Reserve the original word's width and baseline so adjacent text never moves. */
-.brand-wordmark{display:inline-block;position:relative;vertical-align:baseline}
-.brand-wordmark-size{visibility:hidden}
-.brand-wordmark img{position:absolute;left:0;top:50%;transform:translateY(-50%);display:block;width:100%;height:auto}
+/* The slogan determines both rows' width; centre them within the app icon's height. */
+.brand-copy{display:grid;grid-template-columns:max-content;align-content:center;gap:5px;height:42px}
+.brand-copy small{margin:0;font-size:9px;line-height:11px;letter-spacing:.19em;font-weight:500}
+.brand-wordmark{display:block;position:relative;width:100%;aspect-ratio:697.55/87.17}
+.brand-wordmark img{position:absolute;inset:0;display:block;width:100%;height:auto}
 .brand-wordmark .brand-wordmark-light{display:none}
 [data-tone="light"] .brand-wordmark-light{display:block}
 [data-tone="light"] .brand-wordmark-dark{display:none}
@@ -35,6 +36,41 @@ footer{align-items:center}
 [data-tone="light"] .footer-brand-light{display:block}
 [data-tone="light"] .footer-brand-dark{display:none}
 @media(max-width:700px){footer{flex-direction:row;flex-wrap:wrap}}
+
+/* Chassis measurements share the weight category and stay readable at narrow widths. */
+.chassis-inputs{border-top:2px solid var(--cat-weight)}
+.chassis-inputs h3{margin-top:24px}
+.chassis-inputs .field,.chassis-inputs details{margin-bottom:14px}
+.chassis-inputs summary{cursor:pointer;font-size:13px;color:var(--cat-weight)}
+.chassis-inputs textarea{width:100%;max-width:100%;resize:vertical;background:var(--bg);color:var(--ink);border:1px solid var(--line);border-radius:6px;padding:10px;font:inherit;line-height:1.5}
+.chassis-inputs ol{padding-left:20px;font-size:12px;line-height:1.7;color:var(--muted)}
+.chassis-editor{padding:14px;border:1px solid var(--line);border-radius:8px;background:var(--bg)}
+.chassis-result{margin-top:18px;border-top:2px solid var(--cat-weight);overflow-wrap:anywhere}
+.chassis-result h3{display:flex;align-items:center;gap:9px}
+.chassis-result .performance-stats{grid-template-columns:repeat(2,minmax(0,1fr))!important;margin:16px 0}
+.chassis-result .performance-stat strong{font-size:23px!important}
+.chassis-diagram{margin:16px 0;padding:14px;border:1px solid var(--line);border-radius:8px;background:var(--bg)}
+.chassis-diagram svg{display:block;width:100%;max-height:315px;color:var(--cat-weight)}
+.chassis-diagram text{fill:var(--ink);font:12px sans-serif}
+.chassis-diagram figcaption{font-size:12px;color:var(--muted);text-align:center;line-height:1.6}
+.chassis-triangle{fill:color-mix(in srgb,var(--cat-weight) 12%,transparent);stroke:var(--cat-weight);stroke-width:2}
+.chassis-centre{fill:none;stroke:var(--muted);stroke-dasharray:4 4}
+.chassis-contact{fill:var(--cat-weight)}
+.chassis-tyre{fill:var(--panel);stroke:var(--cat-weight);stroke-width:2}
+.chassis-loads{margin:18px 0;padding:16px;background:var(--bg);border:1px solid var(--line);border-radius:8px}
+.chassis-loads svg{display:block;width:100%;max-height:240px}
+.chassis-loads text{fill:var(--ink);font:13px sans-serif}
+.chassis-loads figcaption{font-size:13px;margin-bottom:12px}
+.chassis-load-measured{fill:var(--cat-weight)}
+.chassis-load-planned{fill:none;stroke:var(--cat-motor);stroke-width:2}
+.chassis-result table{min-width:540px}
+.chassis-result th,.chassis-result td{overflow-wrap:normal;word-break:normal}
+.chassis-cg-measured{fill:var(--cat-motor);stroke:var(--ink);stroke-width:1}
+.chassis-cg-planned{fill:none;stroke:var(--cat-power);stroke-width:3}
+.chassis-inputs td,.chassis-result td{font-size:12px}
+.chassis-inputs .table-wrap,.chassis-result .table-wrap{max-width:100%;overflow-x:auto}
+.chassis-snapshot{margin-top:16px;padding:12px;border-left:3px solid var(--cat-weight);background:var(--bg)}
+.chassis-snapshot p{font-size:12px;line-height:1.6}
 
 /* Magnetic measurements use the existing motor category and theme palette. */
 .magnetic-inputs textarea{font:inherit;line-height:1.6;background:var(--bg);color:var(--ink);border:1px solid var(--line);border-radius:6px;padding:10px;width:100%;max-width:100%;min-height:76px;resize:vertical}

@@ -38,7 +38,7 @@ function fillInputs() {
 function refresh() {
   const input = calculationInput(), m = PerformanceModel.calculate(input), rim = state.setup.tyreMode === 'rim';
   $('#diameter-fields').hidden = rim; $('#rim-fields').hidden = !rim;
-  $('#tyre-hint').textContent = rim ? `Outside diameter = rim + 2 × thickness${m.rearDiameter ? ' = ' + performanceNumber(m.rearDiameter, 3) + ' mm' : '.'}` : 'Use the fitted tyre’s outside diameter, after truing.';
+  $('#tyre-hint').textContent = rim ? `Outside diameter = rim + 2 × thickness${m.rearDiameter ? ' = ' + performanceNumber(m.rearDiameter, 3) + ' mm' : '.'}` + '. Use the measured tyre-seat diameter and rubber thickness at that same seat, not a catalogue flange size.' : 'Use the fitted tyre’s outside diameter, after truing.';
   $('#ratio-inline').textContent = m.ratio === null ? '—' : m.ratio.toFixed(3) + ':1';
   $('#flow-rpm').textContent = performanceNumber(m.ratedRpm, 0) + ' RPM';
   $('#flow-gearing').textContent = m.ratio === null ? '— : —' : input.pinion + ' : ' + input.gear + ' teeth';
@@ -50,13 +50,16 @@ function refresh() {
     // Blank optional fields are valid; syntax, bounds and tooth counts are not.
     const invalid = el.validity.badInput || (el.value !== '' && !el.validity.valid);
     el.setAttribute('aria-invalid', String(invalid));
-    if (invalid && !error) error = 'Check the highlighted input: use positive numbers and whole tooth counts.';
+    if (invalid && !error) error = el.name==='tyreRequiredGap'?'Minimum permitted gear gap: enter 0–3 mm, or leave this optional target blank.':['rearDiameter','wornDiameter','tyreLeft','tyreRight','tyreMinimum'].includes(el.name)?'Fitted tyre diameters for 1:32 calculations must be between 8 and 30 mm.':'Check the highlighted input and its permitted range; tooth counts must be whole numbers.';
   }
   $('#input-error').textContent = error; $('#input-error').hidden = !error;
   for (const id of ['save-setup', 'save-copy']) $('#' + id).disabled = !!error;
   $('[name=magneticWornClearance]').disabled = state.setup.magneticWearMode === 'axle';
   refreshMagneticInputs();
   WorkshopUI.refresh();
+  ChassisUI.refresh();
+  PredictionUI.refresh();
+  InputHelp.refresh();
   updateLibraryStatus();
 }
 function renderCurves(input, model) {
@@ -110,6 +113,9 @@ document.addEventListener('input', event => {
   const el = event.target;
   if (!el.name || !Object.hasOwn(state.setup, el.name)) return;
   state.setup[el.name] = el.validity.badInput ? 'invalid' : el.value;
+  if(['chassisMode','chassisSupportReference'].includes(el.name)){
+    state.setup.chassisConfirmed='no';$('[name=chassisConfirmed]').value='no';
+  }
   refresh(); persist();
 });
 function replaceWorkbench(next,label) {
@@ -136,6 +142,6 @@ $('#setup-file').onchange = async event => {
   } catch (error) { toast('Could not open setup: ' + error.message); }
   finally { event.target.value = ''; }
 };
-RaceUI.init(); initializeMagnetic(); WorkshopUI.init(); initializeDesign(); readWorkspace(); setupAppearance(); fillInputs(); initializeLibrary(); initializePages();
+RaceUI.init(); initializeMagnetic(); WorkshopUI.init(); ChassisUI.init(); ChassisTestUI.init(); PredictionUI.init(); InputHelp.init(); initializeDesign(); readWorkspace(); setupAppearance(); fillInputs(); initializeLibrary(); initializePages();
 $('#save-copy').onclick=()=>{openLibraryTask('save',activeLibraryId);libraryTask.asCopy=true;$('#library-editor-title').textContent='Save a new copy';$('#library-editor-confirm').textContent='Save new copy';$('#library-save-copy').hidden=true;};
 

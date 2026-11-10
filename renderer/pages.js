@@ -25,6 +25,7 @@ function renderRoute(){
     if(help)renderHelp(topic);
   }
   RaceUI.route(page,sub);
+  PredictionUI.route(page,sub);
 }
 function setupOptions(id,selected){
   const select=$('#'+id);select.innerHTML=library.map(item=>`<option value="${item.id}">${esc(item.setup.name)}</option>`).join('');select.value=selected||'';
@@ -39,7 +40,7 @@ function renderAnalysis(){
   setupOptions('analysis-setup',analysisId);setupOptions('compare-a',compareA);setupOptions('compare-b',compareB);
   const item=library.find(e=>e.id===analysisId),input=CalculatorModel.inputOf(item.setup),m=PerformanceModel.calculate(input);
   $('#analysis-stats').innerHTML=performanceStats(input);$('#analysis-stats').className='analysis-summary';
-  renderCurves(input,m);renderTelemetry(input);$('#magnetic-results').innerHTML=magneticResults(input,true);WorkshopUI.renderSaved();selectAnalysisTopic(analysisTopic);renderComparison();
+  renderCurves(input,m);renderTelemetry(input);$('#magnetic-results').innerHTML=magneticResults(input,true);WorkshopUI.renderSaved();ChassisUI.renderSaved();selectAnalysisTopic(analysisTopic);renderComparison();
 }
 function selectAnalysisTopic(topic){
   analysisTopic=topic;
@@ -50,14 +51,17 @@ function renderComparison(){
   const a=library.find(e=>e.id===compareA),b=library.find(e=>e.id===compareB);
   if(!a||!b)return;
   const rows=CompareModel.compare(a.setup,b.setup,$('#compare-goal').value);
-  const delta=r=>r.delta===null?'Unavailable':!r.sameBasis?'Different measurement basis':`${r.delta>0?'↑ +':r.delta<0?'↓ ':''}${performanceNumber(r.delta,r.digits)} ${r.unit}${r.percent!==null?`<small>${r.percent>0?'+':''}${performanceNumber(r.percent,1)}% from A</small>`:''}`;
-  $('#comparison').innerHTML=`${a.id===b.id?'<p class="note">Choose two different saved setups to compare changes.</p>':''}${rows.some(r=>!r.sameBasis)?'<p class="note">Motor rating bases differ, or magnetic test conditions are missing or differ. Affected metrics are shown without a direct change or performance verdict.</p>':''}<div class="table-wrap"><table class="comparison-table"><thead><tr><th>Metric</th><th>Setup A</th><th>Setup B</th><th>Change · B − A</th></tr></thead><tbody>${rows.map(r=>`<tr data-compare-metric="${r.key}"><th>${r.label}<small class="muted"> · ${r.unit}</small></th><td>${performanceNumber(r.a,r.digits)}</td><td>${performanceNumber(r.b,r.digits)}</td><td class="${r.tone}">${delta(r)}</td></tr>`).join('')}</tbody></table></div>`;
+  const delta=r=>!r.sameBasis?'Different measurement basis':r.delta===null?'Unavailable':`${r.delta>0?'↑ +':r.delta<0?'↓ ':''}${performanceNumber(r.delta,r.digits)} ${r.deltaUnit||r.unit}${r.percent!==null?`<small>${r.percent>0?'+':''}${performanceNumber(r.percent,1)}% from A</small>`:''}`;
+  $('#comparison').innerHTML=`${a.id===b.id?'<p class="note">Choose two different saved setups to compare changes.</p>':''}${rows.some(r=>!r.sameBasis)?'<p class="note">Motor rating bases, magnetic conditions, or chassis weighing references differ or are incomplete. Affected metrics are shown without a direct change or performance verdict.</p>':''}<div class="table-wrap"><table class="comparison-table"><thead><tr><th>Metric</th><th>Setup A</th><th>Setup B</th><th>Change · B − A</th></tr></thead><tbody>${rows.map(r=>`<tr data-compare-metric="${r.key}"><th>${r.label}<small class="muted"> · ${r.unit}</small></th><td>${performanceNumber(r.a,r.digits)}</td><td>${performanceNumber(r.b,r.digits)}</td><td class="${r.tone}">${delta(r)}</td></tr>`).join('')}</tbody></table></div>`;
 }
 function showSavedAnalysis(id,compare=false){analysisId=id;if(compare){compareA=id;compareB=(library.find(e=>e.id!==id)||library[0])?.id;}navigate(compare?'analyze/compare':'analyze');}
 function focusSetupInput(name){
+  if(Object.hasOwn(PredictionModel.fields,name)){navigate('analyze/predicted');document.querySelector('[data-prediction-tab=outlook]').click();}
   WorkshopUI.reveal(name);
+  // Follow the active tyre-entry mode rather than focusing a hidden diameter input.
+  if(name==='rearDiameter'&&state.setup.tyreMode==='rim')name='rimDiameter';
   const field=$('[name="'+name+'"]');if(!field)return;
-  if(field.closest('details'))field.closest('details').open=true;
+  for(let parent=field.parentElement;parent;parent=parent.parentElement)if(parent.tagName==='DETAILS')parent.open=true;
   field.focus({preventScroll:true});field.closest('.panel').scrollIntoView({block:'start'});
 }
 function initializePages(){

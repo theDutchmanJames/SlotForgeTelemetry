@@ -1,6 +1,6 @@
 {
   "name": "slotforge-calculator",
-  "version": "0.9.0",
+  "version": "0.10.0",
   "description": "SlotForge Telemetry: gearing, motor performance, weight, tyres and lap calculations",
   "author": "theDutchmanJames",
   "private": true,
@@ -22,7 +22,9 @@
     "test:paddock-ui": "electron tests/race-ui-smoke.cjs",
     "test:race-analysis-ui": "electron tests/race-analysis-ui.cjs",
     "test:race-progress-ui": "electron tests/race-progress-ui.cjs",
-    "test:manual-laps-ui": "electron tests/manual-laps-ui.cjs"
+    "test:manual-laps-ui": "electron tests/manual-laps-ui.cjs",
+    "test:chassis-ui": "electron tests/chassis-ui.cjs",
+    "test:prediction-ui": "electron tests/prediction-ui.cjs"
   },
   "devDependencies": {
     "electron": "45.1.0",

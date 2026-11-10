@@ -21,7 +21,7 @@ test('sorted curve interpolates only inside measured bounds and retains local sl
 test('worn clearance is explicitly measured or approximated, with no force outside measured range',()=>{
  const exact=M.calculate(setup({magneticWornClearance:'.9'}),80,-.2);near(exact.wornEstimate,27);near(exact.estimateChange,5);assert.equal(exact.approximate,false);
  const assumed=M.calculate(setup({magneticWearMode:'axle',magneticWornClearance:'5'}),80,-.2);near(assumed.wornHeight,.9);near(assumed.wornEstimate,27);
- const impossible=M.calculate(setup({magneticWearMode:'axle'}),80,-2);assert.ok(impossible.wornHeight<0);assert.equal(impossible.wornEstimate,null);
+ const impossible=M.calculate(setup({magneticWearMode:'axle'}),80,-2);assert.equal(impossible.wornHeight,null);assert.equal(impossible.wornContact,true);assert.equal(impossible.wornEstimate,null);
  assert.equal(M.calculate(setup({magneticWearMode:'axle'}),80,null).wornHeight,null);
  assert.equal(M.calculate(setup({magneticClearance:''}),80).estimate,null);
  const boundary=setup({magneticClearance:'1.2',magneticCurve:'0.8,30\n1,24',magneticWearMode:'axle',rearDiameter:'20',wornDiameter:'19.6'});

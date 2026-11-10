@@ -2,17 +2,17 @@
 function initializeMagnetic(){
   const section=document.createElement('section');section.className='panel magnetic-inputs';section.dataset.category='motor';
   const number=(name,label)=>`<label class="field">${label}<input name="${name}" type="number" min="0" max="${name==='magneticLimit'?100000:1000}" step="any" placeholder="Optional"></label>`;
-  const text=(name,label)=>`<label class="field">${label}<input name="${name}" maxlength="200" placeholder="Record the test conditions"></label>`;
+  const text=(name,label)=>`<label class="field">${label}<input name="${name}" maxlength="200" data-input-help="Saved test conditions only; these notes do not change the calculated pull."></label>`;
   section.innerHTML=`<h2><i class="icon-tile">${sfIcon('short-can-motor')}</i>Magnetic downforce</h2>
     <p class="hint">Enter magnetic pull only, in gram-force (gf). Do not enter car weight or a combined weight + pull reading. This measures attraction to the tester rails, including any extra magnets fitted.</p>
-    <label class="field">Repeated pull readings · gf<textarea name="magneticReadings" rows="2" maxlength="2000" placeholder="For example: 19, 20, 21" aria-describedby="magnetic-reading-help"></textarea></label>
+    <label class="field">Repeated pull readings · gf<textarea name="magneticReadings" rows="2" maxlength="2000" data-input-example="19, 20, 21" aria-describedby="magnetic-reading-help"></textarea></label>
     <p class="hint" id="magnetic-reading-help">One reading is enough. Separate readings with spaces, commas or new lines; use decimal points. Repeat at the same clearance and position. Zero means measured zero; blank means unknown.</p>
     <div class="form-grid">${number('magneticClearance','Motor underside to rail top · mm')}${number('magneticLimit','Your club / tester limit · gf')}</div>
     <div class="form-grid">${text('magneticTester','Tester / measuring method')}${text('magneticRails','Test rails / track type')}${text('magneticOrientation','Motor mounting / face towards rails')}
     <label class="field">Additional traction magnets<select name="magneticExtra"><option value="unknown">Not recorded</option><option value="none">None — motor attraction</option><option value="fitted">Fitted — combined attraction</option></select></label>
     <label class="field">Motor during measurement<select name="magneticCondition"><option value="unknown">Not recorded</option><option value="off">Off / stationary</option><option value="running">Running — record conditions in setup notes</option></select></label></div>
     <h3>Measured clearance curve</h3><p class="hint">Use the same motor, tester, rail material and orientation for every point. Each row: clearance in mm, then magnetic pull in gf. Use one point per height (average repeats). Estimates stay inside your measured range.</p>
-    <label class="field">Clearance (mm), pull (gf)<textarea name="magneticCurve" rows="4" maxlength="4000" placeholder="Example only:&#10;0.8, 30&#10;1.0, 24&#10;1.2, 20"></textarea></label>
+    <label class="field">Clearance (mm), pull (gf)<textarea name="magneticCurve" rows="4" maxlength="4000" data-input-example="0.8, 30&#10;1.0, 24&#10;1.2, 20"></textarea></label>
     <h3>Connect to tyre wear</h3><label class="field">Worn motor clearance method<select name="magneticWearMode"><option value="measured">Enter measured worn clearance</option><option value="axle">Approximate: motor follows rear axle</option></select></label>
     ${number('magneticWornClearance','Measured worn motor-to-rail clearance · mm')}
     <p class="hint">The approximation adds half the rear tyre diameter change to current motor clearance. It assumes unchanged mounting and the motor follows the rear axle vertically; chassis pitch, pod movement and compression are excluded. Enter current and worn tyre diameters in Tyres & clearance.</p>
@@ -46,7 +46,7 @@ function magneticResults(input,full=false){
   if(m.error)return `<section class="panel" data-category="motor"><h3>Magnetic downforce</h3><p class="note">${esc(m.error)}</p></section>`;
   if(!full&&!m.count&&!m.points.length&&m.limit===null)return '<section class="panel" data-category="motor"><h3>Magnetic downforce</h3><p class="hint">Add measured pull readings in Magnetic downforce to see force, repeatability and support load. Save a clearance curve to explore it in Analyze.</p></section>';
   const measured=`<div class="performance-stats">${telemetryCard('Mean measured magnetic pull',m.mean,'gf')}${telemetryCard('Magnetic force',m.forceN,'N',4)}${telemetryCard('Pull relative to car weight',m.loadPercent,'%')}${telemetryCard('Total static support load',m.supportN,'N',4)}</div>`;
-  const wornReason=m.wornHeight!==null&&m.wornHeight<=0?'Motor reaches or passes the rail-top plane; do not interpret this as usable running clearance.':m.wornHeight!==null&&m.wornEstimate===null?'Worn clearance is outside the measured curve range. No extrapolation is made.':'';
+  const wornReason=m.wornContact||m.wornHeight!==null&&m.wornHeight<=0?'Motor reaches or passes the rail-top plane; do not interpret this as usable running clearance.':m.wornHeight!==null&&m.wornEstimate===null?'Worn clearance is outside the measured curve range. No extrapolation is made.':'';
   return `<section class="panel magnetic-result" data-category="motor"><h3>${sfIcon('short-can-motor')}Magnetic downforce</h3>${measured}
     <p class="hint">${m.count} reading${m.count===1?'':'s'} · min ${fmt(m.min,'gf')} · max ${fmt(m.max,'gf')} · range ${fmt(m.range,'gf')}. This is observed repeatability, not instrument accuracy.</p>
     <p class="hint">Support load: ${fmt(m.supportGf,'gf')} equivalent. Actual mass stays ${fmt(m.massG,'g')}; hypothetical added ballast is excluded. This is total support (tyres and guide), not rear-tyre load or a grip / lap-time prediction.</p>

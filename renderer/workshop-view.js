@@ -2,8 +2,8 @@
 const WorkshopUI=(()=>{
   let draftTool='tyres',savedTool='tyres';
   const selectOptions=()=>Object.entries(WorkshopModel.tools).map(([k,t])=>`<option value="${k}">${t.title}</option>`).join('');
-  const field=k=>{const f=WorkshopModel.fields[k],attrs=`name="${k}" aria-describedby="workshop-${Object.keys(WorkshopModel.tools).find(t=>WorkshopModel.tools[t].keys.includes(k))}-hint"`;
-    return `<label class="field">${esc(f.label)}${f.type==='select'?`<select ${attrs}>${f.options.map(o=>{const [v,label]=o.split('|');return `<option value="${v}">${esc(label)}</option>`;}).join('')}</select>`:f.type==='textarea'?`<textarea ${attrs} rows="4" maxlength="${f.max}" placeholder="${esc(f.example)}" spellcheck="false"></textarea><small>Example format shown above; enter your own measurements. Use decimal points.</small>`:`<input ${attrs} type="${f.type}" ${f.type==='number'?`min="${/^(strategyLaps|strategyStops|gearDriver|gearDriven)$/.test(k)?Math.ceil(f.min):f.min}" max="${f.max}" step="${/^(strategyLaps|strategyStops|gearDriver|gearDriven)$/.test(k)?1:'any'}"`:`maxlength="${f.max}"`} placeholder="Optional">`}</label>`;
+  const field=k=>{const f=WorkshopModel.fields[k],attrs=`name="${k}" aria-describedby="workshop-${Object.keys(WorkshopModel.tools).find(t=>WorkshopModel.tools[t].keys.includes(k))}-hint${f.help?` workshop-field-${k}-hint`:''}"`;
+    return `<label class="field">${esc(f.label)}${f.type==='select'?`<select ${attrs}>${f.options.map(o=>{const [v,label]=o.split('|');return `<option value="${v}">${esc(label)}</option>`;}).join('')}</select>`:f.type==='textarea'?`<textarea ${attrs} rows="4" maxlength="${f.max}" ${k==='experimentSources'?'data-input-help':'data-input-example'}="${esc(f.example)}" spellcheck="false"></textarea>${k==='experimentSources'?'':'<small>Enter your own measurements using decimal points and the column order above. Examples are not saved or calculated.</small>'}`:`<input ${attrs} type="${f.type}" ${f.type==='number'?`min="${/^(strategyLaps|strategyStops|gearDriver|gearDriven)$/.test(k)?Math.ceil(f.min):(f.inputMin??f.min)}" max="${f.inputMax??f.max}" step="${/^(strategyLaps|strategyStops|gearDriver|gearDriven)$/.test(k)?1:'any'}"`:`maxlength="${f.max}"`} placeholder="Optional">`}${f.help?`<small id="workshop-field-${k}-hint">${esc(f.help)}</small>`:f.type==='text'?'<small>Saved context only. These words do not supply measurements or change the calculations.</small>':''}</label>`;
   };
   function init(){
     topicStyle.workshop=['gearing','motor-tester'];
@@ -29,6 +29,7 @@ const WorkshopUI=(()=>{
     document.querySelector('.workshop-inputs').dataset.category=WorkshopModel.tools[tool].category;
     for(const e of document.querySelectorAll('[data-workshop-inputs]'))e.hidden=e.dataset.workshopInputs!==tool;
     if(tool==='experiment')refreshRuns();
+    ChassisTestUI.refresh();
     refresh();
   }
   function refreshRuns(){
@@ -45,7 +46,8 @@ const WorkshopUI=(()=>{
       const times=run.times.slice(start-1,start+99),name=run.label.replace(/[|\r\n]/g,' ').slice(0,115)+` [${start}–${start+times.length-1}]`;
       const rows=[state.setup.experimentRows.trim(),`${name} | ${side} | ${times.join(', ')}`].filter(Boolean).join('\n');
       const sources=[state.setup.experimentSources,`${new Date().toISOString()} · ${run.id} · ${run.label} · valid laps ${start}–${start+times.length-1}`].filter(Boolean).join('\n');
-      const next={...state.setup,experimentRows:rows,experimentSources:sources,experimentConfirmed:'no'};WorkshopModel.clean(next,WorkshopModel.tools.experiment.keys);
+      let next={...state.setup,experimentRows:rows,experimentSources:sources,experimentConfirmed:'no'};WorkshopModel.clean(next,WorkshopModel.tools.experiment.keys);
+      next=ChassisTestUI.captureInto(next,rows.split(/\r?\n/).filter(l=>l.trim()).length-1);
       state.setup=next;for(const k of ['experimentRows','experimentSources','experimentConfirmed'])document.querySelector(`[name="${k}"]`).value=next[k];
       window.refresh();persist();status.textContent=`Appended ${times.length} of ${run.times.length} valid, non-pit laps. Conditions reset to unconfirmed; review the snapshot before comparing.`;
     }catch(e){status.textContent=e.message;}
@@ -66,9 +68,10 @@ const WorkshopUI=(()=>{
     const notes=t.keys.filter(k=>['text','select'].includes(WorkshopModel.fields[k].type)&&input[k]).map(k=>{const f=WorkshopModel.fields[k],value=f.type==='select'?f.options.find(o=>o.split('|')[0]===input[k])?.split('|')[1]:input[k];return `<p class="hint">${esc(f.label)}: ${esc(value)}</p>`;}).join('');
     return head+notes+(full&&tool==='experiment'&&input.experimentSources?`<p class="hint workshop-provenance">Recorded-lap snapshots: ${esc(input.experimentSources)}</p>`:'')+(r.metrics.length?`<div class="performance-stats">${r.metrics.map(m=>telemetryCard(m.label,m.value,m.unit,m.digits)).join('')}</div>`:'')+(full?chart(r.plot):'')+
       (r.rows.length?`<div class="table-wrap"><table><caption>${t.title} · ${full?'saved measurements':'draft measurements'}</caption><thead><tr>${r.headers.map(h=>`<th>${esc(h)}</th>`).join('')}</tr></thead><tbody>${r.rows.map(row=>`<tr>${row.map(v=>`<td>${cell(v)}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`:r.metrics.length?'':'<p class="hint">Enter measurements to see results. Blank values are unknown, not zero.</p>')+
-      r.notes.map(s=>`<p class="note">${esc(s)}</p>`).join('')+`<p class="hint">${esc(t.limits)}</p><a href="#settings/calculations/workshop-${tool}">Calculations & measurement guide →</a></section>`;
+      (tool==='experiment'?ChassisTestUI.render(input):'')+r.notes.map(s=>`<p class="note">${esc(s)}</p>`).join('')+`<p class="hint">${esc(t.limits)}</p><a href="#settings/calculations/workshop-${tool}">Calculations & measurement guide →</a></section>`;
   }
   function refresh(){
+    ChassisTestUI.refresh();
     document.querySelector('#workshop-live').innerHTML=results(calculationInput(),draftTool);
     for(const [k,t] of Object.entries(WorkshopModel.tools)){
       const r=WorkshopModel.calculate(calculationInput(),k),group=document.querySelector(`[data-workshop-inputs="${k}"]`),error=group.querySelector('.workshop-error');error.textContent=r.error||'';error.hidden=!r.error;

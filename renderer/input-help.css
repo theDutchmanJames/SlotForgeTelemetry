@@ -1,0 +1,6 @@
+.input-help { display:block; margin-top:4px; font-size:12px; line-height:1.5; color:var(--muted); min-width:0; }
+.input-help small { display:block; }
+.input-help .input-data-status { font-weight:600; margin-bottom:5px; }
+.input-help code { display:block; white-space:pre-wrap; overflow-wrap:anywhere; font-size:inherit; font-weight:400; padding:4px 0; }
+.prediction-input-state { margin-bottom:18px; }
+.prediction-input-state li { margin:6px 0; }

@@ -1,4 +1,5 @@
 (function(root){
+  const Fit=typeof module==='object'&&module.exports?require('./fit-model.js'):root.FitModel;
   const numbers={ratedRpm:['No-load motor RPM',10000000],ratedVoltage:['RPM measured at (V)',1000],motorTorque:['Motor torque (gf·cm)',1000000],torqueVoltage:['Torque measured at (V)',1000],rearDiameter:['Rear tyre diameter (mm)',1000]};
   const choices={motorType:['Unknown','Brushed DC','Brushless'],torqueType:['Unknown','Stall','Rated running']};
   const keys=[...Object.keys(numbers),...Object.keys(choices)];
@@ -31,6 +32,7 @@
   const finite=value=>Number.isFinite(value)?value:null;
   function calculate(input={}){
     const v=Object.fromEntries(Object.entries(numbers).map(([k,[,max]])=>[k,positive(input[k],max)]));
+    v.rearDiameter=Fit.diameter(v.rearDiameter);
     const p=teeth(input.pinion),g=teeth(input.gear),ratio=p&&g?g/p:null;
     const rpm=v.ratedRpm,torqueNm=v.motorTorque===null?null:v.motorTorque*0.0000980665,radius=v.rearDiameter===null?null:v.rearDiameter/2000;
     const knownTorque=['Stall','Rated running'].includes(input.torqueType),axleRpm=rpm&&ratio?finite(rpm/ratio):null;
