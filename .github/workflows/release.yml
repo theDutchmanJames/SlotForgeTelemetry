@@ -26,7 +26,8 @@ jobs:
             files: |
               dist/linux/*.AppImage
               dist/linux/*.deb
-          - os: macos-latest
+          # Universal packaging supports Intel hosts; avoid the constrained arm64 runner pool.
+          - os: macos-15-intel
             platform: mac
             command: npm run dist:mac -- --publish never
             files: |
