@@ -30,7 +30,7 @@ test('ballast plan quantifies loads and points out a reduction in guide load',()
 test('tyre-change wheel lift uses the researched grip/roll trade-off',()=>{
  const s=setup({adviceSymptom:'tip',adviceRecentChange:'tyres'}),r=rule(s,'grip-after-tyres');assert(r);assert.deepEqual(r.principles,['gripRoll']);assert.match(r.action,/previous tyres/);
  assert(!rule({...s,adviceRecentChange:'none'},'grip-after-tyres'));
- for(const [change,id] of Object.entries({body:'after-body-adjustment',ballast:'after-ballast',motor:'after-motor',gearing:'after-gearing',track:'after-conditions',layout:'layout-package'}))assert(rule({...s,adviceRecentChange:change},id));
+ for(const [change,id] of Object.entries({body:'route-mounting',ballast:'after-ballast',motor:'after-motor',gearing:'after-gearing',track:'after-conditions',layout:'layout-package'}))assert(rule({...s,adviceRecentChange:change},id));
 });
 test('known numerical conflicts stay visible together and cannot be cleared by a checklist',()=>{
  let s=setup({adviceUseSetup:'yes',adviceSymptom:'slide',rearDiameter:'19',gearDiameter:'20',tyreLeft:'19',tyreRight:'18.8',tyreMinimum:'20',rulesRows:'Mass | 85 | - | 80 | g'});
@@ -40,7 +40,7 @@ test('known numerical conflicts stay visible together and cannot be cleared by a
  assert.equal(rule({...s,rangeDiameter:'0.2'},'tyre-mismatch').unresolved,false);
 });
 test('next questions adapt to supplied facts and avoid irrelevant measurements',()=>{
- let s=setup({adviceSymptom:'slide'});assert.equal(calc(s).next[0].field,'advicePower');s.advicePower='power';assert.equal(calc(s).next[0].field,'adviceDirection');
+ let s=setup({adviceSymptom:'slide'});assert.equal(calc(s).next[0].field,'adviceSlideWhen');s.advicePower='power';assert.equal(calc(s).next[0].field,'adviceWheelspin');
  s={...s,adviceDirection:'both',advicePhase:'exit',adviceRecentChange:'none',adviceWheelspin:'yes',adviceUseSetup:'yes',rearDiameter:'19',gearDiameter:'18',tyreLeft:'19',tyreRight:'19',chassisGuideSpan:'100',chassisTrack:'60'};
  const fields=calc(s).next.map(q=>q.field);assert(!fields.includes('advicePower'));assert(!fields.includes('rearDiameter'));assert(!fields.includes('tyreHistory'));assert(!fields.includes('ratedRpm'));assert(rule(s,'wheelspin'));
  const outside=setup({...fixture,chassisTrackMethod:'outside',chassisOutside:'68',chassisLeftWidth:'',chassisRightWidth:'8'});assert(calc(outside).next.some(q=>q.field==='chassisLeftWidth'));assert(!calc(outside).next.some(q=>q.field==='chassisOutside'));
@@ -50,7 +50,7 @@ test('check results are scoped, survive exports, and can be explicitly reconfirm
  let s=setup({name:'Checked car',adviceSymptom:'tip'});s.adviceCheckLog=Checks.mark(C.inputOf(s),'body','clear');s.adviceCheckLog=Checks.mark(C.inputOf(s),'tyres','issue');
  assert.equal(calc(s).checks.statuses.body,'clear');assert.equal(calc(s).suggestions[0].id,'check-tyres');assert(!calc(s).suggestions.some(r=>r.id==='check-body'));
  const restored=C.decode(C.encode(s,null)).setup;assert.deepEqual(calc(restored).checks.statuses,calc(s).checks.statuses);
- const changed={...restored,totalWeight:'80'};assert(calc(changed).checks.stale);assert.equal(calc(changed).checks.statuses.tyres,undefined);assert.throws(()=>Checks.mark(C.inputOf(changed),'guide','clear'),/new check list/);
+ const changed={...restored,tyreLeft:'19'};assert(calc(changed).checks.stale);assert.equal(calc(changed).checks.statuses.tyres,undefined);changed.adviceCheckLog=Checks.mark(C.inputOf(changed),'guide','clear');assert.equal(calc(changed).checks.statuses.guide,'clear');assert(calc(changed).checks.staleIds.includes('tyres'));
  changed.adviceCheckLog=Checks.reconfirm(C.inputOf(changed));assert.equal(calc(changed).checks.statuses.tyres,'issue');
  assert(!calc({...s,name:'Renamed',adviceStep:'measure'}).checks.stale);
  assert.throws(()=>Checks.parse('{'),/could not be read/);assert.throws(()=>C.cleanSetup({...s,adviceCheckLog:'{}'}),/Invalid/);

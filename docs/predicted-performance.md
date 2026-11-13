@@ -103,8 +103,50 @@ Twelve curated research principles link 79 records across 61 source entries. The
 
 Questions prioritize known input conflicts, then simple observations, then missing prerequisites of relevant calculations. Existing values and confirmed zero readings are reused. Motor RPM, tyre-wear histories and braking traces are not indiscriminately requested for unrelated symptoms. The user may skip every question.
 
-Individual guide, tyre, axle, body/pod, pickup and track checks store explicit results and a shared setup/observation scope. They do not interpret free text. Changing physical data or the symptom makes the list historical; users may explicitly reconfirm checks after rechecking this setup, or start a fresh list. Rename and navigation changes do not invalidate it. A checklist never overrides a contradictory measurement.
+Individual guide, tyre, axle, body/pod, pickup and track inspections store their own relevant setup scope (check-log version 2). Changing a fitted tyre dimension requests another tyre/body check while preserving unrelated pickup checks. Changing the symptom, navigation or a hypothetical ballast/gear plan does not invalidate completed inspections. Affected checks retain their earlier status and can be rechecked individually. Version 1 histories remain readable and conservatively request rechecking when their old scope differs. A checklist never overrides a contradictory measurement.
 
 Suggested tests have stable IDs plus the selected action text. A recorded unchanged test can advance the investigation without relying on guessed intent. Unresolved numeric findings and reported faults stay visible. Better/worse outcomes prompt repeat testing or restoration of the baseline. Legacy recorded outcomes are compared with new optional-field defaults so this update alone does not invalidate them. Setup exports and library saves include the new optional fields; A/B snapshots omit recursive check/outcome records.
 
 Validation covers symptom-only use, changing geometry/body mass, guide-load plans, torque trade-offs, magnetic eligibility, electrical/braking records, faster-but-less-consistent runs, adaptive question prerequisites, legacy migration, scoped checks, record/source integrity, persistence, navigation, escaping and responsive light/dark layouts.
+
+## Symptom-specific routes
+
+The route layer in renderer/feedback-routes.js chooses observations and practical checks; feedback-engine.js joins those to eligible existing calculations. All choices are optional. The original symptom remains saved when answers lead into another investigation route. Inactive branch answers stay stored but cannot steer the active branch. Contradictory crossover sequences prompt review of the first movement instead of looping.
+
+| Starting behaviour | Distinguishing follow-ups | Practical checks and optional calculations |
+| --- | --- | --- |
+| Tipping | Inside wheels lift, front leaves first, slide/catch, or local trip | Body/pod contact and tyre shoulders first; confirmed support loads, body share, CG height and separate ballast proposals for wheel lift. A local snag prioritises clearance and track inspection. |
+| Rear sliding | Power, coast, braking or general; wheelspin and lower entry speed | Delivery and preparation, entry-speed comparison, or sideways-braking route. Reuse fitted tyre/gear data; only eligible net-force and support measurements inform further comparisons. |
+| Sudden catching | Straightens, tips, hops or guide leaves; throttle event versus rail realignment | Cross into the resulting behaviour; inspect rubbing. Optional motor-off angle-force measurements require responsive rails and matching conditions. |
+| Guide escape | Bump, acceleration, tight turns, one direction, everywhere or roll-first | Separate visible nose lift from electrical cutout. Inspect blade/braid/front contact and wire rotation; only the relevant branch suggests support/ballast comparisons. |
+| Hopping | Straight, power, corners, local section or recent assembly work | Seating/roundness, gentler delivery, rubbing/movement or the worked assembly. Diameter variation remains distinct from measured radial runout. |
+| Lacks power | Acceleration, straight speed, revs without motion, cutout, fade, tight turns or trigger travel | Separate tyre-to-rim slip, wheelspin and loose hardware. Check pickup and freedom before gearing. Distinguish full-trigger delivery from controller response; analogue/digital and shared-car effects select appropriate electrical checks. |
+| Braking | Weak, abrupt, sideways or varying; adjustable response and direction | Controlled entry speed, system brake behaviour, contact and tyre/guide symmetry. Speed-time samples describe only their measured window; brake percentage is not deceleration. |
+| Deterioration | Power, grip, guide, braking or pace; cooling, cleaning and other cars | Matched early/late runs and relevant component checks. Grip deterioration can use same-tyre wear history; it is not requested as a prerequisite for unrelated power loss. |
+| Consistency | Repeated incident, unpredictable behaviour, lap variation, control trade-off or fade | Follow the dominant incident, compare preparation/traffic/warm-up, or use A–B–A runs and incidents against the selected driving goal. |
+| Not sure | Closest observed movement | Observe one familiar section at a comfortable pace, then enter the matching route. |
+
+Shared onset, recent-change and location questions refine relevant branches. Answers distinguish body screws from motor-pod work, and inspect recently trued tyre shoulders without prescribing generic sanding, lubricant, screw-turn counts or ballast quantities. Forum observations remain qualitative evidence, not causal coefficients or guaranteed fixes.
+
+“Skip this question” advances without assigning a value. Review or change your answers retains active answered/skipped questions; revisit restores skipped measurement prompts too. Each recommendation states effort and equipment, its purpose, a way to check the result and an easier alternative. Reported faults and numeric conflicts stay visible even if their check is unavailable.
+
+### Test outcomes and follow-up
+
+Inspections offer fault found, no fault found, uncertain or unable to check. Setup/controller changes offer improved, no clear difference or worse; a different problem can also be recorded. No clear difference is inconclusive, never proof that a suspected cause is ruled out. Uncertain inspections remain unconfirmed. A linked no-fault inspection advances only that explicit check; unresolved measured findings persist. Better results prompt a repeat, worse results restoration of the baseline where practical, and reported faults correction before tuning around them.
+
+Starting a separate investigation after a different problem opens a save dialog. A new library snapshot preserves the original investigation before a fresh symptom opens. Cancel or a failed save keeps the original draft. Existing car and advanced measurements carry forward; old route answers, outcome and proposed modification selection do not. The new draft is not bound to the old library entry.
+
+### Additional setup-guide sources
+
+The following SlotRacer manual chapters support the inspection and usability additions; selected suggestions link to the relevant chapter:
+
+- [Basics](https://slotracer.online/manual/basics.php): inspection, contact and maintenance.
+- [Tuning](https://slotracer.online/manual/tuning.php): tyre preparation, mechanical freedom and mounting adjustments.
+- [Controllers](https://slotracer.online/manual/controllers.php): controller compatibility, response and braking.
+- [Power](https://slotracer.online/manual/power.php): track supply and shared-load context.
+
+These are practical guidance sources, separate from the 79-record handling catalogue. Their general recommendations are not silently converted into numerical laws or mandatory setup recipes.
+
+### Starting over
+
+The **Start over** button in the Driver Feedback header opens a confirmation. Confirming clears route answers, feedback notes, check history, skipped/unavailable choices and test results, then returns to Your experience. It preserves the car setup, advanced measurements, measurement-method notes and saved library entries. Workbench numbers return to opt-in. Cancel leaves the draft untouched. The reset detaches the current library binding, so a later save cannot silently update the previous investigation.

@@ -75,19 +75,23 @@ The original motor/gearing engine and vector icons come from Paddock. The colour
 
 ### Get help with how your car behaves
 
-Open **Driver Feedback** from the main menu, or choose **Help me with my car** on the workbench. Start with “my car tips over”, excessive sliding, sudden recovery, guide lift, hopping, weak acceleration, braking or inconsistent laps. **Every input is optional; no saved setup or measuring equipment is required.**
+Open **Driver Feedback** from the main menu, or choose **Help me with my car** on the workbench. Start with “my car tips over”, excessive sliding, sudden recovery, guide lift, hopping, lack of power, braking, deterioration during a run or inconsistent laps. **Every input is optional; no saved setup or measuring equipment is required.**
 
 - Get practical checks, possible explanations, changes to explore, trade-offs and a suggested test. Optional questions distinguish corner entry/exit, braking/coasting and one-corner or left/right problems.
 - Include workbench numbers only when you choose. Follow five guided steps: Your experience, First checks, Your setup, Look deeper, and Try & learn. Shared workbench inputs never need re-entry.
 - See which values are already included, which are still missing, and what each measurement adds. Targeted optional-input links explain what would make the advice more specific; free-text track, tyre and controller notes are clearly distinguished from calculation inputs.
 - Compare vertical ballast moves, added ballast, gearing or comparable-RPM motor magnetic pull without changing the baseline. Optional component inventories estimate CG and yaw/roll inertia; angle/pull measurements interpolate only within the measured range.
-- Record whether a check improved, worsened or did not change the behaviour. Outcomes are tied to the recorded setup and symptom; later changes are identified. Keep observations, methods and proposals with saved setups and exports. Use the existing A–B–A tool for handwritten laps or manual/Paddock run snapshots, with frozen setup evidence.
+- Record a fault, no fault or an uncertain inspection; for a setup change, record improvement, no clear difference or a worse result. Outcomes are tied to the recorded setup and symptom; later changes are identified. Keep observations, methods and proposals with saved setups and exports. Use the existing A–B–A tool for handwritten laps or manual/Paddock run snapshots, with frozen setup evidence.
 
 Advice is conditional, not a diagnosis or a guaranteed lap-time prediction. Static support geometry does not establish a safe cornering speed; unknown grip, force distribution and transient handling remain unknown. [Read the calculation scope and sources](docs/predicted-performance.md).
 
-Driver Feedback connects your measurements to the next check: support loads and ballast placement, body mass and CG height, tyre wear and clearance, magnetic readings, gearing, loaded electrical tests and comparable lap runs. Advice explains the values behind it and keeps unresolved conflicts visible. A simple **Next useful question** changes as you supply information; every question remains optional.
+Driver Feedback connects your measurements to the next check: support loads and ballast placement, body mass and CG height, tyre wear and clearance, magnetic readings, gearing, loaded electrical tests and comparable lap runs. Advice explains the values behind it and keeps unresolved conflicts visible. Each symptom has its own follow-up route: weak acceleration, tyre-to-rim slip and poor controller response lead to different checks. A simple **Next useful question** changes as you answer; skip it or revisit previous answers at any time. Suggestions show equipment, effort and an easier alternative.
 
-Record individual mechanical checks as **looks OK** or **problem found**, and choose a suggestion for your track test. Results stay attached to their setup; after a change you can recheck and confirm them or start a new list. An optional research browser includes 79 owner/build records, original links and counterexamples—these provide tuning ideas, never automatic brand rankings.
+If a change introduces a different problem, save the first investigation and start a separate one with the same measurements. Inspections only need repeating when relevant setup details change; changing questions does not erase completed checks.
+
+Use **Start over** at the top of Driver Feedback to clear the investigation after confirmation. Your car measurements and saved library entries are kept; you can include the measurements again when ready.
+
+Record individual mechanical checks as **looks OK** or **problem found**, and choose a suggestion for your track test. Results stay attached to the relevant setup details; affected inspections can be rechecked individually. An optional research browser includes 79 owner/build records, original links and counterexamples—these provide tuning ideas, never automatic brand rankings.
 
 ### Chassis geometry & three-point balance
 

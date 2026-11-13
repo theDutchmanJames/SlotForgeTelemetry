@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.13.0 — 13 November 2026 · Symptom-specific Driver Feedback
+
+- Give all ten starting behaviours distinct follow-up routes, including lack of power, controller response, tyre-to-rim slip, guide escape and deterioration during a run.
+- Add optional questions with skip/revisit controls, editable answers, effort/equipment labels and easier alternatives.
+- Incorporate SlotRacer setup-guide checks for tyre shoulders, body versus pod adjustments, analogue/digital systems and shared power effects.
+- Separate inspection outcomes from setup-change results; retain uncertainty and unresolved findings without treating an inconclusive result as proof.
+- Preserve an investigation in the library before opening a different symptom, carrying existing measurements forward.
+- Add Start over with confirmation: clear feedback and test history while retaining car measurements and saved setups.
+- Scope individual checks to relevant setup details, migrate older histories and prevent inactive answers or contradictory crossover loops from steering advice.
+- Expand regression coverage for all routes, outcomes, saving, reset, cancellation, migration and responsive light/dark layouts.
+
 ## 0.12.0 — 13 November 2026 · Adaptive Driver Feedback
 
 - Connect measured support geometry, body mass, ballast plans, tyres, magnetic force, gearing, electrical/braking tests and lap comparisons to specific advice with visible evidence.

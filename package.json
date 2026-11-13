@@ -1,6 +1,6 @@
 {
   "name": "slotforge-calculator",
-  "version": "0.12.0",
+  "version": "0.13.0",
   "description": "SlotForge Telemetry: gearing, motor performance, weight, tyres and lap calculations",
   "author": "theDutchmanJames",
   "private": true,

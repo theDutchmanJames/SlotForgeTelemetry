@@ -8,12 +8,13 @@
   const T=node?require('./telemetry-model.js'):root.TelemetryModel;
   const Fit=node?require('./fit-model.js'):root.FitModel;
   const Checks=node?require('./feedback-checks.js'):root.FeedbackChecks;
+  const Routes=node?require('./feedback-routes.js'):root.FeedbackRoutes;
   const choice=(label,options)=>({label,type:'select',options});
   const number=(label,min=0,max=1000)=>({label,type:'number',min,max});
   const text=(label,max=600)=>({label,type:'text',max});
   const lines=(label,max=6000)=>({label,type:'textarea',max});
   const fields={
-    adviceSymptom:choice('What would you like help with?',['unknown|Explore / not sure','tip|My car tips over','slide|The rear slides too much','snap|It slides, then catches suddenly','guide|The guide lifts / car goes straight off','hop|It hops, chatters or vibrates','slow|It feels slow or weak','brake|Braking is difficult','fade|It gets worse during a run','consistent|I want more consistent laps']),
+    adviceSymptom:choice('What would you like help with?',['unknown|I’m not sure what’s wrong','tip|My car tips over','slide|The rear slides too much','snap|It slides, then suddenly catches','guide|The front comes out of the slot','hop|My car hops, chatters or vibrates','slow|My car lacks power','brake|Braking feels wrong','fade|It gets worse during a run','consistent|My car is difficult to drive consistently']),
     adviceGoal:text('What would a better result feel like?'),
     adviceUseSetup:choice('Include workbench numbers?',['no|Observations only — no measurements needed','yes|Include the current workbench setup']),
     advicePhase:choice('When does it happen?',['unknown|Not sure / skip','entry|Entering a corner','middle|Mid-corner','exit|Leaving a corner','straight|On a straight']),
@@ -27,7 +28,7 @@
     adviceChecks:choice('Mechanical checks',['unknown|Not checked / not sure','clear|Guide, tyres, axles and body/pod checked free','issue|Rubbing, binding or another issue found']),
     adviceRecentChange:choice('Did this start after a change?',['unknown|Not sure / skip','none|No recent change / new car','tyres|Tyres or tyre preparation','ballast|Ballast placement','body|Body, pod or mounting adjustment','gearing|Gearing','motor|Motor','layout|Motor-layout conversion','track|Track, lane or controller']),
     adviceWheelspin:choice('Do the rear wheels spin under power?',['unknown|Not sure / skip','yes|Yes, the wheels spin','no|No wheelspin noticed']),
-    adviceBrakeFeel:choice('What feels wrong with braking?',['unknown|Not sure / skip','weak|Too little slowing','strong|Too abrupt','sideways|The car turns sideways']),
+    adviceBrakeFeel:choice('What feels wrong with braking?',['unknown|Not sure / skip','weak|Too little slowing','strong|Too abrupt','sideways|The car turns sideways','varying|It varies from lap to lap']),
     adviceNotes:lines('What you observed — keep observations separate from suspected causes',2000),
     adviceHeight:number('Whole-car CG height above track · mm',0.001),
     adviceHeightBasis:choice('CG height evidence',['unknown|Unknown method','estimated|Estimated','measured|Measured using a documented method']),
@@ -45,11 +46,12 @@
     adviceStep:choice('Driver Feedback step',['experience|Your experience','checks|First checks','setup|Your setup','measure|Look deeper','test|Try & learn']),
     adviceMeasurement:choice('Measurement to explore',['body|Body mass','tyres|Tyres & clearance','drive|Motor & gearing','chassis|Support geometry','height|CG height','magnetic|Magnetic attraction','components|Component inventory','yaw|Attraction through a slide','power|Power & braking','laps|Pace & consistency','proposal|Explore a change']),
     adviceBodyMass:number('Complete body assembly mass · g',0.001,100000),
-    adviceOutcome:choice('What happened?',['unknown|Not tested / not recorded','better|Improved','same|No clear change','worse|Worse','clear|No fault found']),
+    adviceOutcome:choice('What happened?',['unknown|Not tested / not recorded','better|Change: improved','same|Change: no clear difference','worse|Change: worse','clear|Inspection: no fault found','fault|Inspection: a fault was found','different|A different problem appeared','uncertain|Checked, but the result is uncertain','unable|Could not do this check']),
     adviceResultContext:{label:'Recorded test context',type:'hidden',max:30000},
     adviceCheckLog:{label:'Recorded mechanical checks',type:'hidden',max:26000},
     adviceTestId:{label:'Linked suggested test',type:'hidden',max:80},
-    adviceTestAction:{label:'Linked suggested action',type:'hidden',max:1000}
+    adviceTestAction:{label:'Linked suggested action',type:'hidden',max:1000},
+    ...Routes.fields
   };
   const defaults=()=>Object.fromEntries(Object.entries(fields).map(([k,f])=>[k,f.type==='select'?f.options[0].split('|')[0]:'']));
   const hints={
@@ -75,6 +77,7 @@
   function numeric(raw,min,max){if(typeof raw!=='string'||raw.length>32||! /^[+-]?(?:\d+\.?\d*|\.\d+)(?:e[+-]?\d+)?$/i.test(raw.trim()))throw Error('Use finite numbers with decimal points.');const v=Number(raw);if(!Number.isFinite(v)||v<min||v>max)throw Error(`Use a number between ${min} and ${max}.`);return v;}
   function clean(input={}){const out=defaults();for(const [k,f] of Object.entries(fields)){const v=input[k]??out[k];if(typeof v!=='string')throw Error('Check '+f.label+'.');if(f.type==='select'){if(!f.options.some(o=>o.split('|')[0]===v))throw Error('Check '+f.label+'.');}else if(f.type==='number'){if(v!==''){numeric(v,f.min,f.max);if(k==='adviceGear'&&!Number.isInteger(Number(v)))throw Error('Proposed gear must have whole teeth.');}}else if(v.length>f.max)throw Error(f.label+' is too long.');out[k]=v;}
     Checks.parse(out.adviceCheckLog);
+    Routes.list(out.adviceRouteSkipped);Routes.list(out.adviceUnavailable);
     return out; // Incomplete measurement tables are retained; only their calculation is withheld.
   }
   const n=(c,k)=>c[k]===''?null:Number(c[k]);
@@ -233,7 +236,7 @@
   function snapshot(input){
     // Capture physical inputs and advisor context, never recursive run evidence.
     const workshop=W.clean(input);for(const k of Object.keys(workshop))if(k.startsWith('experiment'))delete workshop[k];
-    const advisor=clean(input);for(const key of ['adviceTestObservations','adviceTestChange','adviceResultContext','adviceStep','adviceMeasurement','adviceOutcome','adviceCheckLog','adviceTestId','adviceTestAction'])delete advisor[key];
+    const advisor=clean(input);for(const key of ['adviceTestObservations','adviceTestChange','adviceResultContext','adviceStep','adviceMeasurement','adviceOutcome','adviceCheckLog','adviceTestId','adviceTestAction','adviceTestKind','adviceSecondary','adviceRouteSkipped','adviceUnavailable'])delete advisor[key];
     let rearDiameter=input.rearDiameter??'';
     if(input.tyreMode==='rim'){const rim=P.positive(input.rimDiameter,1000),thick=P.positive(input.tyreThickness,500);rearDiameter=rim!==null&&thick!==null?String(rim+2*thick):'';}
     return {...P.baseline({...P.blank(),pinion:'',gear:'',...input,rearDiameter}),...T.clean(input),...M.clean(input),...H.snapshot(input),...workshop,...advisor};

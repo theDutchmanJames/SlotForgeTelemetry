@@ -31,22 +31,61 @@ app.whenReady().then(async()=>{
   for(const value of await run("PredictionModel.fields.adviceMeasurement.options.map(x=>x.split('|')[0])")){await set('[name=adviceMeasurement]',value);assert.equal(await run("[...document.querySelectorAll('[data-feedback-tool]')].every(b=>document.querySelector('[name='+b.dataset.feedbackTool+']'))"),true,'Valid tool destinations');}
   // Guided questions, persistent individual checks, full evidence and explicit test links.
   await run("state.setup={...CalculatorModel.blank(),name:'Guided review',adviceSymptom:'slide'};fillInputs();persist();");await click('[data-feedback-step=checks]');
-  assert.match(await run("document.querySelector('[data-feedback-panel=checks] .feedback-next-question').textContent"),/throttle/);
-  await set('[data-feedback-panel=checks] [data-feedback-question=advicePower]','power');assert.equal(await run('state.setup.advicePower'),'power');
-  assert.equal(await run("document.querySelector('[data-feedback-panel=checks] [data-feedback-question]').dataset.feedbackQuestion"),'adviceDirection');
+  assert.match(await run("document.querySelector('[data-feedback-panel=checks] .feedback-next-question').textContent"),/rear step out/);
+  await set('[data-feedback-panel=checks] [data-feedback-question=adviceSlideWhen]','power');assert.equal(await run('state.setup.adviceSlideWhen'),'power');
+  assert.equal(await run("document.querySelector('[data-feedback-panel=checks] [data-feedback-question]').dataset.feedbackQuestion"),'adviceWheelspin');
   await click('[data-feedback-check=tyres][data-check-status=clear]');assert.equal(await run('DriverFeedbackModel.analyze(calculationInput()).checks.statuses.tyres'),'clear');
   await click('[data-feedback-check=body][data-check-status=issue]');assert.equal(await run('DriverFeedbackModel.analyze(calculationInput()).suggestions[0].id'),'check-body');
-  await run("state.setup.totalWeight='80';fillInputs();persist();");assert.match(await run("document.querySelector('#feedback-check-list').textContent"),/not applied to this setup/);
-  await click('[data-feedback-action=reconfirm-checks]');assert.equal(await run('DriverFeedbackModel.analyze(calculationInput()).checks.statuses.body'),'issue');
+  await run("state.setup.tyreLeft='19';fillInputs();persist();");assert.match(await run("document.querySelector('#feedback-check-list').textContent"),/Some checks need another look/);
+  await click('[data-feedback-check=tyres][data-check-status=clear]');assert.equal(await run('DriverFeedbackModel.analyze(calculationInput()).checks.statuses.body'),undefined);assert.equal(await run('DriverFeedbackModel.analyze(calculationInput()).checks.statuses.tyres'),'clear');
   await set('#feedback-evidence-topic','all');assert.equal(await run("document.querySelectorAll('#feedback-evidence-results>details').length"),79);
   await set('#feedback-evidence-search','Elva');assert.match(await run("document.querySelector('#feedback-evidence-results').textContent"),/exposed two-wheel lift/);
   await set('#feedback-evidence-search','<img onerror=alert(1)>');assert.equal(await run("document.querySelectorAll('#feedback-evidence-results img').length"),0);await set('#feedback-evidence-search','');
   await click('[data-feedback-check=body][data-check-status=clear]');await click('#feedback-checks [data-feedback-test]');
-  assert.equal(await run('state.setup.adviceStep'),'test');assert.ok(await run('state.setup.adviceTestId'));await set('[name=adviceOutcome]','same');await click('[data-feedback-action=record]');
+  assert.equal(await run('state.setup.adviceStep'),'test');assert.ok(await run('state.setup.adviceTestId'));await set('[name=adviceOutcome]',await run("state.setup.adviceTestKind==='inspection'?'clear':'same'"));await click('[data-feedback-action=record]');
   assert.equal(await run('DriverFeedbackModel.analyze(calculationInput()).resultState'),'recorded');
   await click('[data-feedback-action=save]');await run("document.querySelector('#library-entry-name').value='Guided review'");await click('#library-editor-confirm');
   assert.ok(await run("library.find(e=>e.setup.name==='Guided review').setup.adviceCheckLog"));
   await win.reload();await new Promise(r=>setTimeout(r,250));await route('feedback');assert.equal(await run('DriverFeedbackModel.analyze(calculationInput()).checks.statuses.body'),'clear');
+  // Distinct routes, skippable questions, answer editing and accessible optional checks.
+  const routeCases={tip:['adviceTipFirst','front','adviceGuideWhen'],slide:['adviceSlideWhen','power','adviceWheelspin'],snap:['adviceCatchResult','hop','adviceHopWhen'],guide:['adviceGuideWhen','accel','adviceGuideFirst'],hop:['adviceHopWhen','power','adviceGentle'],slow:['adviceWeakWhere','revs','adviceDriveSlip'],brake:['adviceBrakeFeel','weak','adviceBrakeAdjust'],fade:['adviceFadeWhat','grip','adviceCleaning'],consistent:['adviceConsistentWhat','times','adviceRunContext'],unknown:['adviceUnknownWhat','tip','adviceTipFirst']};
+  for(const [symptom,[first,value,next]] of Object.entries(routeCases)){
+   await run("state.setup={...CalculatorModel.blank(),adviceSymptom:"+JSON.stringify(symptom)+"};fillInputs();persist();");await click('[data-feedback-step=experience]');
+   assert.equal(await run("document.querySelector('[data-feedback-panel=experience] [data-feedback-question]').dataset.feedbackQuestion"),first);
+   await set('[data-feedback-panel=experience] [data-feedback-question='+first+']',value);
+   assert.equal(await run("document.querySelector('[data-feedback-panel=experience] [data-feedback-question]').dataset.feedbackQuestion"),next);
+   assert.equal(await run("document.querySelector('#feedback-answers [data-feedback-question='+"+JSON.stringify(first)+"+']').value"),value);
+  }
+  await run("state.setup={...CalculatorModel.blank(),name:'Route retention',adviceSymptom:'slow',adviceUseSetup:'yes',totalWeight:'80',adviceHeight:'14',rearDiameter:'19',gearDiameter:'18'};fillInputs();persist();");
+  await set('[data-feedback-panel=experience] [data-feedback-question=adviceWeakWhere]','revs');
+  await click('[data-feedback-panel=experience] [data-feedback-skip=adviceDriveSlip]');assert.equal(await run("FeedbackRoutes.list(state.setup.adviceRouteSkipped).includes('adviceDriveSlip')"),true);
+  await click('[data-feedback-action=restore-questions]');assert.equal(await run("document.querySelector('[data-feedback-panel=experience] [data-feedback-question]').dataset.feedbackQuestion"),'adviceDriveSlip');
+  await set('[data-feedback-panel=experience] [data-feedback-question=adviceDriveSlip]','rim');
+  assert.match(await run("document.querySelector('#feedback-checks').textContent"),/tyre-to-rim attachment/);
+  await run("focusSetupInput('adviceDriveSlip')");assert.equal(await run('document.activeElement.dataset.feedbackQuestion'),'adviceDriveSlip');assert.equal(await run('document.activeElement.checkVisibility()'),true);
+  await set('[data-feedback-panel=experience] [data-feedback-question=adviceDriveSlip]','none');
+  await click('[data-feedback-step=checks]');assert(await run("document.querySelector('#feedback-checks a[href=\"https://slotracer.online/manual/tuning.php\"]')!==null"));
+  await click('#feedback-checks [data-feedback-unable=route-drive-slip]');assert.equal(await run("document.querySelector('#feedback-checks [data-feedback-rule=route-drive-slip]')"),null);
+  assert.match(await run("document.querySelector('#feedback-checks').textContent"),/easier observation/);
+  await click('[data-feedback-action=restore-actions]');await click('#feedback-checks [data-feedback-test=route-drive-slip]');assert.equal(await run('state.setup.adviceTestKind'),'inspection');
+  assert.equal(await run("document.querySelector('[name=adviceOutcome] option[value=better]').disabled"),true);
+  await set('[name=adviceOutcome]','uncertain');await click('[data-feedback-action=record]');assert.equal(await run('DriverFeedbackModel.analyze(calculationInput()).resultState'),'recorded');
+  await set('[name=adviceOutcome]','different');await set('[name=adviceSecondary]','tip');await click('[data-feedback-action=record]');
+  await click('[data-feedback-action=secondary]');assert.match(await run("document.querySelector('#library-editor-title').textContent"),/Keep this investigation/);
+  await click('#library-editor-cancel');assert.equal(await run('state.setup.adviceSymptom'),'slow');
+  await click('[data-feedback-action=secondary]');await click('#library-editor-confirm');
+  assert.equal(await run('state.setup.adviceSymptom'),'tip');assert.equal(await run('state.setup.adviceOutcome'),'unknown');assert.equal(await run('state.setup.adviceStep'),'experience');assert.equal(await run('state.setup.adviceHeight'),'14');assert.equal(await run('state.setup.totalWeight'),'80');assert.equal(await run('activeLibraryId'),null);
+  assert.equal(await run("library.find(e=>e.setup.name==='Route retention').setup.adviceOutcome"),'different');
+  assert.equal(await run("library.find(e=>e.setup.name==='Route retention').setup.adviceDriveSlip"),'none');
+  await win.reload();await new Promise(r=>setTimeout(r,250));await route('feedback');assert.equal(await run('state.setup.adviceSymptom'),'tip');
+  // Reset is explicit, cancel-safe and preserves car measurements and saved evidence.
+  await run("state.setup.adviceTipFirst='lift';state.setup.adviceNotes='Reset draft';state.setup.adviceOutcome='fault';state.setup.adviceTestChange='Inspect movement';state.setup.adviceCheckLog=FeedbackChecks.mark(calculationInput(),'body','issue');fillInputs();persist();");
+  await click('[data-feedback-action=reset]');assert.match(await run("document.querySelector('#library-editor-description').textContent"),/measurements are kept/);await click('#library-editor-cancel');
+  assert.equal(await run('state.setup.adviceTipFirst'),'lift');assert.equal(await run('state.setup.adviceNotes'),'Reset draft');
+  await click('[data-feedback-action=reset]');await click('#library-editor-confirm');
+  assert.equal(await run('state.setup.adviceSymptom'),'unknown');assert.equal(await run('state.setup.adviceStep'),'experience');assert.equal(await run('state.setup.adviceUseSetup'),'no');assert.equal(await run('state.setup.adviceCheckLog'),'');assert.equal(await run('state.setup.adviceTestChange'),'');assert.equal(await run('state.setup.adviceNotes'),'');assert.equal(await run('state.setup.adviceOutcome'),'unknown');assert.equal(await run('state.setup.adviceHeight'),'14');assert.equal(await run('state.setup.totalWeight'),'80');assert.equal(await run('activeLibraryId'),null);
+  assert.equal(await run("library.find(e=>e.setup.name==='Route retention').setup.adviceOutcome"),'different');assert.equal(await run('document.activeElement.name'),'adviceSymptom');
+  await win.reload();await new Promise(r=>setTimeout(r,250));await route('feedback');assert.equal(await run('state.setup.adviceSymptom'),'unknown');assert.equal(await run('state.setup.adviceHeight'),'14');
   // All unresolved numerical findings must be visible, even beyond the compact first three.
   await run("state.setup={...CalculatorModel.blank(),adviceUseSetup:'yes',adviceSymptom:'tip',rearDiameter:'19',gearDiameter:'20',tyreMinimum:'20',tyreLeft:'19',tyreRight:'18.8',rulesRows:'Mass | 85 | - | 80 | g'};fillInputs();");await click('[data-feedback-step=checks]');
   for(const id of ['gear-clearance','tyre-mismatch','tyre-minimum','class-limits'])assert.equal(await run("document.querySelector('#feedback-checks [data-feedback-rule='+"+JSON.stringify(id)+"+']').checkVisibility()"),true,id);
