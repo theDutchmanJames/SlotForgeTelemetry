@@ -85,6 +85,10 @@ Open **Driver Feedback** from the main menu, or choose **Help me with my car** o
 
 Advice is conditional, not a diagnosis or a guaranteed lap-time prediction. Static support geometry does not establish a safe cornering speed; unknown grip, force distribution and transient handling remain unknown. [Read the calculation scope and sources](docs/predicted-performance.md).
 
+Driver Feedback connects your measurements to the next check: support loads and ballast placement, body mass and CG height, tyre wear and clearance, magnetic readings, gearing, loaded electrical tests and comparable lap runs. Advice explains the values behind it and keeps unresolved conflicts visible. A simple **Next useful question** changes as you supply information; every question remains optional.
+
+Record individual mechanical checks as **looks OK** or **problem found**, and choose a suggestion for your track test. Results stay attached to their setup; after a change you can recheck and confirm them or start a new list. An optional research browser includes 79 owner/build records, original links and counterexamples—these provide tuning ideas, never automatic brand rankings.
+
 ### Chassis geometry & three-point balance
 
 Measure the **guide-to-rear-axle triangle**, see it drawn to scale, and calculate its angle, proportions and guide position relative to the front axle. Enter rear tyre contact centre spacing directly, or estimate it from overall rear width and individual tyre widths.

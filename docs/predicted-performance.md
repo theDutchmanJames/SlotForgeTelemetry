@@ -76,8 +76,35 @@ Dynamic drift/recovery, traction-limited lap simulation and self-calibrating phy
 
 Five steps move from observations to practical checks, an explicitly included workbench or saved setup, optional measurements, and a recorded test outcome. Existing setup fields are shared; changing a value in Driver Feedback updates the workbench draft but never silently updates a library entry. Rim-derived tyre diameter is read-only here; the rim/thickness tool remains its source.
 
-Body share = complete body assembly mass / ready-to-drive car mass × 100. It requires a body lighter than the complete car and does not determine CG height or tipping risk. Net magnetic interpretation requires responsive rails and an explicitly confirmed net-force basis. Existing support, component, proposal and workshop models retain their assumptions.
+Body share = complete body assembly mass / ready-to-drive car mass × 100. It requires a body lighter than the complete car and does not determine CG height or tipping risk. Net magnetic interpretation requires responsive rails and an explicitly confirmed net-force basis. Angle-force interpretation additionally requires included setup data and confirmed motor-off measurements in the same fixture. Existing support, component, proposal and workshop models retain their assumptions.
 
 Owner evidence is linked to original reports. It prioritises investigations, not brand scores or universal ballast recommendations. No numerical correlation or trained prediction model is claimed.
 
 The most recently recorded outcome retains the investigation context. Changes to setup, symptom, test description or outcome mark it as belonging to a different context; changing steps or the saved name does not. Save as a separate setup to retain multiple experiments. Workbench persistence, explicit library saves and exports use existing storage controls.
+
+
+## Adaptive guidance and research integration
+
+The guided page now combines the existing models through renderer/feedback-engine.js. Findings include the actual values and provenance: observations, confirmed support readings, conditional static geometry, calculated proposals, loaded DC measurements and comparable recorded runs. No probabilities, universal setup thresholds or learned car rankings are introduced.
+
+Twelve curated research principles link 79 records across 61 source entries. The full catalogue is available in the page's optional research browser. Principles preserve unsuccessful tests, conflicting ballast preferences, mixed interventions, unknown magnet state and kit/specimen identity. Records are not counted as independent experiments or assigned numerical confidence weights. Descriptive records inform context; no motor-layout, paint-weight or manufacturer coefficient is derived. The archived HTML research library is the source for renderer/handling-evidence.js; record IDs must be taken from the explicit R-number, not model names such as Audi R8. Regression checks validate unique IDs, principle coverage and source links.
+
+### How measurements change advice
+
+- Body share is explained with its actual mass and qualitative body position. Confirmed support geometry and CG height produce an explicit baseline margin, with no inferred safe speed.
+- Ballast plans show mass and support-load changes; a plan that reduces front support is highlighted during a guide-escape investigation. Vertical proposals explain whether model CG height actually decreases.
+- Tyre changes preceding wheel lift select the grip/roll trade-off. Entered wear connects axle height, rollout and gear gap; measured force/gap data remain conditional. Diameter mismatch within entered measurement bounds prompts remeasurement rather than an established fault.
+- Power-on sliding is combined with observed wheelspin and the gearing proposal's ideal wheel-torque multiplier. Layout conversions prompt a complete change record. No higher-RPM upgrade is recommended.
+- Net magnetic force, motor-off angular measurements, steady-DC voltage drop and measured braking traces each retain their own eligibility rules. Missing or unsupported inputs cannot create a finding.
+- Comparable A/B runs show run-mean pace and incidents per recorded lap together. Return-to-A drift remains explicit. Incident recovery is not added again to lap times that already include it.
+- Entered class-limit conflicts and physical interference remain visible even when more than three recommendations exist. Additional checks are folded, not dropped.
+
+### Questions and recorded checks
+
+Questions prioritize known input conflicts, then simple observations, then missing prerequisites of relevant calculations. Existing values and confirmed zero readings are reused. Motor RPM, tyre-wear histories and braking traces are not indiscriminately requested for unrelated symptoms. The user may skip every question.
+
+Individual guide, tyre, axle, body/pod, pickup and track checks store explicit results and a shared setup/observation scope. They do not interpret free text. Changing physical data or the symptom makes the list historical; users may explicitly reconfirm checks after rechecking this setup, or start a fresh list. Rename and navigation changes do not invalidate it. A checklist never overrides a contradictory measurement.
+
+Suggested tests have stable IDs plus the selected action text. A recorded unchanged test can advance the investigation without relying on guessed intent. Unresolved numeric findings and reported faults stay visible. Better/worse outcomes prompt repeat testing or restoration of the baseline. Legacy recorded outcomes are compared with new optional-field defaults so this update alone does not invalidate them. Setup exports and library saves include the new optional fields; A/B snapshots omit recursive check/outcome records.
+
+Validation covers symptom-only use, changing geometry/body mass, guide-load plans, torque trade-offs, magnetic eligibility, electrical/braking records, faster-but-less-consistent runs, adaptive question prerequisites, legacy migration, scoped checks, record/source integrity, persistence, navigation, escaping and responsive light/dark layouts.

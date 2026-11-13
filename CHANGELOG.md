@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.12.0 — 13 November 2026 · Adaptive Driver Feedback
+
+- Connect measured support geometry, body mass, ballast plans, tyres, magnetic force, gearing, electrical/braking tests and lap comparisons to specific advice with visible evidence.
+- Choose the next useful question from missing relevant inputs; preserve simple observation-only use and keep unresolved findings visible.
+- Add individual mechanical checks with setup-aware records, explicit reconfirmation and linked track-test outcomes.
+- Include a searchable 79-record research catalogue and 12 curated, source-linked principles with counterexamples and limits.
+- Preserve legacy outcomes and setup files; gate angle-force interpretation on motor-off, net-force measurements and responsive rails.
+- Add model and desktop regression coverage for adaptive advice, questions, evidence and persistence.
+
 ## 0.11.0 — 13 November 2026 · Driver Feedback & visual ballast planning
 
 - Replaced Predicted Performance with a dedicated Driver Feedback page and five guided steps, from a driving symptom and practical checks to optional measurements and a recorded test outcome. Existing links redirect to the new page.

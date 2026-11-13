@@ -29,6 +29,28 @@ app.whenReady().then(async()=>{
   await run("state.setup.adviceComponents='unfinished row';fillInputs();persist()");assert.match(await run("document.querySelector('#feedback-error').textContent"),/Component row/);
   await win.reload();await new Promise(r=>setTimeout(r,500));await route('feedback');assert.equal(await run('state.setup.adviceTestChange'),'Move existing ballast lower');assert.equal(await run('state.setup.adviceComponents'),'unfinished row');await set('[name=adviceComponents]','');
   for(const value of await run("PredictionModel.fields.adviceMeasurement.options.map(x=>x.split('|')[0])")){await set('[name=adviceMeasurement]',value);assert.equal(await run("[...document.querySelectorAll('[data-feedback-tool]')].every(b=>document.querySelector('[name='+b.dataset.feedbackTool+']'))"),true,'Valid tool destinations');}
+  // Guided questions, persistent individual checks, full evidence and explicit test links.
+  await run("state.setup={...CalculatorModel.blank(),name:'Guided review',adviceSymptom:'slide'};fillInputs();persist();");await click('[data-feedback-step=checks]');
+  assert.match(await run("document.querySelector('[data-feedback-panel=checks] .feedback-next-question').textContent"),/throttle/);
+  await set('[data-feedback-panel=checks] [data-feedback-question=advicePower]','power');assert.equal(await run('state.setup.advicePower'),'power');
+  assert.equal(await run("document.querySelector('[data-feedback-panel=checks] [data-feedback-question]').dataset.feedbackQuestion"),'adviceDirection');
+  await click('[data-feedback-check=tyres][data-check-status=clear]');assert.equal(await run('DriverFeedbackModel.analyze(calculationInput()).checks.statuses.tyres'),'clear');
+  await click('[data-feedback-check=body][data-check-status=issue]');assert.equal(await run('DriverFeedbackModel.analyze(calculationInput()).suggestions[0].id'),'check-body');
+  await run("state.setup.totalWeight='80';fillInputs();persist();");assert.match(await run("document.querySelector('#feedback-check-list').textContent"),/not applied to this setup/);
+  await click('[data-feedback-action=reconfirm-checks]');assert.equal(await run('DriverFeedbackModel.analyze(calculationInput()).checks.statuses.body'),'issue');
+  await set('#feedback-evidence-topic','all');assert.equal(await run("document.querySelectorAll('#feedback-evidence-results>details').length"),79);
+  await set('#feedback-evidence-search','Elva');assert.match(await run("document.querySelector('#feedback-evidence-results').textContent"),/exposed two-wheel lift/);
+  await set('#feedback-evidence-search','<img onerror=alert(1)>');assert.equal(await run("document.querySelectorAll('#feedback-evidence-results img').length"),0);await set('#feedback-evidence-search','');
+  await click('[data-feedback-check=body][data-check-status=clear]');await click('#feedback-checks [data-feedback-test]');
+  assert.equal(await run('state.setup.adviceStep'),'test');assert.ok(await run('state.setup.adviceTestId'));await set('[name=adviceOutcome]','same');await click('[data-feedback-action=record]');
+  assert.equal(await run('DriverFeedbackModel.analyze(calculationInput()).resultState'),'recorded');
+  await click('[data-feedback-action=save]');await run("document.querySelector('#library-entry-name').value='Guided review'");await click('#library-editor-confirm');
+  assert.ok(await run("library.find(e=>e.setup.name==='Guided review').setup.adviceCheckLog"));
+  await win.reload();await new Promise(r=>setTimeout(r,250));await route('feedback');assert.equal(await run('DriverFeedbackModel.analyze(calculationInput()).checks.statuses.body'),'clear');
+  // All unresolved numerical findings must be visible, even beyond the compact first three.
+  await run("state.setup={...CalculatorModel.blank(),adviceUseSetup:'yes',adviceSymptom:'tip',rearDiameter:'19',gearDiameter:'20',tyreMinimum:'20',tyreLeft:'19',tyreRight:'18.8',rulesRows:'Mass | 85 | - | 80 | g'};fillInputs();");await click('[data-feedback-step=checks]');
+  for(const id of ['gear-clearance','tyre-mismatch','tyre-minimum','class-limits'])assert.equal(await run("document.querySelector('#feedback-checks [data-feedback-rule='+"+JSON.stringify(id)+"+']').checkVisibility()"),true,id);
+  await run("focusSetupInput('adviceOldZ')");assert.equal(await run('document.activeElement.checkVisibility()'),true);
   for(const width of [1440,760,390]){win.setContentSize(width,1100);for(const tone of ['light','dark']){await click('[data-tone-choice='+tone+']');for(const step of ['experience','checks','setup','measure','test']){await click('[data-feedback-step='+step+']');assert.equal(await run('document.documentElement.scrollWidth<=innerWidth'),true,width+'/'+tone+'/'+step);}await click('[data-feedback-step=experience]');fs.writeFileSync(path.join(output,'feedback-'+width+'-'+tone+'.png'),(await win.webContents.capturePage()).toPNG());}}
   await route('analyze');assert.equal(await run("document.querySelector('#driver-feedback').hidden"),true);await route('settings/calculations/predicted');await click('#help-try');await new Promise(r=>setTimeout(r,100));assert.equal(await run('location.hash'),'#feedback');assert.equal(await run('document.activeElement.name'),'adviceSymptom');assert.deepEqual(errors,[]);
   console.log('Driver Feedback UI passed: guidance, shared data, calculations, outcomes, save/reload, legacy routes, help and responsive themes.');win.destroy();app.quit();

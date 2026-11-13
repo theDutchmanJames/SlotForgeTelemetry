@@ -7,6 +7,7 @@
   const M=node?require('./magnetic-model.js'):root.MagneticModel;
   const T=node?require('./telemetry-model.js'):root.TelemetryModel;
   const Fit=node?require('./fit-model.js'):root.FitModel;
+  const Checks=node?require('./feedback-checks.js'):root.FeedbackChecks;
   const choice=(label,options)=>({label,type:'select',options});
   const number=(label,min=0,max=1000)=>({label,type:'number',min,max});
   const text=(label,max=600)=>({label,type:'text',max});
@@ -24,6 +25,9 @@
     adviceController:text('Controller / brake setting / voltage / warm-up'),adviceRules:text('Class rules and changes you want to avoid',1000),
     adviceParts:choice('Replacement parts',['unknown|Ask me to check compatibility and rules','adjust|Prefer adjustments to existing parts','allowed|Replacement parts may be considered']),
     adviceChecks:choice('Mechanical checks',['unknown|Not checked / not sure','clear|Guide, tyres, axles and body/pod checked free','issue|Rubbing, binding or another issue found']),
+    adviceRecentChange:choice('Did this start after a change?',['unknown|Not sure / skip','none|No recent change / new car','tyres|Tyres or tyre preparation','ballast|Ballast placement','body|Body, pod or mounting adjustment','gearing|Gearing','motor|Motor','layout|Motor-layout conversion','track|Track, lane or controller']),
+    adviceWheelspin:choice('Do the rear wheels spin under power?',['unknown|Not sure / skip','yes|Yes, the wheels spin','no|No wheelspin noticed']),
+    adviceBrakeFeel:choice('What feels wrong with braking?',['unknown|Not sure / skip','weak|Too little slowing','strong|Too abrupt','sideways|The car turns sideways']),
     adviceNotes:lines('What you observed — keep observations separate from suspected causes',2000),
     adviceHeight:number('Whole-car CG height above track · mm',0.001),
     adviceHeightBasis:choice('CG height evidence',['unknown|Unknown method','estimated|Estimated','measured|Measured using a documented method']),
@@ -42,7 +46,10 @@
     adviceMeasurement:choice('Measurement to explore',['body|Body mass','tyres|Tyres & clearance','drive|Motor & gearing','chassis|Support geometry','height|CG height','magnetic|Magnetic attraction','components|Component inventory','yaw|Attraction through a slide','power|Power & braking','laps|Pace & consistency','proposal|Explore a change']),
     adviceBodyMass:number('Complete body assembly mass · g',0.001,100000),
     adviceOutcome:choice('What happened?',['unknown|Not tested / not recorded','better|Improved','same|No clear change','worse|Worse','clear|No fault found']),
-    adviceResultContext:{label:'Recorded test context',type:'hidden',max:30000}
+    adviceResultContext:{label:'Recorded test context',type:'hidden',max:30000},
+    adviceCheckLog:{label:'Recorded mechanical checks',type:'hidden',max:26000},
+    adviceTestId:{label:'Linked suggested test',type:'hidden',max:80},
+    adviceTestAction:{label:'Linked suggested action',type:'hidden',max:1000}
   };
   const defaults=()=>Object.fromEntries(Object.entries(fields).map(([k,f])=>[k,f.type==='select'?f.options[0].split('|')[0]:'']));
   const hints={
@@ -59,11 +66,15 @@
     adviceRails:'Controls whether magnetic angle measurements and motor-pull comparisons can be interpreted.',
     adviceParts:'Used when exploring a replacement motor. Fit and class rules still need checking.',
     adviceChecks:'An unresolved or unchecked mechanical issue keeps a mechanical check in your advice.',
+    adviceRecentChange:'Select the change that preceded the problem. This selects relevant checks and counterexamples; it does not prove the cause.',
+    adviceWheelspin:'An observed loss of traction changes the priority from more wheel torque to tyres and power delivery.',
+    adviceBrakeFeel:'Select the observed response to choose a practical brake test. A controller percentage cannot supply deceleration.',
     adviceUseSetup:'Select “Include” to use the values entered on Telemetry. Observation-only deliberately ignores workbench numbers, including the bundled example.',
     adviceMethod:'Saved measurement record; does not change the numbers or verify their accuracy.'
   };
   function numeric(raw,min,max){if(typeof raw!=='string'||raw.length>32||! /^[+-]?(?:\d+\.?\d*|\.\d+)(?:e[+-]?\d+)?$/i.test(raw.trim()))throw Error('Use finite numbers with decimal points.');const v=Number(raw);if(!Number.isFinite(v)||v<min||v>max)throw Error(`Use a number between ${min} and ${max}.`);return v;}
   function clean(input={}){const out=defaults();for(const [k,f] of Object.entries(fields)){const v=input[k]??out[k];if(typeof v!=='string')throw Error('Check '+f.label+'.');if(f.type==='select'){if(!f.options.some(o=>o.split('|')[0]===v))throw Error('Check '+f.label+'.');}else if(f.type==='number'){if(v!==''){numeric(v,f.min,f.max);if(k==='adviceGear'&&!Number.isInteger(Number(v)))throw Error('Proposed gear must have whole teeth.');}}else if(v.length>f.max)throw Error(f.label+' is too long.');out[k]=v;}
+    Checks.parse(out.adviceCheckLog);
     return out; // Incomplete measurement tables are retained; only their calculation is withheld.
   }
   const n=(c,k)=>c[k]===''?null:Number(c[k]);
@@ -123,7 +134,7 @@
     if(r.support){r.evidence.push(['Static geometry only','CG projection to nearest support edge',r.support.distance,'mm']);r.evidence.push(['Rigid geometry only','CG-to-edge angle',r.support.angle,'°']);}
     if(['tip','snap','guide'].includes(c.adviceSymptom)&&height===null)r.missing.push('Optional CG height or a complete component inventory enables mass-height comparisons. Advice remains available without it.');
     if(c.adviceBody==='high')r.missing.push('High body weight is a qualitative observation, not a numeric whole-car CG measurement.');
-    try{const points=yawPoints(c.adviceYawRows);if(points.length){const a=n(c,'adviceYawAngle'),value=interpolate(points,a),centre=interpolate(points,0);r.yaw={points,value,angle:a,retention:value!==null&&centre>0?value/centre*100:null,eligible:c.advicePullMethod==='net'&&c.adviceRails==='yes'};if(!r.yaw.eligible)r.missing.push('Angle-force calculations require net magnetic force and magnetically responsive rails. Total/rear lift force and gauss cannot be substituted.');}}catch(e){r.issues.push(e.message);}
+    try{const points=yawPoints(c.adviceYawRows);if(points.length){const a=n(c,'adviceYawAngle'),value=interpolate(points,a),centre=interpolate(points,0);r.yaw={points,value,angle:a,retention:value!==null&&centre>0?value/centre*100:null,eligible:use&&c.advicePullMethod==='net'&&c.adviceRails==='yes'&&base.magneticCondition==='off'};if(!r.yaw.eligible)r.missing.push('Angle-force interpretation requires included setup data, net magnetic force, responsive rails and motor-off measurements in the same fixture. Total/rear lift force and gauss cannot be substituted.');}}catch(e){r.issues.push(e.message);}
     const row=(label,a,b,unit)=>r.comparison.push({label,a,b,unit});
     if(['lower','add'].includes(c.adviceProposal)){
       const part=n(c,'advicePartMass'),old=n(c,'adviceOldZ'),next=n(c,'adviceNewZ');
@@ -213,7 +224,7 @@
     if(c.adviceChecks!=='clear')need('checks','adviceChecks','Record your mechanical checks','An unresolved check stays in the suggestions until you report that the guide, tyres, axles and body/pod move freely.');
     const rules=records('checks','rulesRows','Numeric class limits');
     if(!rules.error&&!rules.entered)need('checks','rulesRows','Optional: explicit numeric class limits','Tests entered measurements against minimum/maximum limits. Free-text rules remain notes only.');
-    if(use&&mass!==null&&['tip','slide','snap','guide'].includes(c.adviceSymptom))behaviour.why+=` Your entered mass is ${mass} g; mass alone does not locate the CG or establish grip.`;
+    if(use&&mass!==null&&['tip','slide','snap','guide'].includes(c.adviceSymptom))behaviour.why+=` Your included running mass is ${mass} g; mass alone does not locate the CG or establish grip.`;
     if(height!==null&&c.adviceSymptom==='tip')behaviour.action+=` With the ${Number(height.toFixed(3))} mm CG-height input, use Explore a change to compare ballast mass and height. This remains conditional on that input.`;
     r.inputSummary=!use?'Workbench numbers are switched off. The suggestions use your selected observations and any optional advisor measurements below.':`Your workbench numbers are included. Stock weight, motor ratings and tyre size give numeric results below; they do not by themselves identify why the car tips or slides. Select a calculation area to see its results and useful next inputs.`;
     r.usingSetup=use;
@@ -222,7 +233,7 @@
   function snapshot(input){
     // Capture physical inputs and advisor context, never recursive run evidence.
     const workshop=W.clean(input);for(const k of Object.keys(workshop))if(k.startsWith('experiment'))delete workshop[k];
-    const advisor=clean(input);for(const key of ['adviceTestObservations','adviceTestChange','adviceResultContext','adviceStep','adviceMeasurement','adviceOutcome'])delete advisor[key];
+    const advisor=clean(input);for(const key of ['adviceTestObservations','adviceTestChange','adviceResultContext','adviceStep','adviceMeasurement','adviceOutcome','adviceCheckLog','adviceTestId','adviceTestAction'])delete advisor[key];
     let rearDiameter=input.rearDiameter??'';
     if(input.tyreMode==='rim'){const rim=P.positive(input.rimDiameter,1000),thick=P.positive(input.tyreThickness,500);rearDiameter=rim!==null&&thick!==null?String(rim+2*thick):'';}
     return {...P.baseline({...P.blank(),pinion:'',gear:'',...input,rearDiameter}),...T.clean(input),...M.clean(input),...H.snapshot(input),...workshop,...advisor};
