@@ -1,6 +1,16 @@
 # Chassis geometry and balance
 
-The Telemetry workbench provides a visible **Chassis geometry & balance** shortcut. Enter measurements there and save the setup; **Analyze → Chassis geometry & balance** reads only that saved version. The original Weight & ballast and Testing & planning tools retain their original meanings.
+Open the **Chassis geometry & balance** input section on the Telemetry workbench. Enter measurements there and save the setup; **Analyze → Chassis geometry & balance** reads only that saved version. The original Weight & ballast and Testing & planning tools retain their original meanings.
+
+## Visual placement
+
+The visual ballast planner edits the same chassis plan as the numeric fields. Front is left; car-right is the top of the drawing. Click before entering dimensions if you prefer: Telemetry records a relative drawing position, not an invented millimetre measurement. Names are supplied automatically. Only the ballast weight needs typing to add it to the plan. Dimensions and support readings remain optional until you want calculated loads.
+
+Click a position, enter the mass and choose **Add to plan**. **New part** clears the editor for another placement. Select a numbered marker or **Edit** in the part list to change a planned part. Click, drag, or use arrow keys, then choose **Update part**. Optional name, action and position fields are in **Name, action & precise position**. Keyboard adjustments use 0.5 mm for millimetre positions or 0.5 percentage points for drawing positions; Shift uses 2 instead. The dashed **+** can also be dragged repeatedly before adding the part. It is an unapplied position; only applied rows affect the calculated plan or are saved. A move has separate original and new positions and preserves mass. Removing a row deletes that proposed change; choosing the **Remove a part** action models taking mass off the car.
+
+**Set references** adjusts the guide, rear axle and rear contact positions on the schematic. It preserves stored part coordinates and saves with the setup. Drawing positions use fractions of the guide span and half the rear contact spacing. Once dimensions are available, x = fraction × guide span − (guide span − support span), and y = lateral fraction × contact spacing / 2. These remain drawing estimates and follow changes to those dimensions. Existing millimetre positions retain their original meaning. Actual front support and front axle modes account for their longitudinal offset from the guide pivot. Two-support weighing can use a drawing placement for front/rear loads, but does not infer a left/right load split. Three-point weighing is required for that split. Select and confirm the support arrangement before interpreting loads.
+
+The drawing does not identify whether a position is physically usable. Check space, clearance and moving parts on the actual car. A top view cannot measure height. Positions outside the pictured chassis remain available in the numeric part list; they are not silently moved to the image boundary.
 
 ## Measure the triangle
 

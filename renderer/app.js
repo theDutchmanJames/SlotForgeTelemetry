@@ -20,6 +20,7 @@ function persist() {
   } catch (error) {
     $('#save-state').textContent = error.name === 'QuotaExceededError' || error.name === 'SecurityError' ? 'Local saving unavailable · use Export setup' : 'Invalid inputs · last valid workspace retained';
   }
+  const feedbackStatus=$('#feedback-save-status');if(feedbackStatus)feedbackStatus.textContent=$('#save-state').textContent;
 }
 function readWorkspace() {
   try { const saved = localStorage.getItem(STORAGE); if (saved) Object.assign(state, CalculatorModel.decode(saved)); }
@@ -43,7 +44,7 @@ function refresh() {
   $('#flow-rpm').textContent = performanceNumber(m.ratedRpm, 0) + ' RPM';
   $('#flow-gearing').textContent = m.ratio === null ? '— : —' : input.pinion + ' : ' + input.gear + ' teeth';
   $('#flow-tyre').textContent = performanceNumber(m.rearDiameter, 2) + ' mm';
-  $('#stats').innerHTML = liveStats(input);
+  ResultFolders.refresh(input);
   let error = '';
   try { CalculatorModel.cleanSetup(state.setup); } catch (e) { error = e.message; }
   for (const el of document.querySelectorAll('input[type=number][name]')) {
@@ -58,6 +59,7 @@ function refresh() {
   refreshMagneticInputs();
   WorkshopUI.refresh();
   ChassisUI.refresh();
+  WorkbenchUI.refresh();
   PredictionUI.refresh();
   InputHelp.refresh();
   updateLibraryStatus();
@@ -142,6 +144,6 @@ $('#setup-file').onchange = async event => {
   } catch (error) { toast('Could not open setup: ' + error.message); }
   finally { event.target.value = ''; }
 };
-RaceUI.init(); initializeMagnetic(); WorkshopUI.init(); ChassisUI.init(); ChassisTestUI.init(); PredictionUI.init(); InputHelp.init(); initializeDesign(); readWorkspace(); setupAppearance(); fillInputs(); initializeLibrary(); initializePages();
+RaceUI.init(); initializeMagnetic(); WorkshopUI.init(); ChassisUI.init(); ChassisTestUI.init(); PredictionUI.init(); InputHelp.init(); initializeDesign(); WorkbenchUI.init(); ResultFolders.init(); readWorkspace(); setupAppearance(); fillInputs(); initializeLibrary(); initializePages();
 $('#save-copy').onclick=()=>{openLibraryTask('save',activeLibraryId);libraryTask.asCopy=true;$('#library-editor-title').textContent='Save a new copy';$('#library-editor-confirm').textContent='Save new copy';$('#library-save-copy').hidden=true;};
 

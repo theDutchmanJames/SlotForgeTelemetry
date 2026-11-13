@@ -96,11 +96,12 @@ const ChassisUI=(()=>{
         if(r.changes.length)html+=parts(r.changes,false);
       }
     }
+    if(full&&!b&&r.changes.length)html+=parts(r.changes,false);
     html+=r.notes.map(t=>`<p class="note">${esc(t)}</p>`).join('');
     if(input.chassisNotes)html+=`<p class="hint">Measurement notes: ${esc(input.chassisNotes)}</p>`;
     return html+'<p class="hint">Static estimates only. Magnetic attraction, extra contacts and chassis compliance can invalidate the support model. Geometry and balance do not predict lap times or cornering limits.</p><a href="#settings/calculations/chassis">Measurement guide & calculations →</a></section>';
   }
-  function parts(rows,editable){return rows.length?`<div class="table-wrap"><table><caption>Ballast changes · x behind front support; y right of centre</caption><thead><tr><th>Part / action</th><th>Mass · g</th><th>x, y · mm</th>${editable?'<th>Action</th>':''}</tr></thead><tbody>${rows.map((r,i)=>`<tr><th>${esc(r.name)}<small> · ${esc(r.action)}</small></th><td>${fmt(r.mass)}</td><td>${fmt(r.x)}, ${fmt(r.y)}${r.action==='move'?` → ${fmt(r.toX)}, ${fmt(r.toY)}`:''}</td>${editable?`<td><button class="btn small" data-remove-chassis="${i}" aria-label="Remove ${esc(r.name)} from plan">Remove</button></td>`:''}</tr>`).join('')}</tbody></table></div>`:'<p class="hint">No ballast changes planned.</p>';}
+  function parts(rows,editable){return rows.length?`<div class="table-wrap"><table><caption>Ballast changes · x behind front support; y right of centre</caption><thead><tr><th>Part / action</th><th>Mass · g</th><th>Position</th>${editable?'<th>Action</th>':''}</tr></thead><tbody>${rows.map((r,i)=>`<tr><th>${esc(r.name)}<small> · ${esc(r.action)}</small></th><td>${fmt(r.mass)}</td><td>${r.space==='drawing'?`${fmt(r.x*100)}% along guide span, ${fmt(Math.abs(r.y)*100)}% towards ${r.y<0?'left':'right'} rear contact${r.action==='move'?` → ${fmt(r.toX*100)}%, ${fmt(r.toY*100)}% right`:''} (drawing)`: `${fmt(r.x)}, ${fmt(r.y)} mm${r.action==='move'?` → ${fmt(r.toX)}, ${fmt(r.toY)} mm`:''}`}</td>${editable?`<td><button class="btn small" data-remove-chassis="${i}" aria-label="Remove ${esc(r.name)} from plan">Remove</button></td>`:''}</tr>`).join('')}</tbody></table></div>`:'<p class="hint">No ballast changes planned.</p>';}
   function refresh(){
     const s=state.setup,mode=s.chassisMode;
     for(const e of document.querySelectorAll('[data-chassis-width]'))e.hidden=e.dataset.chassisWidth!==s.chassisTrackMethod;

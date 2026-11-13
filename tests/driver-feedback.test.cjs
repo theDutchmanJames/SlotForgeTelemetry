@@ -1,0 +1,20 @@
+const test=require('node:test'),assert=require('node:assert/strict');
+const C=require('../renderer/calculator-model.js'),D=require('../renderer/driver-feedback-model.js'),A=require('../renderer/prediction-model.js');
+const setup=overrides=>({...C.blank(),...overrides});
+test('a recorded unsuccessful suggested check moves on, without interpreting free text',()=>{const s=setup({adviceSymptom:'tip',adviceOutcome:'clear'});s.adviceTestChange=D.analyze(s).suggestions[0].action;s.adviceResultContext=D.record(s);assert.match(D.analyze(s).suggestions[0].title,/roll stability/);assert.match(D.analyze({...s,adviceTestChange:'Something unrelated'}).suggestions[0].title,/mechanical/);});
+test('optional feedback migrates old setups and survives export',()=>{const s=setup({name:'Investigation',adviceStep:'measure',adviceBodyMass:'22',adviceOutcome:'same',adviceTestChange:'Check tyre seating'});assert.equal(C.decode(C.encode(s)).setup.adviceStep,'measure');const old={...s};for(const k of ['adviceStep','adviceOutcome','adviceBodyMass','adviceResultContext','adviceMeasurement'])delete old[k];assert.equal(C.cleanSetup(old).adviceStep,'experience');});
+test('observation only never includes example measurements; body share needs valid total',()=>{let r=D.analyze({...C.EXAMPLE,adviceBodyMass:'22',totalWeight:'80'});assert.equal(r.bodyShare,null);r=D.analyze(setup({adviceUseSetup:'yes',totalWeight:'80',adviceBodyMass:'22'}));assert(Math.abs(r.bodyShare-27.5)<1e-10);r=D.analyze(setup({adviceUseSetup:'yes',totalWeight:'20',adviceBodyMass:'22'}));assert.equal(r.bodyShare,null);assert.match(r.issues.join(' '),/less than/);});
+test('measured tyre problem takes priority and power changes sliding advice',()=>{const s=setup({adviceUseSetup:'yes',adviceSymptom:'slide',advicePower:'power',rearDiameter:'19',gearDiameter:'18',tyreLeft:'19',tyreRight:'18.8'});const r=D.analyze(s);assert.match(r.suggestions[0].title,/unequal/);assert(r.suggestions.some(x=>/gentler/.test(x.action)));const coast=D.analyze({...s,advicePower:'coast'});assert(coast.suggestions.some(x=>/electrical braking is off/.test(x.action)));});
+test('net magnetic zero remains a measured zero; other force bases withheld',()=>{const s=setup({adviceUseSetup:'yes',totalWeight:'80',magneticReadings:'0',adviceRails:'yes',advicePullMethod:'net'});const r=D.analyze(s);assert.equal(r.net,true);assert.equal(r.magnetic.loadPercent,0);assert.equal(D.analyze({...s,advicePullMethod:'rear'}).net,false);assert.equal(D.analyze({...s,adviceRails:'no'}).net,false);});
+test('outcome is tied to setup and symptom, not view position or saved name',()=>{const s=setup({adviceSymptom:'tip',adviceOutcome:'better',adviceTestChange:'Free guide rotation'});s.adviceResultContext=D.record(s);assert.equal(D.analyze(s).resultState,'recorded');assert.equal(D.analyze({...s,name:'Renamed',adviceStep:'measure',adviceMeasurement:'chassis'}).resultState,'recorded');assert.equal(D.analyze({...s,totalWeight:'80'}).resultState,'changed');assert.equal(D.analyze({...s,adviceOutcome:'worse'}).resultState,'changed');assert.equal(D.analyze({...s,adviceSymptom:'slide'}).resultState,'changed');assert.throws(()=>D.record(setup()),/Choose/);assert.throws(()=>D.record(setup({adviceOutcome:'better'})),/Describe/);assert(!Object.hasOwn(A.snapshot(s),'adviceResultContext'));});
+
+test('feedback reuses measured axle mass without requiring duplicate total entry',()=>{
+ const s=setup({adviceUseSetup:'yes',frontWeight:'30',rearWeight:'50',adviceBodyMass:'20',magneticReadings:'8',adviceRails:'yes',advicePullMethod:'net'});
+ const r=D.analyze(s);assert.equal(r.mass,80);assert.equal(r.bodyShare,25);assert.equal(r.magnetic.loadPercent,10);
+ assert(r.base.coverage.find(c=>c.key==='stockMass').metrics.some(m=>m.value===80&&/front/.test(m.label)));
+ assert(!r.base.guidance.handling.some(g=>g.field==='totalWeight'));
+ assert.equal(D.analyze({...s,totalWeight:'100'}).mass,100);
+ assert.equal(D.analyze({...s,frontWeight:''}).mass,null);
+ assert.equal(D.analyze({...s,frontWeight:'0',rearWeight:'0'}).mass,null);
+ assert.equal(D.analyze({...s,adviceUseSetup:'no'}).mass,null);
+});

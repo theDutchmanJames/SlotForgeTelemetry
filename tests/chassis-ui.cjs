@@ -53,5 +53,5 @@ app.whenReady().then(async()=>{
    }
   }
   assert.deepEqual(errors,[]);console.log('Chassis UI passed: geometry, modes, saving, saved-only analysis, help, ballast add/move/remove, escaping, immutable run evidence, recovery, both themes and 390/760px layouts.');win.destroy();app.quit();
- }catch(e){console.error(e);win.destroy();app.exit(1);}
+ }catch(e){console.error(e,errors);win.destroy();app.exit(1);}
 });

@@ -1,6 +1,6 @@
-# Predicted Performance
+# Driver Feedback
 
-Implemented 10 November 2026. Entry: Analyze → Predicted Performance, or Help me with my car on the workbench. This is a local, deterministic advisor; no network, AI service, sensor, IMU or LiDAR is used.
+Guided redesign implemented 13 November 2026. Entry: Driver Feedback in the main menu, or Help me with my car on the workbench. The former Analyze → Predicted Performance link redirects to Driver Feedback. This is a local, deterministic advisor; no network, AI service, sensor, IMU or LiDAR is used.
 
 ## User flow and storage
 
@@ -8,7 +8,7 @@ All advisor inputs are optional. Observation-only is the default, even when the 
 
 Workbench numbers are opt-in. The page edits the current workbench, not a library entry in place. Loading a saved setup uses the existing replacement confirmation and returns to the advisor. Saving creates/updates a library snapshot; export includes the same optional fields. Older setups receive blank/unknown defaults. Partial component and angle tables are retained and flagged without inventing results. Invalid numeric or selection values cannot replace the last valid persisted workspace.
 
-The workflow has Setup outlook, Explore a change, and Test & learn. Six areas connect all existing calculators: handling/balance, motor/drivetrain, tyres/clearance, power/braking, pace/consistency, checks/evidence. Supporting workshop results keep their original assumptions and units. Source observations and numeric estimates are distinguished; no overall score, probability of diagnosis, inferred friction coefficient or automatic “better motor” ranking is produced. Free-text goals, constraints and rules are recorded and displayed, not interpreted by a language model.
+The five steps are Your experience, First checks, Your setup, Look deeper, and Try & learn. Optional measurement areas connect body mass, tyres, drivetrain, support geometry, CG height, magnetic attraction, component inventory, yaw measurements, braking and lap tests. Supporting workshop results keep their original assumptions and units. Source observations and numeric estimates are distinguished; no overall score, probability of diagnosis, inferred friction coefficient or automatic “better motor” ranking is produced. Free-text goals, constraints and rules are recorded and displayed, not interpreted by a language model.
 
 ### Knowing which inputs matter
 
@@ -22,7 +22,7 @@ Tyre preparation explicitly separates **current gap below the driven gear**, cal
 
 ### Mass and CG
 
-Running mass is the entered total car mass. Existing separate ballast plans are not silently applied. Vertical move of an existing part of mass m: h′ = h + m(z′ − z)/M. Addition: M′ = M + m, h′ = (Mh + mz′)/M′. Existing-part moves must leave a physically nonnegative vertical mass moment; moving the entire mass must agree with the baseline CG. Horizontal position is unchanged only for a strictly vertical move. Use the existing chassis planner for horizontal add/remove/move effects.
+Running mass uses the entered total car mass, or the sum of both front and rear scale readings when total mass is blank. The source is shown in Driver Feedback; partial readings do not supply total mass. Existing separate ballast plans are not silently applied. Vertical move of an existing part of mass m: h′ = h + m(z′ − z)/M. Addition: M′ = M + m, h′ = (Mh + mz′)/M′. Existing-part moves must leave a physically nonnegative vertical mass moment; moving the entire mass must agree with the baseline CG. Horizontal position is unchanged only for a strictly vertical move. Use the existing chassis planner for horizontal add/remove/move effects.
 
 An optional absolute height bound propagates through these linear formulas with all other inputs held exact. Bounds inconsistent with nonnegative height or a known part's moment are withheld. They are not confidence intervals and do not include component mass/position uncertainty.
 
@@ -54,7 +54,7 @@ The existing workshop test tool accepts manual lap lists and copied manual/Paddo
 
 ## Knowing which inputs are used
 
-Predicted Performance reads the current Telemetry workbench, including unsaved edits, when “Use workbench numbers” is enabled. The selected calculation area separates recorded measurements, available results, and optional missing information or confirmations. Turning workbench numbers off excludes those measurements without deleting them.
+Driver Feedback reads the current Telemetry workbench, including unsaved edits, when “Use workbench numbers” is enabled. The guided measurement step separates recorded measurements, available results, and optional missing information or confirmations. Turning workbench numbers off excludes those measurements without deleting them.
 
 Examples sit below inputs, labelled “Example only”, and never populate a setup. Measurement fields indicate whether actual text has been entered; this alone does not mean it is valid or sufficient for a calculation. The prediction page validates measurement records and distinguishes an empty record, a partial record, and one needing correction.
 
@@ -71,3 +71,13 @@ Current tyre diameter, left/right measurements, diameter spread around one tyre,
 - [Maxon motor characteristics](https://www.maxongroup.com/medias/sys_master/8815460712478.pdf): loaded/thermal conditions matter. No unsupported motor temperature forecast is added.
 
 Dynamic drift/recovery, traction-limited lap simulation and self-calibrating physical models remain outside the implemented prediction claims. Those require representative slotcar validation data; more equations alone would not establish their accuracy. IMU and LiDAR integration is excluded from this project plan.
+
+## Guided investigation
+
+Five steps move from observations to practical checks, an explicitly included workbench or saved setup, optional measurements, and a recorded test outcome. Existing setup fields are shared; changing a value in Driver Feedback updates the workbench draft but never silently updates a library entry. Rim-derived tyre diameter is read-only here; the rim/thickness tool remains its source.
+
+Body share = complete body assembly mass / ready-to-drive car mass × 100. It requires a body lighter than the complete car and does not determine CG height or tipping risk. Net magnetic interpretation requires responsive rails and an explicitly confirmed net-force basis. Existing support, component, proposal and workshop models retain their assumptions.
+
+Owner evidence is linked to original reports. It prioritises investigations, not brand scores or universal ballast recommendations. No numerical correlation or trained prediction model is claimed.
+
+The most recently recorded outcome retains the investigation context. Changes to setup, symptom, test description or outcome mark it as belonging to a different context; changing steps or the saved name does not. Save as a separate setup to retain multiple experiments. Workbench persistence, explicit library saves and exports use existing storage controls.

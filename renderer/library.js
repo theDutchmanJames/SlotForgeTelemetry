@@ -81,7 +81,7 @@ function completeLibraryTask(asCopy=false) {
       commitLibrary(task.entries,{recover:true});deletedEntry=null;bindLibrary(null);libraryNotice('Library restored from backup. Your workbench draft was kept.');
     } else {
       if(!item)throw Error('This saved setup no longer exists.');
-      state.setup=CalculatorModel.cleanSetup({...item.setup,...task.gearing});state.reference=null;bindLibrary(item.id);fillInputs();persist();navigate('telemetry');toast('Loaded '+item.setup.name+'.');
+      state.setup=CalculatorModel.cleanSetup({...item.setup,...task.gearing});if(task.feedbackInclude)state.setup.adviceUseSetup='yes';state.reference=null;bindLibrary(item.id);fillInputs();persist();navigate('telemetry');toast('Loaded '+item.setup.name+'.');
     }
       renderLibrary();$('#library-editor').close();
       if(task.afterRoute)navigate(task.afterRoute);

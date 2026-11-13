@@ -5,14 +5,15 @@ function liveStats(input){
     ['Gear ratio',m.motor.ratio,':1',3,'ratio'],['No-load axle speed',m.motor.axleRpm,'RPM',0,'axleRpm'],
     ['No-load speed',m.motor.speedKmh,'km/h',2,'speedKmh'],['Rollout',m.motor.rollout,'mm/motor rev',2,'rollout'],
     ['Estimated peak mechanical power',m.motor.peakPowerW,'W',2,'peakPowerW'],['Estimated peak motor power / mass',m.powerToWeight,'W/kg',2,'powerToWeight']
-  ].map(([label,value,unit,digits,key])=>`<div class="performance-stat" data-category="${metricStyle[key][0]}">${metricHeading(key,label)}<strong data-performance-result="${key}">${performanceNumber(value,digits)} <small>${unit}</small></strong>${key==='peakPowerW'?`<small class="metric-caption">at ${performanceNumber(m.motor.peakMotorRpm,0)} RPM</small>`:key==='powerToWeight'?`<small class="metric-caption">based on ${performanceNumber(m.massG)} g</small>`:''}</div>`).join('')}</div><p class="hint">${m.motor.curveReady?'Peak mechanical power uses the ideal brushed DC model, before drivetrain losses; it is not a continuous rating.':'For power estimates, confirm brushed DC, stall torque and matching test voltages.'}${m.massG===null?' Add car weight for power-to-weight.':''}</p>${input.wheelbase||input.ballastPosition?balanceResults(m):''}${input.gearDiameter?clearanceResults(m):''}${magneticResults(input)}`;
+  ].map(([label,value,unit,digits,key])=>`<div class="performance-stat" data-category="${metricStyle[key][0]}">${metricHeading(key,label)}<strong data-performance-result="${key}">${performanceNumber(value,digits)} <small>${unit}</small></strong>${key==='peakPowerW'?`<small class="metric-caption">at ${performanceNumber(m.motor.peakMotorRpm,0)} RPM</small>`:key==='powerToWeight'?`<small class="metric-caption">based on ${performanceNumber(m.massG)} g</small>`:''}</div>`).join('')}</div><p class="hint">${m.motor.curveReady?'Peak mechanical power uses the ideal brushed DC model, before drivetrain losses; it is not a continuous rating.':'For power estimates, confirm brushed DC, stall torque and matching test voltages.'}${m.massG===null?' Add car weight for power-to-weight.':''}</p>`;
 }
 function navigate(route){if(location.hash!=='#'+route)location.hash=route;renderRoute();}
 function renderRoute(){
-  const [requested,sub,topic]=location.hash.slice(1).split('/'),page=['telemetry','analyze','library','settings'].includes(requested)?requested:'telemetry';
+  if(location.hash==='#analyze/predicted'){history.replaceState(null,'','#feedback');}
+  const [requested,sub,topic]=location.hash.slice(1).split('/'),page=['telemetry','analyze','feedback','library','settings'].includes(requested)?requested:'telemetry';
   for(const section of document.querySelectorAll('[data-page]'))section.hidden=section.dataset.page!==page;
   for(const link of document.querySelectorAll('[data-route]')){if(link.dataset.route===page)link.setAttribute('aria-current','page');else link.removeAttribute('aria-current');}
-  document.title=`${page[0].toUpperCase()+page.slice(1)} · SlotForge Telemetry`;
+  document.title=`${page==='feedback'?'Driver Feedback':page[0].toUpperCase()+page.slice(1)} · SlotForge Telemetry`;
   if(page==='library'){readLibrary();renderLibrary();updateLibraryStatus();}
   if(page==='analyze'){
     readLibrary();renderAnalysis();const compare=sub==='compare';
@@ -56,11 +57,12 @@ function renderComparison(){
 }
 function showSavedAnalysis(id,compare=false){analysisId=id;if(compare){compareA=id;compareB=(library.find(e=>e.id!==id)||library[0])?.id;}navigate(compare?'analyze/compare':'analyze');}
 function focusSetupInput(name){
-  if(Object.hasOwn(PredictionModel.fields,name)){navigate('analyze/predicted');document.querySelector('[data-prediction-tab=outlook]').click();}
+  if(Object.hasOwn(PredictionModel.fields,name)){PredictionUI.focus(name);return;}
   WorkshopUI.reveal(name);
   // Follow the active tyre-entry mode rather than focusing a hidden diameter input.
   if(name==='rearDiameter'&&state.setup.tyreMode==='rim')name='rimDiameter';
   const field=$('[name="'+name+'"]');if(!field)return;
+  ResultFolders.forInput(field);
   for(let parent=field.parentElement;parent;parent=parent.parentElement)if(parent.tagName==='DETAILS')parent.open=true;
   field.focus({preventScroll:true});field.closest('.panel').scrollIntoView({block:'start'});
 }

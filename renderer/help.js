@@ -17,6 +17,6 @@ function renderHelp(topic){
   $('#help-topics').innerHTML=Object.entries(calculationHelp).map(([id,h])=>`<a data-category="${topicStyle[id][0]}" href="#settings/calculations/${id}" ${id===key?'aria-current="page"':''}>${sfIcon(topicStyle[id][1])}${h.title}</a>`).join('');
   $('#help-content').dataset.category=topicStyle[key][0];
   $('#help-content').innerHTML=`<section class="panel help-topic-panel"><p class="eyebrow">THE NUMBERS EXPLAINED</p><h2 class="help-title">${sfIcon(topicStyle[key][1])}${help.title}</h2><div class="help-formula">${help.formula}</div><p class="hint">${help.meaning}</p></section><div class="help-grid"><section class="panel help-example"><h3>A worked example</h3><p>${help.example}</p></section><section class="panel"><h3>Assumptions & limits</h3><p>${help.limits}</p></section></div><button class="btn primary" id="help-try">Try it in Telemetry →</button>`;
-  if(key==='predicted')$('#help-try').textContent='Open Predicted Performance →';
+  if(key==='predicted')$('#help-try').textContent='Open Driver Feedback →';
   $('#help-try').onclick=()=>{navigate('telemetry');requestAnimationFrame(()=>focusSetupInput(help.field));};
 }

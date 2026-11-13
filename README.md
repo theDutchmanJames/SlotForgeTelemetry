@@ -75,13 +75,13 @@ The original motor/gearing engine and vector icons come from Paddock. The colour
 
 ### Get help with how your car behaves
 
-Open **Analyze → Predicted Performance**, or choose **Help me with my car** on the workbench. Start with “my car tips over”, excessive sliding, sudden recovery, guide lift, hopping, weak acceleration, braking or inconsistent laps. **Every input is optional; no saved setup or measuring equipment is required.**
+Open **Driver Feedback** from the main menu, or choose **Help me with my car** on the workbench. Start with “my car tips over”, excessive sliding, sudden recovery, guide lift, hopping, weak acceleration, braking or inconsistent laps. **Every input is optional; no saved setup or measuring equipment is required.**
 
 - Get practical checks, possible explanations, changes to explore, trade-offs and a suggested test. Optional questions distinguish corner entry/exit, braking/coasting and one-corner or left/right problems.
-- Include workbench numbers only when you choose. Inspect handling, drivetrain, tyres, power/braking, race consistency and evidence, with links to every measurement tool.
-- See which numbers are included and what each area can calculate now. Targeted optional-input links explain what would make the advice more specific; free-text track, tyre and controller notes are clearly distinguished from calculation inputs.
+- Include workbench numbers only when you choose. Follow five guided steps: Your experience, First checks, Your setup, Look deeper, and Try & learn. Shared workbench inputs never need re-entry.
+- See which values are already included, which are still missing, and what each measurement adds. Targeted optional-input links explain what would make the advice more specific; free-text track, tyre and controller notes are clearly distinguished from calculation inputs.
 - Compare vertical ballast moves, added ballast, gearing or comparable-RPM motor magnetic pull without changing the baseline. Optional component inventories estimate CG and yaw/roll inertia; angle/pull measurements interpolate only within the measured range.
-- Keep observations, measurement methods and proposals with your saved setup and exports. Use the existing A–B–A tool for handwritten laps or manual/Paddock run snapshots, with frozen setup evidence.
+- Record whether a check improved, worsened or did not change the behaviour. Outcomes are tied to the recorded setup and symptom; later changes are identified. Keep observations, methods and proposals with saved setups and exports. Use the existing A–B–A tool for handwritten laps or manual/Paddock run snapshots, with frozen setup evidence.
 
 Advice is conditional, not a diagnosis or a guaranteed lap-time prediction. Static support geometry does not establish a safe cornering speed; unknown grip, force distribution and transient handling remain unknown. [Read the calculation scope and sources](docs/predicted-performance.md).
 
@@ -109,7 +109,11 @@ Build a measured clearance curve in **Analyze → Magnetic downforce**, with a g
 
 **Try a change before reaching for the tools.** The Telemetry workbench updates its results as you enter gear teeth, rear tyre size, motor ratings and weight. Start with a pinion, driven gear and fitted tyre diameter; add the motor and other measurements when available.
 
-Use a measured tyre diameter or calculate it from rim diameter and radial tyre thickness. The **Setup inputs** shortcuts take you directly to Gearing, Motor, Tyres & clearance, Weight & ballast, Chassis geometry & balance, Gear finder, Lap speed, Magnetic downforce and Testing & planning.
+Use a measured tyre diameter or calculate it from rim diameter and radial tyre thickness. **Setup inputs** are collapsible sections with live summaries: open only what you need, or choose **Close all**. Your values stay intact, and Telemetry remembers which sections you left open. Help and analysis links open the relevant section automatically.
+
+**Live results** are grouped into Drivetrain overview, Performance, Weight & balance, Tyres & clearance, Magnetic downforce, Lap speed, and Testing & planning. Opening an input section opens its matching results. Closed groups still show current summaries. **Pin** keeps a group open when you switch topics; **Close unpinned** folds the rest away. Open-group and pin preferences are remembered on this device, and folding never discards your ballast draft. Closing a pinned group also unpins it.
+
+The **visual ballast planner** uses a chassis drawing with the front on the left. Click to place ballast, enter its weight and choose **Add to plan**. Telemetry fills the name and position; no chassis dimensions or scale readings are required to record the placement. Drag the new dashed point before adding it, or drag an existing marker and choose **Update part** to reposition it. Optional name, action and precise-position controls sit in a foldout. Drawing-only placements save with the setup and use dimensions added later for calculated balance. Add, remove and move scenarios use the existing chassis balance calculations; measured support readings enable the before/after load comparison. This is a schematic position planner, not a physical fit or grip prediction.
 
 | Calculation | What it helps you understand |
 | --- | --- |

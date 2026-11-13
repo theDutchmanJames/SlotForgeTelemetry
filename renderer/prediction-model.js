@@ -37,7 +37,12 @@
     advicePartMass:number('Ballast mass · g',0.001,100000),adviceOldZ:number('Existing ballast height · mm'),adviceNewZ:number('Proposed ballast height · mm'),
     adviceGear:number('Proposed driven gear · whole teeth',1,999999),adviceCandidatePull:number('Candidate net motor pull · gf',0,100000),
     adviceMotorMatch:choice('Candidate comparison conditions',['unknown|Not verified','yes|Comparable RPM rating; same fixture, rails and installed gap']),
-    adviceTestChange:text('One change being tested',1000),adviceTestObservations:lines('Run observations: handling, incidents and recovery',3000)
+    adviceTestChange:text('One change being tested',1000),adviceTestObservations:lines('Run observations: handling, incidents and recovery',3000),
+    adviceStep:choice('Driver Feedback step',['experience|Your experience','checks|First checks','setup|Your setup','measure|Look deeper','test|Try & learn']),
+    adviceMeasurement:choice('Measurement to explore',['body|Body mass','tyres|Tyres & clearance','drive|Motor & gearing','chassis|Support geometry','height|CG height','magnetic|Magnetic attraction','components|Component inventory','yaw|Attraction through a slide','power|Power & braking','laps|Pace & consistency','proposal|Explore a change']),
+    adviceBodyMass:number('Complete body assembly mass · g',0.001,100000),
+    adviceOutcome:choice('What happened?',['unknown|Not tested / not recorded','better|Improved','same|No clear change','worse|Worse','clear|No fault found']),
+    adviceResultContext:{label:'Recorded test context',type:'hidden',max:30000}
   };
   const defaults=()=>Object.fromEntries(Object.entries(fields).map(([k,f])=>[k,f.type==='select'?f.options[0].split('|')[0]:'']));
   const hints={
@@ -74,7 +79,7 @@
   function analyze(input={}){
     const r={error:'',issues:[],evidence:[],suggestions:[],missing:[],properties:null,support:null,yaw:null,comparison:[],proposalNotes:[],coverage:[],guidance:{}};let c;
     c=defaults();for(const k of Object.keys(fields)){try{c[k]=clean({[k]:input[k]})[k];}catch(e){r.issues.push(e.message+' Clear it to skip this measurement.');}}
-    const use=c.adviceUseSetup==='yes',base=use?input:{},motor=P.calculate(base),chassis=H.calculate(base),mass=P.positive(base.totalWeight,100000);
+    const use=c.adviceUseSetup==='yes',base=use?input:{},telemetry=T.calculate(base),motor=telemetry.motor,chassis=H.calculate(base),mass=telemetry.massG;
     const add=(title,why,action,trade,test,area='handling')=>r.suggestions.push({title,why,action,trade,test,area});
     if(c.adviceChecks!=='clear')add(c.adviceChecks==='issue'?'Resolve the mechanical issue first':'Start with a quick mechanical check','Rubbing or restricted movement can resemble a balance, grip or motor problem.','With the power off, check guide rotation and braid seating, tyre/body clearance, free axles and intended body/pod movement.','Do not loosen everything indiscriminately; keep parts secure and follow the car’s setup instructions.','Repeat the same corner after one correction. Record what changed.','checks');
     const symptom={
@@ -102,7 +107,7 @@
       if(motor.ratio!==null)r.evidence.push(['Calculated','Gear ratio',motor.ratio,':1']);
       if(motor.rollout!==null)r.evidence.push(['Calculated','Rollout',motor.rollout,'mm / motor rev']);
       if(motor.speedKmh!==null)r.evidence.push(['Ideal ceiling','No-load speed',motor.speedKmh,'km/h']);
-      if(mass!==null)r.evidence.push(['Entered','Running mass',mass,'g']);
+      if(mass!==null)r.evidence.push([telemetry.totalWeight===null?'Calculated from axle readings':'Entered','Running mass',mass,'g']);
       const left=Fit.diameter(P.positive(base.tyreLeft,1000)),right=Fit.diameter(P.positive(base.tyreRight,1000));
       if(left!==null&&right!==null&&Math.abs(left-right)>1e-9){r.evidence.push(['Calculated','Rear circumference difference',Math.PI*Math.abs(left-right),'mm']);r.suggestions.unshift({title:'Check unequal rear tyre diameters',why:'The entered left and right fitted diameters differ. This does not establish the cause of the behaviour.',action:'Re-measure seating and roundness; consider matching within rules and clearance limits.',trade:'Truing changes rollout, axle height and possibly magnetic pull. Check actual clearances afterwards.',test:'Compare handling before changing motor or ballast.',area:'tyres'});}
       if(chassis.error)r.issues.push('Chassis: '+chassis.error);
@@ -145,10 +150,9 @@
     r.coverage=Object.entries(W.tools).map(([key,t])=>{const result=use?W.calculate(base,key):null,metrics=(result?.metrics||[]).filter(m=>Number.isFinite(m.value));return {key,title:t.title,field:t.keys[0],status:!use?'Not included':result.error?'Check inputs':metrics.length||result.rows?.length?'Results available — review assumptions':'Optional measurements missing',error:result?.error||'',metrics,tyrePlan:result?.tyrePlan,headers:result?.headers||[],rows:result?.rows||[],notes:result?.notes||[],limits:t.limits};});
     const metric=(label,value,unit='')=>({label,value,unit,digits:2});
     const core=(key,title,field,metrics,limits)=>({key,title,field,metrics:metrics.filter(m=>Number.isFinite(m.value)),limits,status:!use?'Not included':metrics.some(m=>Number.isFinite(m.value))?'Results available — review assumptions':'Optional measurements missing'});
-    const telemetry=T.calculate(base);
     r.coverage.unshift(
       core('stockDrive','Your motor & gearing','ratedRpm',[metric('Entered no-load RPM',motor.ratedRpm,'RPM'),metric('Gear ratio',motor.ratio,':1'),metric('Rollout',motor.rollout,'mm / motor rev'),metric('No-load speed',motor.speedKmh,'km/h'),metric('Ideal peak shaft power',motor.peakPowerW,'W'),metric('Ideal peak shaft power / entered mass',telemetry.powerToWeight,'W/kg')],'Stock ratings describe gearing and ideal motor output, not grip or lap time. No-load speed is at the entered RPM test conditions. Peak power requires brushed DC, stall torque and matching RPM/torque test voltages; it excludes drivetrain losses.'),
-      core('stockMass','Your weight & balance','totalWeight',[metric('Entered total car mass',mass,'g'),metric('Whole-car CG height',height,'mm'),metric('Rear support share',chassis.error?null:chassis.baseline?.rearShare,'%'),metric('Static CG projection to support edge',r.support?.distance,'mm')],'Total weight does not tell us where the weight sits. CG height retains its entered or component-model evidence basis; static support geometry is not a tipping threshold.'),
+      core('stockMass','Your weight & balance','totalWeight',[metric(telemetry.totalWeight===null?'Car mass from front + rear readings':'Entered total car mass',mass,'g'),metric('Whole-car CG height',height,'mm'),metric('Rear support share',chassis.error?null:chassis.baseline?.rearShare,'%'),metric('Static CG projection to support edge',r.support?.distance,'mm')],'Total weight does not tell us where the weight sits. CG height retains its entered or component-model evidence basis; static support geometry is not a tipping threshold.'),
       core('stockTyres','Your fitted tyre & gear clearance','rearDiameter',[metric('Fitted rear tyre diameter',motor.rearDiameter,'mm'),metric('Static gear clearance',telemetry.clearance,'mm')],'Gear clearance = (fitted tyre diameter − driven gear outside diameter) / 2. Check actual clearances over rails and joints; other components may sit lower.'),
       {key:'chassis',title:'Support geometry & ballast',field:'chassisGuideSpan',status:!use?'Not included':chassis.error?'Check inputs':chassis.baseline?'Support readings available':chassis.geometry?'Geometry only':'Optional measurements missing'},
       {key:'magnetic',title:'Magnetic pull & height sensitivity',field:'magneticReadings',status:use&&base.magneticReadings?'Readings entered — verify method':'Optional measurements missing'});
@@ -218,7 +222,7 @@
   function snapshot(input){
     // Capture physical inputs and advisor context, never recursive run evidence.
     const workshop=W.clean(input);for(const k of Object.keys(workshop))if(k.startsWith('experiment'))delete workshop[k];
-    const advisor=clean(input);delete advisor.adviceTestObservations;delete advisor.adviceTestChange;
+    const advisor=clean(input);for(const key of ['adviceTestObservations','adviceTestChange','adviceResultContext','adviceStep','adviceMeasurement','adviceOutcome'])delete advisor[key];
     let rearDiameter=input.rearDiameter??'';
     if(input.tyreMode==='rim'){const rim=P.positive(input.rimDiameter,1000),thick=P.positive(input.tyreThickness,500);rearDiameter=rim!==null&&thick!==null?String(rim+2*thick):'';}
     return {...P.baseline({...P.blank(),pinion:'',gear:'',...input,rearDiameter}),...T.clean(input),...M.clean(input),...H.snapshot(input),...workshop,...advisor};

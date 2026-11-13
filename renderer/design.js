@@ -4,7 +4,7 @@ function initializeDesign(){
   homeHead.classList.add('workbench-toolbar');homeHead.firstElementChild.replaceChildren(setupPanel);
   const decorate=(selector,name)=>{for(const el of document.querySelectorAll(selector))el.insertAdjacentHTML('afterbegin',sfIcon(name));};
   document.querySelector('.brand-mark').innerHTML='<img src="../assets/icon.svg" alt="" width="42" height="42">';
-  for(const [route,name] of Object.entries({telemetry:'setup',analyze:'timer',library:'library',settings:'settings'})){
+  for(const [route,name] of Object.entries({telemetry:'setup',analyze:'timer',feedback:'list',library:'library',settings:'settings'})){
     const link=document.querySelector(`[data-route="${route}"]`);link.querySelector('svg')?.remove();link.insertAdjacentHTML('afterbegin',sfIcon(name));
   }
   for(const [field,tone,name] of [['pinion','gearing','spur-gear'],['ratedRpm','motor','short-can-motor'],['tyreMode','tyres','wheel-tyre-set'],['totalWeight','weight','scales']]){

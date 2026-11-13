@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.11.0 — 13 November 2026 · Driver Feedback & visual ballast planning
+
+- Replaced Predicted Performance with a dedicated Driver Feedback page and five guided steps, from a driving symptom and practical checks to optional measurements and a recorded test outcome. Existing links redirect to the new page.
+- Reuse current workbench values and saved setups, clearly distinguish excluded or missing measurements, and retain the setup context for each recorded outcome. Added optional body-mass share and linked owner evidence without assigning model scores.
+- Compact input and live-result folders reduce scrolling; live summaries, automatic result selection, pinning and remembered layout keep related calculations together.
+- Place ballast on the chassis drawing, drag new or existing points, and refine positions with keyboard arrows or precise fields. Drawing-only placements need a mass but no car dimensions; measured support calculations stay separate until sufficient data is supplied.
+- Preserve drawing calibration, ballast plans and feedback through setup/library saves and exports. Planned changes never overwrite measured car weight.
+- Review fixes: Driver Feedback now reuses front-plus-rear scale totals; draft moves cannot reinterpret millimetres as drawing percentages after dimensions are removed. Updated guidance documentation and the Paddock navigation regression for the new menu.
+- Added model and desktop regressions for guidance, shared data, outcome context, drawing coordinates, dragging, persistence, folders and responsive light/dark layouts; workbench/folder checks now run in release CI.
+
 ## 0.10.0 — 10 November 2026 · Setup guidance & chassis planning
 
 - Moved examples outside input fields and clarified entered, missing and partial measurement records throughout the app. Predicted Performance reuses current workbench data and requests only relevant missing inputs or confirmations. Manual-lap examples follow the selected format and units.

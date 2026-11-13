@@ -22,6 +22,7 @@
     chassisCheckBound:number('Independent mass measurement bound · ± g',0,100000),
     chassisNotes:text('Fixture, support position, scale and measurement notes',1500),
     chassisChanges:{...text('Ballast changes',10000),type:'hidden',default:'[]'},
+    chassisMap:{...text('Chassis drawing references',500),type:'hidden',default:''},
     chassisTarget:number('Desired rear support share · %',0,100),
     chassisTargetX:number('Target ballast behind front support · mm',-1000),
     chassisTargetY:number('Target ballast right of centreline · mm',-1000),
@@ -43,7 +44,10 @@
     return rows.map((r,i)=>{
       if(!r||typeof r!=='object'||!['add','remove','move'].includes(r.action)||typeof r.name!=='string'||!r.name.trim()||r.name.length>100)throw Error(`Ballast row ${i+1}: choose an action and a name of 1–100 characters.`);
       const out={action:r.action,name:r.name.trim(),mass:numeric(r.mass,0.001)};
+      if(r.space!==undefined&&r.space!=='drawing')throw Error('Unknown ballast position reference.');
+      if(r.space==='drawing')out.space='drawing';
       for(const k of ['x','y',...(r.action==='move'?['toX','toY']:[])])out[k]=numeric(r[k],-1000,1000);
+      if(out.space==='drawing'&&['x','y',...(r.action==='move'?['toX','toY']:[])].some(k=>Math.abs(out[k])>10))throw Error('Check the ballast position on the drawing.');
       return out;
     });
   }
@@ -57,7 +61,15 @@
       if(f.type==='textarea')samples(v);
       out[k]=v;
     }
-    changes(out.chassisChanges);return out;
+    changes(out.chassisChanges);mapReferences(out.chassisMap);return out;
+  }
+  // Drawing coordinates only; never replace measured dimensions with SVG pixels.
+  function mapReferences(raw=''){
+    const r=raw===''?{guide:87,rear:580,centre:187,right:40,left:334}:JSON.parse(raw);
+    if(!r||!['guide','rear','centre','right','left'].every(k=>Number.isFinite(r[k]))||
+      r.guide<0||r.rear>687||r.rear-r.guide<100||r.right<0||r.left>376.4||r.centre-r.right<20||r.left-r.centre<20)
+      throw Error('Check the chassis drawing references: guide ahead of rear axle, with left and right contacts on opposite sides of the centreline.');
+    return Object.fromEntries(['guide','rear','centre','right','left'].map(k=>[k,r[k]]));
   }
   const n=(c,k)=>c[k]===''?null:Number(c[k]);
   const summarize=(loads,span,track,tripod)=>{
@@ -118,10 +130,13 @@
         else r.bounds=Object.fromEntries(['mass','frontShare','rearShare','x','y'].map(k=>[k,corners[0][k]===null?null:[Math.min(...corners.map(v=>v[k])),Math.max(...corners.map(v=>v[k]))]]));
       }
       if(r.span===null||(tripod&&T===null)){r.notes.push('Add the support span and, for three-point planning, rear contact centre spacing to calculate CG and ballast changes.');return r;}
+      if(r.changes.some(row=>row.space==='drawing')&&(L===null||T===null)){r.notes.push('Drawing placements are saved. Add guide-to-rear-axle distance and rear contact spacing to calculate this plan in millimetres.');return r;}
       let loads=[...r.baseline.loads];
-      for(const row of r.changes){
+      for(const source of r.changes){
+        const row=resolveChange(source,L,r.span,T);
         if(row.action!=='add'&&row.mass>loads.reduce((a,b)=>a+b,0)+1e-9)throw Error('The part being moved or removed exceeds the car mass at this step.');
-        if(!tripod&&(row.y!==0||(row.action==='move'&&row.toY!==0)))throw Error('Two-support planning uses y = 0. Select three-point weighing for lateral changes.');
+        if(!tripod&&source.space!=='drawing'&&(row.y!==0||(row.action==='move'&&row.toY!==0)))throw Error('Two-support planning uses y = 0. Select three-point weighing for lateral changes.');
+        if(!tripod&&source.space==='drawing'&&(row.y!==0||(row.action==='move'&&row.toY!==0))&&!r.notes.includes('Two-support weighing calculates front/rear loads only; lateral drawing positions are retained but no left/right load split is inferred.'))r.notes.push('Two-support weighing calculates front/rear loads only; lateral drawing positions are retained but no left/right load split is inferred.');
         const parts=row.action==='move'?[[-row.mass,row.x,row.y],[row.mass,row.toX,row.toY]]:[[row.action==='remove'?-row.mass:row.mass,row.x,row.y]];
         for(const [m,x,y] of parts){const d=effect(m,x,y,r.span,T,tripod);loads=loads.map((v,i)=>v+d[i]);}
       }
@@ -150,6 +165,13 @@
     const cleanInput=clean(input),result=calculate(input);if(result.error)throw Error(result.error);
     return {...cleanInput,wheelbase:input.wheelbase??'',totalWeight:input.totalWeight??''};
   }
-  const api={fields,defaults,numeric,samples,changes,clean,calculate,snapshot};
+  function resolveChange(row,length,span,track){
+    if(row.space!=='drawing')return row;
+    if(!(length>0&&span>0&&track>0))throw Error('Dimensions are needed to convert drawing placements to millimetres.');
+    const out={...row,x:row.x*length-(length-span),y:row.y*track/2};
+    if(row.action==='move'){out.toX=row.toX*length-(length-span);out.toY=row.toY*track/2;}
+    return out;
+  }
+  const api={fields,defaults,numeric,samples,changes,clean,calculate,snapshot,mapReferences,resolveChange};
   if(typeof module==='object'&&module.exports)module.exports=api;else root.ChassisModel=api;
 })(globalThis);

@@ -69,6 +69,10 @@ jobs:
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           npm run test:prediction-ui
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          npm run test:workbench-ui
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          npm run test:result-folders-ui
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           npm run test:race-progress-ui
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
       - name: Build native packages

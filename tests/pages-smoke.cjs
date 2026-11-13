@@ -21,9 +21,9 @@ app.whenReady().then(async()=>{
   await reload();await run('localStorage.clear()');await reload();
   assert.equal(await text('#ratio-inline'),'3.000:1');assert.match(await text('#stats'),/27.02/);
   assert.equal(await run(`document.querySelectorAll('[data-page=telemetry] .performance-curve').length`),0);
-  assert.equal(await run(`document.querySelectorAll('.main-nav a').length`),4);
+  assert.equal(await run(`document.querySelectorAll('.main-nav a').length`),5);
   assert.equal(await run(`document.querySelectorAll('[data-input-jump]').length`),9);
-  assert.equal(await run(`document.querySelector('[name=wheelbase]').closest('details')`),null);
+  assert.equal(await run(`document.querySelector('[name=wheelbase]').closest('details').className`),'workbench-folder');
   assert.equal(await run(`document.querySelector('[name=gearDiameter]').closest('.input-column')!==null`),true);
   await click('[data-input-jump=trackLength]');assert.equal(await run('document.activeElement.name'),'trackLength');
   await click('[data-input-jump=totalWeight]');assert.equal(await run('document.activeElement.name'),'totalWeight');
@@ -126,6 +126,6 @@ app.whenReady().then(async()=>{
   await route('analyze');for(const topic of ['weight','wear']){await click('[data-analysis-topic='+topic+']');assert.ok(await run('document.documentElement.scrollWidth<=window.innerWidth'),topic+' overflows');}
   await route('telemetry');await capture('mobile-v4');
   assert.deepEqual(errors,[],'Renderer errors');
-  console.log('UI checks passed: four pages, saved-only analysis, comparison, all calculation topics, library lifecycle, file round trips, storage protection, themes, help and responsive layouts.');app.exit(0);
+  console.log('UI checks passed: five pages, saved-only analysis, comparison, all calculation topics, library lifecycle, file round trips, storage protection, themes, help and responsive layouts.');app.exit(0);
  }catch(e){console.error(e);app.exit(1);}
 });
