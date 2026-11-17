@@ -14,6 +14,7 @@
     "test:magnetic-ui": "electron tests/magnetic-ui.cjs",
     "icons": "electron scripts/build-icon.cjs",
     "screenshots": "electron scripts/screenshots.cjs",
+    "perf": "electron scripts/perf-check.cjs",
     "check": "node scripts/check.cjs",
     "pack": "electron-builder --dir",
     "dist": "electron-builder --win",

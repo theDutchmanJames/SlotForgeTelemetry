@@ -12,7 +12,17 @@ function toast(message) {
   clearTimeout(toastTimer); toastTimer = setTimeout(() => { $('#toast').hidden = true; }, 4500);
 }
 function calculationInput() { return CalculatorModel.inputOf(state.setup); }
+// Typing saves the draft shortly after the last keystroke instead of writing the file on every key.
+// Pending changes are written before the page unloads or loses focus, and before backups are made or restored.
+let persistTimer = null, persistSuspended = false;
+function schedulePersist() { clearTimeout(persistTimer); persistTimer = setTimeout(persist, 400); }
+function flushPersist() { if (persistTimer !== null) persist(); }
+function suspendPersist(suspended) { persistSuspended = suspended; if (!suspended) flushPersist(); }
+for (const event of ['pagehide', 'beforeunload', 'blur']) window.addEventListener(event, flushPersist);
+document.addEventListener('visibilitychange', () => { if (document.hidden) flushPersist(); });
 function persist() {
+  clearTimeout(persistTimer); persistTimer = null;
+  if (persistSuspended) { persistTimer = -1; return; } // Kept pending: written when resumed, dropped if a restore replaces it.
   try {
     const text = CalculatorModel.encode(state.setup, state.reference);
     DataStore.setItem(STORAGE, text);
@@ -120,7 +130,7 @@ document.addEventListener('input', event => {
   if(['chassisMode','chassisSupportReference'].includes(el.name)){
     state.setup.chassisConfirmed='no';$('[name=chassisConfirmed]').value='no';
   }
-  refresh(); persist();
+  refresh(); schedulePersist();
 });
 function replaceWorkbench(next,label) {
   const saved=library.find(item=>item.id===activeLibraryId);

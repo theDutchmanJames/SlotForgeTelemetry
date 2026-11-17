@@ -5,7 +5,9 @@ const RaceUI=(()=>{
  let watchTimer=null,watching=false,watchEpoch=0,watchFailures=0;
  const byId=id=>document.getElementById(id),escape=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
  const time=n=>n===null||n===undefined?'—':(n/1000).toFixed(3)+' s';
- const date=s=>new Date(s).toLocaleString(undefined,{dateStyle:'medium',timeStyle:'short'});
+ // One shared formatter: toLocaleString with options builds a new one per call, which dominated race lists and search.
+ const dateFormat=new Intl.DateTimeFormat(undefined,{dateStyle:'medium',timeStyle:'short'});
+ const date=s=>{const d=new Date(s);return Number.isFinite(d.getTime())?dateFormat.format(d):'Invalid Date';};
  const title=r=>`${r.car} · ${r.sessionName} · ${date(r.startedAt)} · Lane ${r.lane} · ${r.driver}`;
  const options=(runs,id)=>runs.map(r=>`<option value="${escape(r.id)}"${r.id===id?' selected':''}>${escape(title(r))}</option>`).join('');
  const pairKey=(a,b)=>JSON.stringify([a.id,a.contentHash,b.id,b.contentHash]);

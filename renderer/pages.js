@@ -7,7 +7,10 @@ function liveStats(input){
     ['Estimated peak mechanical power',m.motor.peakPowerW,'W',2,'peakPowerW'],['Estimated peak motor power / mass',m.powerToWeight,'W/kg',2,'powerToWeight']
   ].map(([label,value,unit,digits,key])=>`<div class="performance-stat" data-category="${metricStyle[key][0]}">${metricHeading(key,label)}<strong data-performance-result="${key}">${unitValue(value,unit,digits)} <small>${Units.label(unit)}</small></strong>${key==='peakPowerW'?`<small class="metric-caption">at ${performanceNumber(m.motor.peakMotorRpm,0)} RPM</small>`:key==='powerToWeight'?`<small class="metric-caption">based on ${unitText(m.massG,'g')}</small>`:''}</div>`).join('')}</div><p class="hint">${m.motor.curveReady?'Peak mechanical power uses the ideal brushed DC model, before drivetrain losses; it is not a continuous rating.':'For power estimates, confirm brushed DC, stall torque and matching test voltages.'}${m.massG===null?' Add car weight for power-to-weight.':''}</p>`;
 }
-function navigate(route){if(location.hash!=='#'+route)location.hash=route;renderRoute();}
+// navigate() renders straight away; the hashchange that follows the same change must not render the page a second time.
+let renderedHash=null;
+function navigate(route){if(location.hash!=='#'+route)location.hash=route;renderRoute();renderedHash=location.hash;}
+function hashChanged(){if(location.hash===renderedHash){renderedHash=null;return;}renderedHash=null;renderRoute();}
 function renderRoute(){
   if(location.hash==='#analyze/predicted'){history.replaceState(null,'','#feedback');}
   const [requested,sub,topic]=location.hash.slice(1).split('/'),page=['telemetry','trackday','analyze','feedback','library','settings'].includes(requested)?requested:'telemetry';
@@ -69,7 +72,7 @@ function focusSetupInput(name){
   field.focus({preventScroll:true});field.closest('.panel').scrollIntoView({block:'start'});
 }
 function initializePages(){
-  window.addEventListener('hashchange',renderRoute);
+  window.addEventListener('hashchange',hashChanged);
   $('.next-step a').onclick=event=>{event.preventDefault();if(activeLibraryId&&library.some(e=>e.id===activeLibraryId))showSavedAnalysis(activeLibraryId);else navigate('analyze');};
   $('#analysis-setup').onchange=e=>{analysisId=e.target.value;renderAnalysis();};
   $('#analysis-edit').onclick=()=>openLibraryTask('load',analysisId);

@@ -8,8 +8,11 @@ const BackupsUI=(()=>{
   function message(text,error=false){const m=q('#backup-message');m.textContent=text;m.hidden=!text;m.classList.toggle('race-error-note',error);}
   async function act(name,input,done){
     if(busy)return;busy=true;render();
-    try{const r=await call(name,input);if(r&&!r.cancelled){if(r.backups)status=r;else status=await call('status');message(done(r));}}
-    catch(e){message(e.message,true);}finally{busy=false;render();}
+    // Backups include the latest draft. During a restore no draft is written, so it cannot overwrite restored data;
+    // edits made meanwhile are saved if the restore is cancelled or fails.
+    const restoring=name.startsWith('restore');if(typeof flushPersist==='function')flushPersist();if(restoring&&typeof suspendPersist==='function')suspendPersist(true);let restored=false;
+    try{const r=await call(name,input);restored=restoring&&!!r?.restored;if(r&&!r.cancelled){if(r.backups)status=r;else status=await call('status');message(done(r));}}
+    catch(e){message(e.message,true);}finally{if(restoring&&!restored&&typeof suspendPersist==='function')suspendPersist(false);busy=false;render();}
   }
   function render(){
     const box=q('#settings-backups');if(!box)return;

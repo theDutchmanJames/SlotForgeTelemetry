@@ -1,10 +1,12 @@
 // Explicit saves are separate from the automatically saved workbench draft.
 const LIBRARY_KEY='slotforge.telemetry.library.v1',ACTIVE_KEY='slotforge.telemetry.library.active.v1';
-let library=[],libraryRaw=null,libraryError='',activeLibraryId=null,libraryTask=null,deletedEntry=null;
+let library=[],libraryRaw=null,libraryError='',activeLibraryId=null,libraryTask=null,deletedEntry=null,libraryDecoded=undefined;
+// Pages re-read the stored library on every visit (another window may have changed it), but only decode
+// and validate it again when its text changed. Entries are never edited in place, so the decoded list can be reused.
 function readLibrary() {
   libraryRaw=null;
-  try {libraryRaw=DataStore.getItem(LIBRARY_KEY);library=libraryRaw===null?[]:LibraryModel.decode(libraryRaw);libraryError='';}
-  catch {library=[];libraryError='The library could not be read. Its stored data has been left untouched. Export the unreadable data for safekeeping, then restore a valid library backup.';}
+  try {libraryRaw=DataStore.getItem(LIBRARY_KEY);if(libraryRaw!==libraryDecoded){library=libraryRaw===null?[]:LibraryModel.decode(libraryRaw);libraryDecoded=libraryRaw;}libraryError='';}
+  catch {library=[];libraryDecoded=undefined;libraryError='The library could not be read. Its stored data has been left untouched. Export the unreadable data for safekeeping, then restore a valid library backup.';}
 }
 function bindLibrary(id) {
   activeLibraryId=id;
@@ -26,7 +28,7 @@ function commitLibrary(next,{recover=false}={}) {
   if(DataStore.getItem(LIBRARY_KEY)!==libraryRaw){readLibrary();renderLibrary();throw Error('The library changed in another window. Review it and try again.');}
   const text=LibraryModel.encode(next);
   DataStore.setItem(LIBRARY_KEY,text); // Commit before updating memory or reporting success.
-  library=next;libraryRaw=text;libraryError='';renderLibrary();updateLibraryStatus();
+  library=next;libraryRaw=text;libraryDecoded=undefined;libraryError='';renderLibrary();updateLibraryStatus();
 }
 function libraryFailure(error) {return ['QuotaExceededError','SecurityError','DataFileError'].includes(error.name)?'Could not save the library on this device. Your saved entries are unchanged; export your setup as a file.':error.message;}
 function libraryNotice(message) {$('#library-message').textContent=message;}

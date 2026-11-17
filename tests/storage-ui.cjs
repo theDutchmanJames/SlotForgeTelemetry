@@ -2,8 +2,10 @@
 const {app,BrowserWindow}=require('electron'),fs=require('node:fs'),path=require('node:path'),assert=require('node:assert/strict');
 const output=path.join(__dirname,'../test-results'),profile=path.join(output,'storage-ui-'+Date.now());fs.mkdirSync(profile,{recursive:true});app.setPath('userData',profile);app.disableHardwareAcceleration();
 app.whenReady().then(async()=>{
- const paddock=require('../src/paddock-ipc.cjs').registerPaddock(profile);let relaunched=0;
- const storage=require('../src/storage-ipc.cjs').registerStorage(profile,{schedule:false,relaunch:()=>{relaunched++;},confirm:async()=>1});
+ const paddock=require('../src/paddock-ipc.cjs').registerPaddock(profile);let relaunched=0,answer=1,hold=null;
+ // The restore question can be held open, to type while it is shown, and answered with Restore (1) or Cancel (0).
+ const storage=require('../src/storage-ipc.cjs').registerStorage(profile,{schedule:false,relaunch:()=>{relaunched++;},confirm:async()=>{if(hold)await hold.promise;return answer;}});
+ const holdRestore=()=>{let release;hold={promise:new Promise(r=>release=r)};return ()=>{hold=null;release();};};
  const make=preload=>new BrowserWindow({show:false,width:1440,height:1100,webPreferences:{...(preload?{preload:path.join(__dirname,'../src/preload.cjs')}:{}),sandbox:true,contextIsolation:true,nodeIntegration:false,backgroundThrottling:false,offscreen:true}});
  const errors=[];let win;
  const run=s=>win.webContents.executeJavaScript(s,true),pause=()=>new Promise(r=>setTimeout(r,160)),click=s=>run(`document.querySelector(${JSON.stringify(s)}).click()`);
@@ -33,6 +35,22 @@ app.whenReady().then(async()=>{
   assert.equal(relaunched,1);assert.doesNotMatch(read('setups-library-v1.json'),/Added after the backup/);
   assert.ok(storage.backups.list().some(b=>b.kind==='before-restore'),'a safety backup was made');
   await win.loadFile(path.join(__dirname,'../renderer/index.html'));await pause();assert.equal(await run('library.length'),2);
+  // 3b. Typing saves the draft shortly afterwards, and straight away when the page unloads.
+  const typeName=v=>run(`(()=>{const e=document.querySelector('[name=name]');e.value=${JSON.stringify(v)};e.dispatchEvent(new Event('input',{bubbles:true}));})()`);
+  await run("location.hash='telemetry'");await pause();await typeName('Typed just before closing');
+  await win.loadFile(path.join(__dirname,'../renderer/index.html'));await pause();
+  assert.match(read('workbench-draft-v1.json'),/Typed just before closing/,'a pending draft is written on unload');assert.equal(await run("document.querySelector('[name=name]').value"),'Typed just before closing');
+  // 3c. Typing while a restore is being confirmed never overwrites the restored draft; after Cancel it is kept.
+  const restoreWhileTyping=async(text,choice)=>{
+   answer=choice;const release=holdRestore();await run("location.hash='settings/backups'");await wait("document.querySelectorAll('[data-backup-restore]').length>0");
+   await click('[data-backup-restore]');await pause();await typeName(text);await new Promise(r=>setTimeout(r,700));
+   assert.doesNotMatch(read('workbench-draft-v1.json'),new RegExp(text),'no draft is written while a restore is open');
+   release();await wait("!document.querySelector('[data-backup-restore]').disabled",'restore finished');await new Promise(r=>setTimeout(r,150));};
+  await restoreWhileTyping('Typed during cancelled restore',0);assert.match(read('workbench-draft-v1.json'),/Typed during cancelled restore/,'edits are saved after Cancel');
+  const before=relaunched;await restoreWhileTyping('Typed during restore',1);assert.equal(relaunched,before+1);
+  assert.doesNotMatch(read('workbench-draft-v1.json'),/Typed during restore/,'the restored draft is not overwritten');
+  await win.loadFile(path.join(__dirname,'../renderer/index.html'));await pause();assert.doesNotMatch(read('workbench-draft-v1.json'),/Typed during restore/,'nor on unload after the restore');
+  answer=1;
   // 4. A damaged library file is never overwritten; the existing recovery tools still offer it.
   fs.writeFileSync(file('setups-library-v1.json'),'damaged-data');await win.loadFile(path.join(__dirname,'../renderer/index.html'));await pause();
   await run("location.hash='library'");await pause();assert.equal(await run("document.querySelector('#library-recover-export').hidden"),false);assert.equal(read('setups-library-v1.json'),'damaged-data');

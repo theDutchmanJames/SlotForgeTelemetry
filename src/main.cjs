@@ -22,6 +22,9 @@ app.on('second-instance', () => {
   if(win){if(win.isMinimized())win.restore();win.show();win.focus();}
 });
 app.whenReady().then(() => {
+  // The window starts loading first; checking stored races and laps then overlaps with it. Both happen in this
+  // same synchronous step, so every handler exists before the page can send its first request.
+  createWindow();
   const paddock=require('./paddock-ipc.cjs').registerPaddock(app.getPath('userData'));
   require('./storage-ipc.cjs').registerStorage(app.getPath('userData'),{version:app.getVersion()});
   // "A new version is available": installed/portable apps ask GitHub by themselves; development copies only on "Check now".
@@ -35,7 +38,6 @@ app.whenReady().then(() => {
     { label: 'Edit', submenu: [{ role: 'undo' }, { role: 'redo' }, { type: 'separator' }, { role: 'cut' }, { role: 'copy' }, { role: 'paste' }, { role: 'selectAll' }] },
     { label: 'View', submenu: [{ role: 'reload' }, { role: 'resetZoom' }, { role: 'zoomIn' }, { role: 'zoomOut' }, { role: 'togglefullscreen' }] }
   ]));
-  createWindow();
   app.on('activate', () => { if (!BrowserWindow.getAllWindows().length) createWindow(); });
 });
 app.on('window-all-closed', () => { if (process.platform !== 'darwin') app.quit(); });

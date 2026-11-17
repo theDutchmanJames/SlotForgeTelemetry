@@ -2,7 +2,8 @@
 const RaceProgress=(()=>{
  const el=id=>document.getElementById(id),esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
  const time=n=>n===null||n===undefined?'—':(n/1000).toFixed(3)+' s';
- const date=s=>new Date(s).toLocaleString(undefined,{dateStyle:'medium',timeStyle:'short'});
+ const dateFormat=new Intl.DateTimeFormat(undefined,{dateStyle:'medium',timeStyle:'short'});
+ const date=s=>{const d=new Date(s);return Number.isFinite(d.getTime())?dateFormat.format(d):'Invalid Date';};
  const metrics={median:'Typical pace · median',best:'Best eligible lap',spread:'Consistency · middle 50% spread'};
  const label=r=>`${date(r.startedAt)} · ${r.sessionName} · ${r.driver}`;
  let groups=[],entries=[],groupId='',selected='',reference='',metric='median',minimum=5,limit=50,openRun,compare;
