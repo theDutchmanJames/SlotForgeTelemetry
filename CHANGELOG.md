@@ -1,6 +1,8 @@
 # Changelog
 
-## Unreleased · Faster with a full library
+## 0.14.0 — 17 November 2026 · Track day, Garage and backups
+
+### Faster with a full library
 
 Measured with 200 setups, 300 imported races, 300 lap sessions and 40 cars:
 
@@ -9,8 +11,6 @@ Measured with 200 setups, 300 imported races, 300 lap sessions and 40 cars:
 - **Changing pages:** Analyze, Library and Driver Feedback open in about 20–40 ms instead of 100–140 ms. The saved library is only checked again when it has changed, and a page opened by a button is no longer drawn twice.
 - **Typing on the workbench** costs about 5 ms per key instead of 20 ms. Driver Feedback recalculates when you open it rather than on every key, and the draft is saved shortly after you stop typing instead of on every keystroke. It is still saved straight away when Telemetry closes, reloads or loses focus, and before a backup is made. Typing while a restore is being confirmed can never overwrite the restored data.
 - **`npm run perf`:** measures start-up, page changes, typing and storage calls in a throwaway profile with a heavy example library (`--empty` for a first start, `--json <file>` to keep the numbers).
-
-## 0.14.0 — 17 November 2026 · Track day, Garage and backups
 
 ### New version notice
 
