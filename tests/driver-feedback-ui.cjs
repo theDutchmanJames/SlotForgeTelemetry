@@ -7,9 +7,9 @@ app.whenReady().then(async()=>{
  try{
   await win.loadFile(path.join(__dirname,'../renderer/index.html'));assert.deepEqual(errors,[]);
   assert.equal(await run("[...document.querySelectorAll('[placeholder]')].filter(e=>/example|[0-9]/i.test(e.placeholder)||(e.tagName==='TEXTAREA'&&e.placeholder!=='Optional')).length"),0);
-  assert.equal(await run("document.querySelector('[name=tyreHistory]').value"),'');assert.match(await run("document.querySelector('#input-help-tyreHistory').textContent"),/Not entered.*Example only/);
+  assert.equal(await run("document.querySelector('[name=tyreHistory]').value"),'');assert.match(await run("document.querySelector('#input-help-tyreHistory').textContent"),/Not entered.*Example, not used/);
   assert.equal(await run("document.querySelector('main footer').previousElementSibling.id"),'driver-feedback');
-  await route('feedback');assert.equal(await run("document.querySelector('#driver-feedback').hidden"),false);assert.equal(await run("document.querySelectorAll('.main-nav a').length"),5);assert.equal(await run("document.querySelectorAll('#driver-feedback [required]').length"),0);
+  await route('feedback');assert.equal(await run("document.querySelector('#driver-feedback').hidden"),false);assert.equal(await run("document.querySelectorAll('.main-nav a').length"),6);assert.equal(await run("document.querySelectorAll('#driver-feedback [required]').length"),0);
   await set('[name=adviceSymptom]','tip');await click('[data-feedback-action=next]');assert.match(await run("document.querySelector('#feedback-checks').textContent"),/roll stability/);
   await run("state.setup={...CalculatorModel.blank(),name:'My car',adviceUseSetup:'yes',adviceSymptom:'tip',totalWeight:'80',rearDiameter:'19',gearDiameter:'18'};fillInputs();persist();");await click('[data-feedback-step=setup]');assert.match(await run("document.querySelector('#feedback-basic').textContent"),/0.5 mm/);
   await run("state.setup.totalWeight='';state.setup.frontWeight='30';state.setup.rearWeight='50';fillInputs();");

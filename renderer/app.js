@@ -33,17 +33,17 @@ function readWorkspace() {
   } catch { /* Keep the default appearance if browser storage is unavailable. */ }
 }
 function fillInputs() {
-  for (const el of document.querySelectorAll('[name]')) if (Object.hasOwn(state.setup, el.name)) el.value = state.setup[el.name];
+  for (const el of document.querySelectorAll('[name]')) if (Object.hasOwn(state.setup, el.name)) el.value = displayInput(el.name, state.setup[el.name]);
   refresh();
 }
 function refresh() {
   const input = calculationInput(), m = PerformanceModel.calculate(input), rim = state.setup.tyreMode === 'rim';
   $('#diameter-fields').hidden = rim; $('#rim-fields').hidden = !rim;
-  $('#tyre-hint').textContent = rim ? `Outside diameter = rim + 2 × thickness${m.rearDiameter ? ' = ' + performanceNumber(m.rearDiameter, 3) + ' mm' : '.'}` + '. Use the measured tyre-seat diameter and rubber thickness at that same seat, not a catalogue flange size.' : 'Use the fitted tyre’s outside diameter, after truing.';
+  $('#tyre-hint').textContent = rim ? `Outside diameter = rim + 2 × thickness${m.rearDiameter ? ' = ' + unitText(m.rearDiameter, 'mm', 3) : '.'}` + '. Use the measured tyre-seat diameter and rubber thickness at that same seat, not a catalogue flange size.' : 'Use the fitted tyre’s outside diameter, after truing.';
   $('#ratio-inline').textContent = m.ratio === null ? '—' : m.ratio.toFixed(3) + ':1';
   $('#flow-rpm').textContent = performanceNumber(m.ratedRpm, 0) + ' RPM';
   $('#flow-gearing').textContent = m.ratio === null ? '— : —' : input.pinion + ' : ' + input.gear + ' teeth';
-  $('#flow-tyre').textContent = performanceNumber(m.rearDiameter, 2) + ' mm';
+  $('#flow-tyre').textContent = unitText(m.rearDiameter, 'mm', 2);
   ResultFolders.refresh(input);
   let error = '';
   try { CalculatorModel.cleanSetup(state.setup); } catch (e) { error = e.message; }
@@ -51,10 +51,10 @@ function refresh() {
     // Blank optional fields are valid; syntax, bounds and tooth counts are not.
     const invalid = el.validity.badInput || (el.value !== '' && !el.validity.valid);
     el.setAttribute('aria-invalid', String(invalid));
-    if (invalid && !error) error = el.name==='tyreRequiredGap'?'Minimum permitted gear gap: enter 0–3 mm, or leave this optional target blank.':['rearDiameter','wornDiameter','tyreLeft','tyreRight','tyreMinimum'].includes(el.name)?'Fitted tyre diameters for 1:32 calculations must be between 8 and 30 mm.':'Check the highlighted input and its permitted range; tooth counts must be whole numbers.';
+    if (invalid && !error) error = el.name==='tyreRequiredGap'?'Minimum permitted gear gap: enter 0–3 mm, or leave this optional target blank.':['rearDiameter','wornDiameter','tyreLeft','tyreRight','tyreMinimum'].includes(el.name)?`Fitted tyre diameters for 1:32 calculations must be between ${unitText(8,'mm',3)} and ${unitText(30,'mm',3)}.`:'Check the highlighted input and its permitted range; tooth counts must be whole numbers.';
   }
   $('#input-error').textContent = error; $('#input-error').hidden = !error;
-  for (const id of ['save-setup', 'save-copy']) $('#' + id).disabled = !!error;
+  for (const id of ['save-setup', 'save-copy', 'setup-sheet']) $('#' + id).disabled = !!error;
   $('[name=magneticWornClearance]').disabled = state.setup.magneticWearMode === 'axle';
   refreshMagneticInputs();
   WorkshopUI.refresh();
@@ -114,7 +114,8 @@ function setupAppearance() {
 document.addEventListener('input', event => {
   const el = event.target;
   if (!el.name || !Object.hasOwn(state.setup, el.name)) return;
-  state.setup[el.name] = el.validity.badInput ? 'invalid' : el.value;
+  // Unit-aware fields are typed in the chosen unit and stored in metric.
+  state.setup[el.name] = el.validity.badInput ? 'invalid' : storeInput(el.name, el.value);
   if(['chassisMode','chassisSupportReference'].includes(el.name)){
     state.setup.chassisConfirmed='no';$('[name=chassisConfirmed]').value='no';
   }
@@ -134,6 +135,7 @@ function applyWorkbench(next){Object.assign(state,next);bindLibrary(null);fillIn
 $('#new-setup').onclick = () => replaceWorkbench({setup:CalculatorModel.blank(),reference:null},'Start a new setup?');
 $('#load-example').onclick = () => replaceWorkbench({setup:{...CalculatorModel.EXAMPLE},reference:null},'Load the example?');
 $('#save-setup').onclick = downloadSetup;
+$('#setup-sheet').onclick = () => { try { SetupSheet.download(state.setup, { units: Units.prefs }); toast('Setup sheet downloaded. Open it and print, or save as PDF.'); } catch (error) { toast('Could not create setup sheet: ' + error.message); } };
 $('#open-setup').onclick = () => $('#setup-file').click();
 $('#setup-file').onchange = async event => {
   const file = event.target.files[0]; if (!file) return;
@@ -144,6 +146,6 @@ $('#setup-file').onchange = async event => {
   } catch (error) { toast('Could not open setup: ' + error.message); }
   finally { event.target.value = ''; }
 };
-RaceUI.init(); initializeMagnetic(); WorkshopUI.init(); ChassisUI.init(); ChassisTestUI.init(); PredictionUI.init(); InputHelp.init(); initializeDesign(); WorkbenchUI.init(); ResultFolders.init(); readWorkspace(); setupAppearance(); fillInputs(); initializeLibrary(); initializePages();
+RaceUI.init(); initializeMagnetic(); WorkshopUI.init(); ChassisUI.init(); ChassisTestUI.init(); PredictionUI.init(); InputHelp.init(); TrackdayUI.init(); initializeDesign(); AnalyzeNav.init(); WorkbenchUI.init(); ResultFolders.init(); WorkbenchLevels.init(); initializeUnits(); readWorkspace(); setupAppearance(); fillInputs(); initializeLibrary(); initializePages();
 $('#save-copy').onclick=()=>{openLibraryTask('save',activeLibraryId);libraryTask.asCopy=true;$('#library-editor-title').textContent='Save a new copy';$('#library-editor-confirm').textContent='Save new copy';$('#library-save-copy').hidden=true;};
 

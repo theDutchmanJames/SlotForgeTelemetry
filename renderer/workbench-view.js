@@ -128,7 +128,7 @@ const WorkbenchUI=(()=>{
     if(!ready)return;
     if(setupIdentity!==state.setup){resetEditor();setupIdentity=state.setup;marking='';}
     if(lastRows!==state.setup.chassisChanges){selected=null;endpoint='current';lastRows=state.setup.chassisChanges;}
-    const s=calculationInput(),m=PerformanceModel.calculate(s),r=ChassisModel.calculate(s),fmt=(v,u='')=>v===null||v===undefined?'Not entered':performanceNumber(v)+' '+u;
+    const s=calculationInput(),m=PerformanceModel.calculate(s),r=ChassisModel.calculate(s),fmt=(v,u='')=>{if(v===null||v===undefined)return 'Not entered';const [token,...rest]=u.split(' ');return unitText(v,token)+(rest.length?' '+rest.join(' '):'');}; // "mm fitted" → "0.8 in fitted"
     const summaries={pinion:fmt(m.ratio,':1'),ratedRpm:fmt(m.ratedRpm,'RPM'),tyreMode:fmt(m.rearDiameter,'mm fitted'),totalWeight:fmt(TelemetryModel.calculate(s).massG,'g current'),chassisGuideSpan:r.geometry?`${fmt(r.geometry.length,'mm span')} · ${fmt(r.track,'mm contacts')}`:'Dimensions optional',targetRollout:fmt(TelemetryModel.calculate(s).targetRollout,'mm/rev target'),trackLength:fmt(TelemetryModel.calculate(s).lapSpeed,'km/h measured'),magneticReadings:s.magneticReadings?.trim()?'Force readings entered':'Not measured',workshop:q('#workshop-tool').selectedOptions[0].text};
     for(const f of folders)f.summary.querySelector('.folder-values').textContent=summaries[f.key]??'Optional measurements';
     q('#chassis-add-part').textContent=selected===null?'Add to plan':'Update part';q('#ballast-endpoints').hidden=q('#chassis-action').value!=='move';

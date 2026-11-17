@@ -117,6 +117,8 @@ Build a measured clearance curve in **Analyze → Magnetic downforce**, with a g
 
 **Try a change before reaching for the tools.** The Telemetry workbench updates its results as you enter gear teeth, rear tyre size, motor ratings and weight. Start with a pinion, driven gear and fitted tyre diameter; add the motor and other measurements when available.
 
+The workbench opens on **Quick setup**: gearing, motor, rear tyres and weight. Switch to **Measure the car** for tyre wear, axle loads, chassis geometry and magnetic downforce, to **Plan & test** for the Gear finder, lap speed and test planning, or to **Everything** for the full page. Values in hidden sections are kept and always count.
+
 Use a measured tyre diameter or calculate it from rim diameter and radial tyre thickness. **Setup inputs** are collapsible sections with live summaries: open only what you need, or choose **Close all**. Your values stay intact, and Telemetry remembers which sections you left open. Help and analysis links open the relevant section automatically.
 
 **Live results** are grouped into Drivetrain overview, Performance, Weight & balance, Tyres & clearance, Magnetic downforce, Lap speed, and Testing & planning. Opening an input section opens its matching results. Closed groups still show current summaries. **Pin** keeps a group open when you switch topics; **Close unpinned** folds the rest away. Open-group and pin preferences are remembered on this device, and folding never discards your ballast draft. Closing a pinned group also unpins it.
@@ -140,7 +142,9 @@ Motor torque is entered in **gf·cm**—gram-force centimetres. Power curves req
 
 ### Explore motor performance and compare setups
 
-Save a setup, then open **Analyze → Setup analysis**. Torque and power curves show how the ideal motor model changes with speed. Move the motor-speed slider to explore torque, power, axle RPM, vehicle speed and driving force at the same operating point.
+Analyze groups its pages as **Setups** (Analysis, Compare) and **Track laps** (Laps, Compare, Progress, Records). Setup topics are grouped as Essentials, Measurements and Planning. Topics with nothing saved yet are dimmed.
+
+Save a setup, then open **Analyze → Setups → Analysis**. Torque and power curves show how the ideal motor model changes with speed. Move the motor-speed slider to explore torque, power, axle RPM, vehicle speed and driving force at the same operating point.
 
 **Compare setups** puts two saved configurations side by side in a simple table. See absolute and percentage changes, with colour highlights for selected performance metrics. Gearing, rollout, mass and measured lap averages remain neutral tradeoffs: a higher theoretical top speed does not automatically mean a faster car around your track.
 
@@ -172,6 +176,16 @@ Save the inputs with a setup, then open **Analyze → Testing & planning** for t
 
 **Gear finder** searches your chosen tooth-count ranges and lists the closest 20 combinations for a target rollout. It can also help compensate for a change in tyre diameter. Check the physical pitch, mesh and fit of any suggested combination before using it.
 
+### Track day
+
+Open **Track day** at the track:
+
+1. Set the car, track and lane once.
+2. Write down what you changed, and type or paste the run's lap times.
+3. Telemetry compares the run with your previous one for the same car, track and lane. You get a plain verdict, a better/worse table and the setup differences.
+
+Saved runs are ordinary manual sessions, so Lap analysis, Progress and Records include them.
+
 ### Bring your own lap times
 
 **You do not need Paddock or Timing to use lap analysis.** Choose **Analyze → Lap analysis → Add lap data** and type or paste times from another timing app, a spreadsheet or a notebook.
@@ -186,7 +200,9 @@ Confirm the sequence only when the times form one consecutive stint. Numbered in
 
 ### Read race sessions from Paddock
 
-Connect to a compatible **SlotForge Paddock** host on your local network through **Settings → Connect to Paddock**. Find it automatically or enter the address and port shown by Paddock, then connect with its Dealership password.
+**Paddock on the same computer:** choose **Settings → Connect to Paddock → Connect to Paddock on this computer**. One click, no password. Telemetry imports every race in the collection, including races Timing saved to a **Shared library**, and keeps them up to date when you return to the app.
+
+**Paddock on another computer:** turn on **Connections → Dealership Mode** in Paddock. Then use **Find Paddock on this network** in Telemetry, or enter the address shown by Paddock, and connect with the Dealership password. Telemetry remembers the collection, never the password. Over the network, Paddock shares races in its older format only.
 
 Telemetry imports reviewed sessions that **SlotForge Timing has already delivered to Paddock**, including measured laps and captured car configurations. Import once and analyse the saved results offline. Refresh retrieves new or corrected sessions; supported hosts can notify Telemetry of changes while connected. Corrections replace previous versions, and withdrawn or quarantined sessions stop contributing to analysis and records.
 

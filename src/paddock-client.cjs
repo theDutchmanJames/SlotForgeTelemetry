@@ -34,20 +34,42 @@ function checkCache(data){
  }
  return data;
 }
+// Network failures from fetch() are opaque ("fetch failed"); explain the usual causes instead.
+const UNREACHABLE={ECONNREFUSED:'Paddock is not accepting connections at that address. Check that Dealership Mode is on in Paddock (Connections → Dealership Mode). Paddock picks a new port each time it starts: use Find Paddock again after restarting it.',
+ EHOSTUNREACH:'That computer cannot be reached. Check that it is switched on and on the same network.',ENETUNREACH:'This computer is not connected to a network that can reach Paddock.',
+ ETIMEDOUT:'Paddock did not answer in time. Check the address and that both computers are on the same network; a firewall may be blocking Paddock.',ECONNRESET:'The connection to Paddock was interrupted. Try again.',UND_ERR_SOCKET:'The connection to Paddock was interrupted. Try again.'};
+function networkError(e){
+ if(e?.name==='AbortError'||e?.name==='TimeoutError')return e;
+ const code=e?.cause?.code||e?.code;
+ return Error(UNREACHABLE[code]||'Could not reach Paddock at that address'+(code?' ('+code+')':'')+'. Check the address and that Dealership Mode is on in Paddock.');
+}
+// Remembers which collection and address were used last. Never stores the password.
+function readRemembered(file){
+ try{const v=JSON.parse(fs.readFileSync(file,'utf8'));if(v?.version===1&&id(v.id)&&typeof v.name==='string'&&v.name.length<=200){address(v.address);return {id:v.id,name:v.name,address:v.address};}}catch{/* Missing or invalid: nothing remembered. */}
+ return null;
+}
 class PaddockClient{
- constructor(file,{requestTimeout=15000,transferTimeout=180000}={}){this.file=file;this.timeout=requestTimeout;this.transferTimeout=transferTimeout;this.connection=null;this.busy=false;this.cooldowns=new Map();this.data={version:1,hosts:[]};this.loadError='';this.generation=0;this.abort=new AbortController();
+ constructor(file,{requestTimeout=15000,transferTimeout=180000}={}){this.file=file;this.rememberFile=path.join(path.dirname(file),'paddock-connection-v1.json');this.timeout=requestTimeout;this.transferTimeout=transferTimeout;this.connection=null;this.busy=false;this.cooldowns=new Map();this.data={version:1,hosts:[]};this.loadError='';this.generation=0;this.abort=new AbortController();
   try{if(fs.existsSync(file)){if(fs.statSync(file).size>MAX_CACHE)throw Error('Cache exceeds 200 MiB.');this.data=checkCache(JSON.parse(fs.readFileSync(file,'utf8')));}}catch{this.loadError='The saved race-result cache is unreadable. It has been preserved. Use Settings → Paddock → Rebuild cache to archive it before downloading again.';}
+  this.remembered=readRemembered(this.rememberFile);
  }
- view(){return {data:this.data,error:this.loadError,connection:this.connection?{id:this.connection.id,name:this.connection.name,address:this.connection.address,notifications:!!this.connection.changes,readyToWatch:!!this.connection.token}:null};}
+ view(){return {data:this.data,error:this.loadError,remembered:this.remembered,connection:this.connection?{id:this.connection.id,name:this.connection.name,address:this.connection.address,notifications:!!this.connection.changes,readyToWatch:!!this.connection.token}:null};}
+ remember(c){
+  const value={version:1,id:c.id,name:c.name,address:c.address,savedAt:new Date().toISOString()};
+  try{fs.mkdirSync(path.dirname(this.rememberFile),{recursive:true});fs.writeFileSync(this.rememberFile,JSON.stringify(value));this.remembered={id:c.id,name:c.name,address:c.address};}catch{/* Convenience only; connecting still works. */}
+ }
+ forget(){try{fs.rmSync(this.rememberFile,{force:true});}catch{/* Nothing to remove. */}this.remembered=null;return this.view();}
  async request(base,password,route,expected,signal,timeout=this.timeout){
   const host=new URL(base).hostname,remaining=(this.cooldowns.get(host)||0)-Date.now();if(remaining>0)throw Error('Too many attempts. Retry in '+Math.ceil(remaining/1000)+' seconds.');
-  const response=await fetch(base+route,{method:'GET',headers:{Authorization:'Bearer '+password,...(expected?{'X-SlotForge-Database':expected}:{})},redirect:'error',signal:AbortSignal.any([signal,AbortSignal.timeout(timeout)])});
-  if(response.status===429){const seconds=Number(response.headers.get('retry-after'));this.cooldowns.set(host,Date.now()+Math.max(60,Number.isFinite(seconds)?Math.min(seconds,3600):60)*1000);}
-  if(Number(response.headers.get('content-length'))>MAX_BYTES){await response.body?.cancel();throw Error('Paddock response exceeds the size limit.');}
-  if(!response.body)throw Error('Paddock returned an empty response.');
+  let response;try{response=await fetch(base+route,{method:'GET',headers:{Authorization:'Bearer '+password,...(expected?{'X-SlotForge-Database':expected}:{})},redirect:'error',signal:AbortSignal.any([signal,AbortSignal.timeout(timeout)])});}catch(e){throw networkError(e);}
+  // Rate limits on sign-in lock this host for a while; a full notification queue (STREAM_LIMIT) must not.
+  const cooldown=()=>{const seconds=Number(response.headers.get('retry-after'));this.cooldowns.set(host,Date.now()+Math.max(60,Number.isFinite(seconds)?Math.min(seconds,3600):60)*1000);};
+  if(Number(response.headers.get('content-length'))>MAX_BYTES){if(response.status===429)cooldown();await response.body?.cancel();throw Error('Paddock response exceeds the size limit.');}
+  if(!response.body){if(response.status===429)cooldown();throw Error('Paddock returned an empty response.');}
   const reader=response.body.getReader(),chunks=[];let size=0;
   try{while(true){const {done,value}=await reader.read();if(done)break;size+=value.length;if(size>MAX_BYTES){await reader.cancel();throw Error('Paddock response exceeds the size limit.');}chunks.push(Buffer.from(value));}}finally{reader.releaseLock();}
-  let result;try{result=JSON.parse(new TextDecoder('utf-8',{fatal:true}).decode(Buffer.concat(chunks)));}catch{throw Error('Paddock returned invalid JSON.');}
+  let result;try{result=JSON.parse(new TextDecoder('utf-8',{fatal:true}).decode(Buffer.concat(chunks)));}catch{if(response.status===429)cooldown();throw Error('Paddock returned invalid JSON.');}
+  if(response.status===429&&result?.code!=='STREAM_LIMIT')cooldown();
   if(!response.ok){const e=Error(typeof result?.error==='string'?result.error.slice(0,500):'Paddock request failed ('+response.status+').');e.httpStatus=response.status;e.apiCode=result?.code;if(expected&&(response.status===401||response.status===403||e.apiCode==='DATABASE_MISMATCH'))this.disconnect();throw e;}return result;
  }
  async exclusive(task){if(this.busy)throw Error('Wait for the current Paddock operation to finish.');this.busy=true;try{return await task();}finally{this.busy=false;}}
@@ -59,9 +81,9 @@ class PaddockClient{
   if(generation!==this.generation)throw Error('Connection cancelled.');
   if(status?.protocol!==2||!id(status.id)||!int(status.revision)||typeof status.name!=='string'||!status.name.trim()||status.name.length>200)throw Error('This is not a supported Paddock host.');
   if(status.capabilities?.telemetry?.version!==1)throw Error('This Paddock version does not support lap-result downloads. Update Paddock to a build with Telemetry results support, then restart hosting.');
-  if(status.permissions?.timingResults!==true)throw Error('Use the Dealership password or the Timing credential; catalogue browsing access cannot read race results.');
-  if(input.expectedId&&input.expectedId!==status.id)throw Error('A different Paddock database is at this address. Choose its host explicitly.');
-  this.connection={id:status.id,name:status.name,address:base,password,changes:status.capabilities.telemetry.changes==='/v1/telemetry/changes',snapshots:status.capabilities.telemetry.snapshot===true,status:status.capabilities.telemetry.status==='/v1/telemetry/status',token:null};return this.view();
+  if(status.permissions?.timingResults!==true)throw Error('This password can only browse the catalogue. Use the Dealership password from Paddock (Connections → Dealership Mode).');
+  if(input.expectedId&&input.expectedId!==status.id)throw Error('A different Paddock collection is at this address. Choose its host explicitly.');
+  this.connection={id:status.id,name:status.name,address:base,password,changes:status.capabilities.telemetry.changes==='/v1/telemetry/changes',snapshots:status.capabilities.telemetry.snapshot===true,status:status.capabilities.telemetry.status==='/v1/telemetry/status',token:null};this.remember(this.connection);return this.view();
  });}
  disconnect(){this.abort.abort();this.abort=new AbortController();this.generation++;this.connection=null;return this.view();}
  async sync(){return this.exclusive(async()=>{

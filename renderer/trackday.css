@@ -1,0 +1,22 @@
+/* Track day: large, glanceable figures for use between runs. */
+.trackday-context{margin-bottom:16px}
+.trackday-context-grid{display:grid;grid-template-columns:2fr 2fr 90px 1.5fr;gap:12px}
+.trackday-layout{display:grid;grid-template-columns:minmax(240px,1fr) minmax(280px,1.2fr) minmax(300px,1.4fr);gap:16px;align-items:start}
+.trackday-layout>.panel{min-width:0;margin:0}
+.trackday-setup-name{font-weight:700;margin:0 0 10px;overflow-wrap:anywhere}
+.trackday-figures{display:grid;grid-template-columns:1fr 1fr;gap:10px 14px;margin:0 0 14px}
+.trackday-figures div{min-width:0}
+.trackday-figures dt{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+.trackday-figures dd{margin:2px 0 0;font-size:20px;font-weight:700;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+.trackday-figures dd small{display:block;font-size:12px;font-weight:500;color:var(--muted)}
+.trackday-log textarea{width:100%;min-height:180px;font:15px/1.5 ui-monospace,Consolas,monospace;resize:vertical}
+.trackday-check{display:flex;gap:8px;align-items:center;font-size:13px;margin:6px 0 8px}
+.trackday-check input{width:18px;height:18px;min-height:0;flex:none;margin:0;padding:0}
+.trackday-log .btn.primary{width:100%;justify-content:center;padding:12px;font-size:15px}
+.trackday-verdict{font-size:17px;font-weight:700;margin:6px 0 12px;line-height:1.4}
+.trackday-compare td,.trackday-today td{font-variant-numeric:tabular-nums}
+.trackday-compare td.good{color:var(--green);font-weight:700}
+.trackday-compare td.bad{color:var(--accent);font-weight:700}
+.trackday-today{margin-top:16px}
+@media(max-width:1100px){.trackday-layout{grid-template-columns:1fr 1fr}.trackday-compare{grid-column:1/-1}}
+@media(max-width:760px){.trackday-layout{grid-template-columns:1fr}.trackday-context-grid{grid-template-columns:1fr 1fr;gap:10px}}

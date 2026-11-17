@@ -34,6 +34,21 @@ test('gear search finds exact rollout and bounds results',()=>{
   assert.equal(T.gears({...example(),pinionMin:'1.5'}).count,0);
   assert.equal(T.gears({...example(),pinionMax:'1000'}).count,0);
 });
+test('gear chart covers the full range, agrees with the single-setup model and marks the current gearing',()=>{
+  const s=example(),c=T.gearChart(s);
+  assert.deepEqual(c.pinions,[8,9,10,11,12]);assert.equal(c.gears.length,13);assert.equal(c.gears[0],24);assert.equal(c.truncated,false);
+  assert.deepEqual(c.current,{pinion:9,gear:27});
+  const cell=c.cells[1][3];assert.deepEqual([cell.pinion,cell.gear],[9,27]);close(cell.rollout,P.calculate(s).rollout);close(cell.errorPercent,0);
+  const other=c.cells[4][12];close(other.ratio,36/12);close(other.speedKmh,P.calculate({...s,pinion:'12',gear:'36'}).speedKmh);
+  close(T.gearChart({...s,targetRollout:'20'}).cells[1][3].errorPercent,(Math.PI*20/3-20)/20*100);
+});
+test('gear chart rejects invalid ranges and caps large ones visibly',()=>{
+  assert.equal(T.gearChart({...example(),pinionMin:'12',pinionMax:'8'}).cells.length,0);
+  assert.equal(T.gearChart({...example(),gearMin:'2.5'}).cells.length,0);
+  const big=T.gearChart({...example(),pinionMin:'1',pinionMax:'100',gearMin:'1',gearMax:'200'});
+  assert.equal(big.pinions.length,T.CHART_LIMIT.pinions);assert.equal(big.gears.length,T.CHART_LIMIT.gears);assert.equal(big.truncated,true);
+  assert.equal(T.gearChart({...C.blank(),pinionMin:'8',pinionMax:'9',gearMin:'20',gearMax:'21'}).cells[0][0].rollout,null);
+});
 test('measured speed and scale conversion remain independent of motor specs',()=>{
   const m=T.calculate({...C.blank(),trackLength:'20',lapTime:'5',scaleFactor:'32'});close(m.lapSpeed,14.4);close(m.scaleSpeed,460.8);
   assert.equal(T.calculate({...C.blank(),trackLength:'20',lapTime:'0'}).lapSpeed,null);

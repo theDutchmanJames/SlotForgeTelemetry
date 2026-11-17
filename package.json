@@ -15,11 +15,16 @@
     "icons": "electron scripts/build-icon.cjs",
     "check": "node scripts/check.cjs",
     "pack": "electron-builder --dir",
-    "dist": "electron-builder --win portable",
+    "dist": "electron-builder --win",
     "dist:linux": "electron-builder --linux --config.directories.output=dist/linux",
     "dist:mac": "electron-builder --mac --config.directories.output=dist/mac",
     "test:shell": "electron tests/shell-smoke.cjs",
     "test:paddock-ui": "electron tests/race-ui-smoke.cjs",
+    "test:paddock-local-ui": "electron tests/paddock-local-ui.cjs",
+    "test:units-ui": "electron tests/units-ui.cjs",
+    "test:workbench-levels-ui": "electron tests/workbench-levels-ui.cjs",
+    "test:analyze-nav-ui": "electron tests/analyze-nav-ui.cjs",
+    "test:trackday-ui": "electron tests/trackday-ui.cjs",
     "test:race-analysis-ui": "electron tests/race-analysis-ui.cjs",
     "test:race-progress-ui": "electron tests/race-progress-ui.cjs",
     "test:manual-laps-ui": "electron tests/manual-laps-ui.cjs",
@@ -48,9 +53,24 @@
       "SOURCE-NOTICES.txt"
     ],
     "win": {
-      "target": "portable",
+      "target": [
+        "nsis",
+        "portable"
+      ],
       "icon": "assets/icon.ico",
       "signExecutable": false
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowElevation": true,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "SlotForge Telemetry",
+      "uninstallDisplayName": "SlotForge Telemetry",
+      "deleteAppDataOnUninstall": false,
+      "artifactName": "SlotForgeTelemetry-${version}-windows-${arch}-Setup.${ext}"
     },
     "mac": {
       "target": [

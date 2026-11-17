@@ -11,7 +11,7 @@ app.whenReady().then(async()=>{
  const set=(name,value)=>run(`(()=>{const e=document.querySelector('[name=${name}]');e.value=${JSON.stringify(value)};e.dispatchEvent(new Event('input',{bubbles:true}));})()`);
  try{
   await win.loadFile(path.join(__dirname,'../renderer/index.html'));await pause();assert.deepEqual(errors,[]);
-  assert.equal(await run(`document.querySelectorAll('.result-group').length`),7);
+  assert.equal(await run(`document.querySelectorAll('.result-group').length`),8);
   assert.equal(await open('drivetrain'),true);assert.equal(await run(`document.querySelectorAll('.result-folder[open]').length`),1);
   await click('[data-folder=tyreMode]>summary');await pause();assert.equal(await open('tyres'),true);assert.equal(await open('drivetrain'),false);
   await set('rearDiameter','19');await set('gearDiameter','18');assert.match(await summary('tyres'),/0.5 mm/);
@@ -35,6 +35,8 @@ app.whenReady().then(async()=>{
   await set('brakeRows','0,36\n0.3,0');assert.match(await run(`document.querySelector('#workshop-live').textContent`),/1.5 m/);
   await win.reload();await pause();assert.equal(await open('weight'),true);assert.equal(await open('workshop'),true);
   assert.equal(await run(`document.querySelector('[data-result-group=weight] .result-pin').getAttribute('aria-pressed')`),'true');
+  // The last jump (Testing & planning) switched to Plan & test; show every group for the keyboard and layout checks.
+  assert.equal(await run('WorkbenchLevels.get()'),'plan');await run(`WorkbenchLevels.set('all')`);
   // Keyboard Enter uses the same accordion action as clicking the heading.
   await run(`document.querySelector('[data-result-group=performance] summary').focus()`);
   win.webContents.focus();win.webContents.sendInputEvent({type:'keyDown',keyCode:'Space'});win.webContents.sendInputEvent({type:'keyUp',keyCode:'Space'});await pause();assert.equal(await open('performance'),true);assert.equal(await open('workshop'),false);
@@ -45,6 +47,6 @@ app.whenReady().then(async()=>{
    fs.writeFileSync(path.join(output,`result-folders-${width}-${tone}.png`),(await win.webContents.capturePage()).toPNG());
    for(const key of ['drivetrain','performance','weight','tyres','magnetic','laps','workshop']){await run(`ResultFolders.open('${key}')`);assert.equal(await run('document.documentElement.scrollWidth<=innerWidth'),true,key+' overflow '+width);}
   }}
-  assert.deepEqual(errors,[]);console.log('Result folders passed: linked inputs, exclusive opening, pinning, persistent preferences, keyboard, draft retention, live summaries, unknown/zero/interference values and seven groups at three widths in both themes.');win.destroy();app.quit();
+  assert.deepEqual(errors,[]);console.log('Result folders passed: linked inputs, exclusive opening, pinning, persistent preferences, keyboard, draft retention, live summaries, unknown/zero/interference values and eight groups at three widths in both themes.');win.destroy();app.quit();
  }catch(e){console.error(e);win.destroy();app.exit(1);}
 });

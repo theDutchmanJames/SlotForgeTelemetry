@@ -5,15 +5,16 @@ function liveStats(input){
     ['Gear ratio',m.motor.ratio,':1',3,'ratio'],['No-load axle speed',m.motor.axleRpm,'RPM',0,'axleRpm'],
     ['No-load speed',m.motor.speedKmh,'km/h',2,'speedKmh'],['Rollout',m.motor.rollout,'mm/motor rev',2,'rollout'],
     ['Estimated peak mechanical power',m.motor.peakPowerW,'W',2,'peakPowerW'],['Estimated peak motor power / mass',m.powerToWeight,'W/kg',2,'powerToWeight']
-  ].map(([label,value,unit,digits,key])=>`<div class="performance-stat" data-category="${metricStyle[key][0]}">${metricHeading(key,label)}<strong data-performance-result="${key}">${performanceNumber(value,digits)} <small>${unit}</small></strong>${key==='peakPowerW'?`<small class="metric-caption">at ${performanceNumber(m.motor.peakMotorRpm,0)} RPM</small>`:key==='powerToWeight'?`<small class="metric-caption">based on ${performanceNumber(m.massG)} g</small>`:''}</div>`).join('')}</div><p class="hint">${m.motor.curveReady?'Peak mechanical power uses the ideal brushed DC model, before drivetrain losses; it is not a continuous rating.':'For power estimates, confirm brushed DC, stall torque and matching test voltages.'}${m.massG===null?' Add car weight for power-to-weight.':''}</p>`;
+  ].map(([label,value,unit,digits,key])=>`<div class="performance-stat" data-category="${metricStyle[key][0]}">${metricHeading(key,label)}<strong data-performance-result="${key}">${unitValue(value,unit,digits)} <small>${Units.label(unit)}</small></strong>${key==='peakPowerW'?`<small class="metric-caption">at ${performanceNumber(m.motor.peakMotorRpm,0)} RPM</small>`:key==='powerToWeight'?`<small class="metric-caption">based on ${unitText(m.massG,'g')}</small>`:''}</div>`).join('')}</div><p class="hint">${m.motor.curveReady?'Peak mechanical power uses the ideal brushed DC model, before drivetrain losses; it is not a continuous rating.':'For power estimates, confirm brushed DC, stall torque and matching test voltages.'}${m.massG===null?' Add car weight for power-to-weight.':''}</p>`;
 }
 function navigate(route){if(location.hash!=='#'+route)location.hash=route;renderRoute();}
 function renderRoute(){
   if(location.hash==='#analyze/predicted'){history.replaceState(null,'','#feedback');}
-  const [requested,sub,topic]=location.hash.slice(1).split('/'),page=['telemetry','analyze','feedback','library','settings'].includes(requested)?requested:'telemetry';
+  const [requested,sub,topic]=location.hash.slice(1).split('/'),page=['telemetry','trackday','analyze','feedback','library','settings'].includes(requested)?requested:'telemetry';
   for(const section of document.querySelectorAll('[data-page]'))section.hidden=section.dataset.page!==page;
   for(const link of document.querySelectorAll('[data-route]')){if(link.dataset.route===page)link.setAttribute('aria-current','page');else link.removeAttribute('aria-current');}
-  document.title=`${page==='feedback'?'Driver Feedback':page[0].toUpperCase()+page.slice(1)} · SlotForge Telemetry`;
+  document.title=`${page==='feedback'?'Driver Feedback':page==='trackday'?'Track day':page[0].toUpperCase()+page.slice(1)} · SlotForge Telemetry`;
+  if(page==='trackday')TrackdayUI.render();
   if(page==='library'){readLibrary();renderLibrary();updateLibraryStatus();}
   if(page==='analyze'){
     readLibrary();renderAnalysis();const compare=sub==='compare';
@@ -41,7 +42,7 @@ function renderAnalysis(){
   setupOptions('analysis-setup',analysisId);setupOptions('compare-a',compareA);setupOptions('compare-b',compareB);
   const item=library.find(e=>e.id===analysisId),input=CalculatorModel.inputOf(item.setup),m=PerformanceModel.calculate(input);
   $('#analysis-stats').innerHTML=performanceStats(input);$('#analysis-stats').className='analysis-summary';
-  renderCurves(input,m);renderTelemetry(input);$('#magnetic-results').innerHTML=magneticResults(input,true);WorkshopUI.renderSaved();ChassisUI.renderSaved();selectAnalysisTopic(analysisTopic);renderComparison();
+  AnalyzeNav.refresh(item.setup);renderCurves(input,m);renderTelemetry(input);$('#magnetic-results').innerHTML=magneticResults(input,true);WorkshopUI.renderSaved();ChassisUI.renderSaved();selectAnalysisTopic(analysisTopic);renderComparison();
 }
 function selectAnalysisTopic(topic){
   analysisTopic=topic;
@@ -52,8 +53,9 @@ function renderComparison(){
   const a=library.find(e=>e.id===compareA),b=library.find(e=>e.id===compareB);
   if(!a||!b)return;
   const rows=CompareModel.compare(a.setup,b.setup,$('#compare-goal').value);
-  const delta=r=>!r.sameBasis?'Different measurement basis':r.delta===null?'Unavailable':`${r.delta>0?'↑ +':r.delta<0?'↓ ':''}${performanceNumber(r.delta,r.digits)} ${r.deltaUnit||r.unit}${r.percent!==null?`<small>${r.percent>0?'+':''}${performanceNumber(r.percent,1)}% from A</small>`:''}`;
-  $('#comparison').innerHTML=`${a.id===b.id?'<p class="note">Choose two different saved setups to compare changes.</p>':''}${rows.some(r=>!r.sameBasis)?'<p class="note">Motor rating bases, magnetic conditions, or chassis weighing references differ or are incomplete. Affected metrics are shown without a direct change or performance verdict.</p>':''}<div class="table-wrap"><table class="comparison-table"><thead><tr><th>Metric</th><th>Setup A</th><th>Setup B</th><th>Change · B − A</th></tr></thead><tbody>${rows.map(r=>`<tr data-compare-metric="${r.key}"><th>${r.label}<small class="muted"> · ${r.unit}</small></th><td>${performanceNumber(r.a,r.digits)}</td><td>${performanceNumber(r.b,r.digits)}</td><td class="${r.tone}">${delta(r)}</td></tr>`).join('')}</tbody></table></div>`;
+  // Values and differences follow the chosen units; percentages are unit-free.
+  const delta=r=>!r.sameBasis?'Different measurement basis':r.delta===null?'Unavailable':`${r.delta>0?'↑ +':r.delta<0?'↓ ':''}${unitValue(r.delta,r.unit,r.digits)} ${r.unit==='%'?r.deltaUnit:Units.label(r.unit)}${r.percent!==null?`<small>${r.percent>0?'+':''}${performanceNumber(r.percent,1)}% from A</small>`:''}`;
+  $('#comparison').innerHTML=`${a.id===b.id?'<p class="note">Choose two different saved setups to compare changes.</p>':''}${rows.some(r=>!r.sameBasis)?'<p class="note">Motor rating bases, magnetic conditions, or chassis weighing references differ or are incomplete. Affected metrics are shown without a direct change or performance verdict.</p>':''}<div class="table-wrap"><table class="comparison-table"><thead><tr><th>Metric</th><th>Setup A</th><th>Setup B</th><th>Change · B − A</th></tr></thead><tbody>${rows.map(r=>`<tr data-compare-metric="${r.key}"><th>${r.label}<small class="muted"> · ${Units.label(r.unit)}</small></th><td>${unitValue(r.a,r.unit,r.digits)}</td><td>${unitValue(r.b,r.unit,r.digits)}</td><td class="${r.tone}">${delta(r)}</td></tr>`).join('')}</tbody></table></div>`;
 }
 function showSavedAnalysis(id,compare=false){analysisId=id;if(compare){compareA=id;compareB=(library.find(e=>e.id!==id)||library[0])?.id;}navigate(compare?'analyze/compare':'analyze');}
 function focusSetupInput(name){

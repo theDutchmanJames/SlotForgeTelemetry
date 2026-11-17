@@ -64,6 +64,20 @@
     rows.sort((a,b)=>(a.error!==null&&b.error!==null?Math.abs(a.error)-Math.abs(b.error):a.ratio-b.ratio)||a.pinion-b.pinion||a.gear-b.gear);
     return {rows:rows.slice(0,20),count:rows.length,target};
   }
-  const api={fields,defaults,number,clean,calculate,gears};
+  // Full pinion × driven-gear grid over the Gear finder ranges. Large ranges are capped, never silently.
+  const CHART_LIMIT={pinions:30,gears:60};
+  function gearChart(input) {
+    const m=calculate(input),target=m.targetRollout??m.motor.rollout;
+    const current={pinion:P.number(input.pinion,999999,false),gear:P.number(input.gear,999999,false)};
+    if(![m.pinionMin,m.pinionMax,m.gearMin,m.gearMax].every(Number.isInteger)||m.pinionMin>m.pinionMax||m.gearMin>m.gearMax)return {pinions:[],gears:[],cells:[],target,current,truncated:false};
+    const span=(a,b,limit)=>Array.from({length:Math.min(b-a+1,limit)},(_,i)=>a+i);
+    const pinions=span(m.pinionMin,m.pinionMax,CHART_LIMIT.pinions),gearList=span(m.gearMin,m.gearMax,CHART_LIMIT.gears);
+    const cells=pinions.map(p=>gearList.map(g=>{
+      const r=P.calculate({...input,pinion:String(p),gear:String(g)});
+      return {pinion:p,gear:g,ratio:r.ratio,rollout:r.rollout,speedKmh:r.speedKmh,errorPercent:target&&r.rollout!==null?(r.rollout-target)/target*100:null};
+    }));
+    return {pinions,gears:gearList,cells,target,current,truncated:pinions.length<m.pinionMax-m.pinionMin+1||gearList.length<m.gearMax-m.gearMin+1};
+  }
+  const api={fields,defaults,number,clean,calculate,gears,gearChart,CHART_LIMIT};
   if(typeof module==='object'&&module.exports)module.exports=api;else root.TelemetryModel=api;
 })(globalThis);

@@ -4,7 +4,7 @@ function initializeDesign(){
   homeHead.classList.add('workbench-toolbar');homeHead.firstElementChild.replaceChildren(setupPanel);
   const decorate=(selector,name)=>{for(const el of document.querySelectorAll(selector))el.insertAdjacentHTML('afterbegin',sfIcon(name));};
   document.querySelector('.brand-mark').innerHTML='<img src="../assets/icon.svg" alt="" width="42" height="42">';
-  for(const [route,name] of Object.entries({telemetry:'setup',analyze:'timer',feedback:'list',library:'library',settings:'settings'})){
+  for(const [route,name] of Object.entries({telemetry:'setup',trackday:'history',analyze:'timer',feedback:'list',library:'library',settings:'settings'})){
     const link=document.querySelector(`[data-route="${route}"]`);link.querySelector('svg')?.remove();link.insertAdjacentHTML('afterbegin',sfIcon(name));
   }
   for(const [field,tone,name] of [['pinion','gearing','spur-gear'],['ratedRpm','motor','short-can-motor'],['tyreMode','tyres','wheel-tyre-set'],['totalWeight','weight','scales']]){
@@ -21,7 +21,7 @@ function initializeDesign(){
   }
   const flow=document.querySelector('.drive-flow');
   flow.innerHTML=`<div data-category="motor"><div class="part-illustration" role="img" aria-label="Motor">${sfIcon('short-can-motor')}</div><span>Motor</span><strong id="flow-rpm"></strong></div><span class="flow-link">${sfIcon('next')}</span><div data-category="gearing"><div class="part-illustration gear-pair" role="img" aria-label="Pinion and driven gear">${sfIcon('motor-pinion')}${sfIcon('spur-gear')}</div><span>Gearing</span><strong id="flow-gearing"></strong></div><span class="flow-link">${sfIcon('next')}</span><div data-category="tyres"><div class="part-illustration" role="img" aria-label="Rear wheel and tyre">${sfIcon('wheel-tyre-set')}</div><span>Rear tyre</span><strong id="flow-tyre"></strong></div>`;
-  for(const [id,name] of Object.entries({'new-setup':'plus','open-setup':'download','save-setup':'upload','save-copy':'plus','save-library':'check','library-import':'download','library-backup':'upload','analysis-edit':'edit','library-undo':'history'}))decorate('#'+id,name);
+  for(const [id,name] of Object.entries({'new-setup':'plus','open-setup':'download','save-setup':'upload','setup-sheet':'list','save-copy':'plus','save-library':'check','library-import':'download','library-backup':'upload','analysis-edit':'edit','library-undo':'history'}))decorate('#'+id,name);
   decorate('.setup-panel h2','setup');decorate('.next-step h3','timer');decorate('.help-link','list');
   for(const button of document.querySelectorAll('[data-analysis-topic]')){
     const [tone,name]=topicStyle[button.dataset.analysisTopic];button.dataset.category=tone;button.insertAdjacentHTML('afterbegin',sfIcon(name));

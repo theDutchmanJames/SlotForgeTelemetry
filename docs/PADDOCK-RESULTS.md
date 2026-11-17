@@ -4,14 +4,39 @@ Available in Telemetry 0.7.0. Paddock owns its host API; use a Paddock build wit
 
 ## Connect and import
 
-1. In Paddock, start Dealership hosting. Keep that computer and Paddock running.
+1. In Paddock, open **Connections → Dealership Mode** and turn it on. This is also needed when Paddock runs on the same computer as Telemetry. Keep Paddock running.
 2. In Telemetry, open **Settings → Connect to Paddock**.
-3. Choose **Find Paddock on this network**, then select your host. If discovery finds nothing, type the address and port shown in Paddock.
-4. Enter the Dealership password and choose **Connect**. Older sharing modes use their Timing credential. A browse-only password cannot access race results.
-5. Choose **Import / refresh results**. This downloads reviewed sessions that Timing has already delivered to Paddock, not unfinished live races.
-6. Open **Analyze → Lap analysis**, select a run and explore its measured laps. A run separates a car's laps by lane and recorded driver.
+3. Choose **Find Paddock on this network**, then select your collection. If the search finds nothing, check Dealership Mode, the network and any firewall, or type the address and port shown in Paddock.
+4. Enter the Dealership password and choose **Connect**. Telemetry imports your results straight away. A browse-only password cannot access race results.
+5. Open **Analyze → Lap analysis**, select a run and explore its measured laps. A run separates a car's laps by lane and recorded driver.
 
-Passwords stay in memory only. Disconnecting or closing Telemetry forgets them. Imported results stay on your computer and can be read offline. No Timing/Paddock result or car specification is edited by Telemetry.
+Use **Import / refresh results** later to fetch new or corrected sessions. Only reviewed sessions that Timing has delivered to Paddock are imported, not unfinished live races.
+
+Telemetry remembers the collection and address you used last (in `paddock-connection-v1.json` in its profile), but never the password. Paddock chooses a new port every time it starts, so when you open **Connect to Paddock** Telemetry searches for that collection again and fills in its new address. Choose **Forget** to clear it. Passwords stay in memory only; disconnecting or closing Telemetry forgets them. Imported results stay on your computer and can be read offline. No Timing/Paddock result or car specification is edited by Telemetry.
+
+## Paddock on this computer
+
+When Paddock runs on the same computer as Telemetry, use this connection. It imports **every** race in the collection, including races Timing saved to a **Shared library**. Those races use Paddock's newer `history-v1` format, which Paddock does not offer over the network.
+
+1. Start Paddock. Check that **Connections → Paddock on this computer** is on; it is on by default.
+2. In Telemetry, open **Settings → Connect to Paddock** and choose **Connect to Paddock on this computer**. No password is needed: Paddock trusts apps running under the same Windows user. If several collections are open, choose one.
+3. Telemetry imports the races straight away. After that it reconnects by itself when it starts, and checks for new races whenever you switch back to Telemetry (at most every 30 seconds). **Refresh races** in Settings, or **Refresh results** in Analyze and Library, checks immediately.
+
+How it works:
+
+- **Credentials stay private.** Telemetry finds Paddock through a private connection file that Paddock keeps for your user account. It refuses that file if the folder is not private to you or is redirected. The credential in it stays in Telemetry's background process: it is never shown, saved or exported.
+- **Paddock restarts are handled.** Paddock changes its credential every time it starts, and Telemetry picks up the new one automatically.
+- **Every race is verified.** Telemetry downloads only new or changed races and checks each against the content fingerprint Paddock accepted. A race that does not match is left out and reported. If Paddock changes during an import, the import starts again. A failed import keeps your previous races.
+- **Corrections and withdrawals follow Paddock.** A corrected race replaces the old version, and a withdrawn race leaves analysis and records.
+- **One combined library.** If you also imported the same collection over the network, the races read on this computer replace that import in analysis, so nothing is counted twice.
+
+How Shared-library races appear in analysis:
+
+- **Records:** Shared-library races record separately whether a lap counts as a personal best and whether it counts as a track record. Records use the track-record flag, and a run's best eligible lap uses the personal one.
+- **Missing details stay missing.** Historical races imported into Paddock can lack lap times, crossing times, lanes or dates. Such laps appear in lap tables but never count towards pace, charts or records.
+- **Classification:** the overall classification and its penalties appear as the session classification and adjustments.
+
+Saved races from this connection live in `paddock-shared-history-v1.json`, and the selected collection in `paddock-local-v1.json`, both in Telemetry's profile. Developer details: [integration/paddock-shared-history-v1](../integration/paddock-shared-history-v1/README.md).
 
 ## Explore and compare
 
@@ -54,7 +79,7 @@ Open **Library → Race results** to browse imported runs, see import dates and 
 
 The local `paddock-results-v1.json` cache is stored in Telemetry's existing application profile, separately from the setup library. An unreadable cache is never silently overwritten. **Settings → Connect to Paddock → Archive unreadable cache and rebuild** keeps the original beside the cache before starting fresh. Then reconnect to Paddock and import again. Calculator drafts, saved setups and themes are unaffected.
 
-If the host does not support results, Telemetry explains that it needs a compatible Paddock build. If authentication is rate-limited, wait for the indicated delay. Repeatedly reconnecting or changing the port does not bypass that cooldown.
+If the host does not support results, Telemetry explains that it needs a compatible Paddock build. If authentication is rate-limited, wait for the indicated delay. Repeatedly reconnecting or changing the port does not bypass that cooldown. A busy notification queue on Paddock (more than ten watching apps) only pauses automatic refresh and does not lock the connection. When Paddock cannot be reached, Telemetry says why in plain words: connection refused (Dealership Mode off or a changed port), host unreachable, or timed out (often a firewall).
 
 ## Developer handoff
 

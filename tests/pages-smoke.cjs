@@ -21,7 +21,7 @@ app.whenReady().then(async()=>{
   await reload();await run('localStorage.clear()');await reload();
   assert.equal(await text('#ratio-inline'),'3.000:1');assert.match(await text('#stats'),/27.02/);
   assert.equal(await run(`document.querySelectorAll('[data-page=telemetry] .performance-curve').length`),0);
-  assert.equal(await run(`document.querySelectorAll('.main-nav a').length`),5);
+  assert.equal(await run(`document.querySelectorAll('.main-nav a').length`),6);
   assert.equal(await run(`document.querySelectorAll('[data-input-jump]').length`),9);
   assert.equal(await run(`document.querySelector('[name=wheelbase]').closest('details').className`),'workbench-folder');
   assert.equal(await run(`document.querySelector('[name=gearDiameter]').closest('.input-column')!==null`),true);

@@ -1,11 +1,12 @@
-// Examples are descriptions, never values. Keep them visible after typing/loading.
+// Examples are descriptions, never values. An empty field shows one short "Example" line;
+// once something is entered the example is no longer needed and folds away (still read by screen readers).
 const InputHelp=(()=>{
   const entries=[];
   function refresh(){
     for(const {field,help,status,example} of entries){
       const ids=new Set((field.getAttribute('aria-describedby')||'').split(/\s+/).filter(Boolean));
       ids.add(help.id);field.setAttribute('aria-describedby',[...ids].join(' '));
-      if(status)status.textContent=field.value.trim()?'Your input is entered; the example is not used.':'Not entered — the example below is not used.';
+      if(status){const filled=!!field.value.trim();help.classList.toggle('input-help-filled',filled);status.textContent=filled?'Entered.':'Not entered.';}
       if(field.id==='manual-text'){
         const ms=document.getElementById('manual-unit').value==='milliseconds';
         const numbered=document.getElementById('manual-format').value==='numbered';
@@ -20,7 +21,7 @@ const InputHelp=(()=>{
       let status=null,example=null;
       if(field.hasAttribute('data-input-example')){
         status=document.createElement('small');status.className='input-data-status';help.append(status);
-        const title=document.createElement('small');title.textContent='Example only';help.append(title);
+        const title=document.createElement('small');title.textContent='Example, not used:';help.append(title);
         example=document.createElement('code');example.textContent=field.dataset.inputExample;help.append(example);
       }else help.textContent=field.dataset.inputHelp;
       field.after(help);entries.push({field,help,status,example});

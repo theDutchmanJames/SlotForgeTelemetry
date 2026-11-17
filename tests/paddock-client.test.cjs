@@ -125,3 +125,21 @@ test('long-chart sampling retains valid extrema and does not bridge hidden inval
  const medianBefore=points.filter(p=>p.index<11&&p.median!==null).at(-1);const medianAfter=points.find(p=>p.index>11&&p.median!==null);if(medianBefore)assert.notEqual(medianBefore.medianSegment,medianAfter.medianSegment);
  const short=rows.slice(30,40).map(l=>({...l}));short[4].number+=10;const gaps=model.chartPoints(short,'',false);assert.notEqual(gaps[3].segment,gaps[4].segment);assert.equal(gaps[4].median,null);
 });
+test('remembers the last collection and address without the password, and can forget it',async t=>{
+ const {client,connect,dir}=await setup(t);await connect();
+ const saved=JSON.parse(fs.readFileSync(path.join(dir,'paddock-connection-v1.json'),'utf8'));
+ assert.equal(saved.id,'paddock-demo');assert.match(saved.address,/^http:\/\/127\.0\.0\.1:\d+$/);assert.equal(JSON.stringify(saved).includes('test-password'),false);
+ const again=new PaddockClient(client.file);assert.deepEqual(again.view().remembered,{id:saved.id,name:saved.name,address:saved.address});assert.equal(again.view().connection,null);
+ assert.equal(again.forget().remembered,null);assert.equal(fs.existsSync(path.join(dir,'paddock-connection-v1.json')),false);
+ fs.writeFileSync(path.join(dir,'paddock-connection-v1.json'),JSON.stringify({version:1,id:'x',name:'n',address:'8.8.8.8:80'}));assert.equal(new PaddockClient(client.file).view().remembered,null);
+});
+test('a full notification queue does not lock out the host; unreachable hosts get a plain explanation',async t=>{
+ const {client}=await setup(t);
+ // Paddock's notification endpoint answers 429 STREAM_LIMIT when ten watchers are already open.
+ const server=http.createServer((req,res)=>{res.setHeader('Retry-After','60');res.writeHead(429,{'Content-Type':'application/json'});res.end(JSON.stringify({error:'Maximum 10 Telemetry notification connections.',code:'STREAM_LIMIT'}));});
+ await new Promise(r=>server.listen(0,'127.0.0.1',r));t.after(()=>{server.closeAllConnections();server.close();});
+ const busy=new PaddockClient(client.file);await assert.rejects(()=>busy.request('http://127.0.0.1:'+server.address().port,'test-password','/v1/telemetry/changes','paddock-demo',new AbortController().signal),/Maximum 10/);
+ assert.equal(busy.cooldowns.size,0);
+ const closed=http.createServer();await new Promise(r=>closed.listen(0,'127.0.0.1',r));const port=closed.address().port;await new Promise(r=>closed.close(r));
+ await assert.rejects(()=>new PaddockClient(client.file).connect({address:'127.0.0.1:'+port,password:'test-password'}),/Dealership Mode/);
+});

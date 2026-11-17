@@ -42,5 +42,6 @@ const ManualLapsUI=(()=>{
   $('manual-import').onclick=()=>$('manual-backup-file').click();$('manual-backup-file').onchange=async e=>{const file=e.target.files[0];e.target.value='';if(!file)return;try{if(file.size>50*1024*1024)throw Error('Choose a backup smaller than 50 MiB.');const recovering=!!state.error;const result=await call(recovering?'recover':'import',await file.text());if(result.cancelled)return;accept(result);$('manual-library-message').textContent=recovering?'Library recovered. The unreadable original was archived at '+result.backup:result.added+' manual sessions restored. Existing sessions were kept.';}catch(error){$('manual-library-message').textContent=error.message;}};
   renderLibrary();call('read').then(accept).catch(e=>{$('manual-library-message').textContent=e.message;});
  }
- return {init,open};
+ // Track day saves through the same storage; apply its result so every list updates.
+ return {init,open,apply:accept};
 })();

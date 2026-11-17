@@ -29,3 +29,14 @@
 @media(max-width:1050px){.calculator-layout{grid-template-columns:280px minmax(0,1fr)}.ballast-load-grid{grid-template-columns:1fr}.ballast-guide-toggle{margin-left:0}#ballast-planner .badge{display:none}}
 @media(max-width:780px){.calculator-layout{grid-template-columns:minmax(0,1fr)}.input-column{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.workbench-folder-tools,.input-column>#input-error,.workbench-folder[open]{grid-column:1/-1}.workbench-folder>summary{padding:10px}.folder-values{padding-left:0}.folder-heading{font-size:12px}.ballast-load-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
 @media(max-width:430px){.input-column,.ballast-load-grid{grid-template-columns:minmax(0,1fr)}#ballast-planner{padding:14px}#ballast-editor-host .chassis-editor,#ballast-editor-host .chassis-editor>.form-grid,#ballast-references-panel .form-grid{grid-template-columns:1fr}#ballast-planner h2{font-size:19px}.ballast-pin{min-width:30px;height:30px}}
+
+/* Workbench levels: a compact switch above the input folders. */
+.workbench-levels{margin:0 0 10px;--category:var(--accent)}
+.level-switch{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;padding:0;background:none;border:0}
+.level-switch button{display:flex;align-items:center;gap:8px;min-width:0;border:1px solid var(--line);border-radius:8px;background:var(--panel);color:var(--muted);font:inherit;font-size:12px;padding:8px 10px;cursor:pointer;text-align:left}
+.level-switch button .sf-icon{width:18px;height:18px;flex:none;color:var(--accent)}
+.level-switch button:hover{color:var(--ink);background:color-mix(in srgb,var(--accent) 8%,var(--panel))}
+.level-switch button[aria-pressed=true]{color:var(--ink);font-weight:700;border-color:var(--accent);background:color-mix(in srgb,var(--accent) 14%,var(--panel));box-shadow:inset 0 -3px 0 var(--accent)}
+.level-switch button:focus-visible{outline:3px solid var(--ink);outline-offset:2px}
+.workbench-levels .hint{margin:8px 2px 0}
+.workbench-folder[hidden],.result-group[hidden]{display:none!important}

@@ -4,7 +4,17 @@ An offline desktop workbench for slotcar calculations, measured lap analysis, ch
 
 ## Open the app
 
-After building on Windows, open `dist/SlotForgeTelemetry-0.10.0-windows-x64-Portable.exe`. This portable build needs no Node.js installation. It is unsigned. Ready-made downloads are available from the repository’s Releases page.
+Every platform gets a **portable app** (runs without installing) and an **installer**:
+
+| Platform | Portable app | Installer |
+| --- | --- | --- |
+| Windows x64 | `dist/SlotForgeTelemetry-<version>-windows-x64-Portable.exe` | `dist/SlotForgeTelemetry-<version>-windows-x64-Setup.exe` |
+| macOS universal | `dist/mac/SlotForgeTelemetry-<version>-mac-universal.zip` | `dist/mac/SlotForgeTelemetry-<version>-mac-universal.dmg` (drag to Applications) |
+| Linux x64/arm64 | `dist/linux/SlotForgeTelemetry-<version>-linux-<arch>.AppImage` | `dist/linux/SlotForgeTelemetry-<version>-linux-<arch>.deb` |
+
+Neither needs Node.js. All builds are unsigned (macOS: ad-hoc signed). Portable and installed copies on the same computer share one saved-data folder (the **SlotForge Calculator** profile), so switching between them keeps your setups and laps. Uninstalling never deletes that data.
+
+The Windows installer asks whether to install for the current user only or for everyone, lets you choose the folder, and adds Start menu and desktop shortcuts. Remove it through **Settings → Apps** (or **Add or remove programs**).
 
 For development, run `npm ci` and `npm start` with Node.js 22.12 or newer, or use `Start SlotForge Telemetry.cmd`. The renderer also works directly in a modern browser; browser and desktop storage are separate.
 
@@ -41,7 +51,11 @@ Lap average uses measured lane distance and time. Scale speed is a simple size c
 
 `npm test` runs model tests; `npm run check` checks JavaScript syntax. `npm run test:ui` exercises all four pages in an isolated Electron profile under test-results, including saved-only analysis, comparisons, library lifecycle, backup/import, failed storage, theme preferences and narrow layouts. Screenshots are saved there.
 
-`npm run dist` builds the Windows portable executable. `npm run pack` builds an unpacked application.
+`npm run dist` builds both Windows packages: the portable executable and the Setup installer. `npm run pack` builds an unpacked application.
+
+### Windows builder
+
+Double-click `build-windows.cmd`, or run it from a terminal. It checks Node.js, installs locked dependencies, runs syntax checks and model tests, then builds the Portable and Setup executables into `dist/`. It fails unless both files are produced. `build-windows.cmd --quick` reuses installed dependencies and skips checks; use it only for revisions already checked. Set `NOPAUSE=1` to skip the closing pause. The builder never publishes anything.
 
 ### Linux and macOS builders
 
