@@ -18,6 +18,9 @@ test('real Paddock local service: both formats, corrections, withdrawals and a r
  assert.equal(service.error,'');
  assert.deepEqual((await client.libraries()).map(l=>l.databaseId),[store.data.id]);
  await client.connect();const first=await client.sync();assert.equal(first.downloaded,2);assert.equal(first.skipped,0);assert.equal(first.unsupported,0);
+ // The car catalogue (scalable-v1) comes through the same local connection, with each car's current configuration.
+ const garage=client.carsView();assert.equal(garage.error,'');assert.deepEqual(garage.hosts[0].cars.map(c=>c.id).sort(),store.data.cars.map(c=>c.id).sort());
+ assert.ok(garage.hosts[0].cars.every(c=>c.technical&&typeof c.technical==='object'));
  // The network Telemetry-v1 index still hides the history-v1 race: this is why the local reader exists.
  const legacy=P('src/telemetry-export.cjs').handleStore(store,'GET',new URL('http://localhost/v1/telemetry/results'),{timingResults:true},store.data.id);assert.equal(legacy.entries.length,1);
  let runs=model.runs({hosts:client.hosts()});

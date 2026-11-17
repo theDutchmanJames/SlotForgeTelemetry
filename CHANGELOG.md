@@ -1,5 +1,15 @@
 # Changelog
 
+## Unreleased · Garage
+
+- **Garage (Library → Garage):** cars and tracks in one place.
+  - **Paddock cars** come in with each import from Paddock on this computer: name, maker, class, availability, current technical configuration and photo. They are read-only; edit them in Paddock. The catalogue is incremental, following Paddock's car change feed, and photos are verified against their SHA-256 fingerprint before use.
+  - **Telemetry cars** can be added for cars that are not in Paddock.
+  - **Tracks** store their lanes and lane lengths.
+  - A car's detail shows its setups, best eligible lap per track and lane (imported races by Paddock car identity, manual and Track day runs by car name), and buttons to start a new setup or a Track day with it.
+- **Setups name their car:** a **Car** choice next to the setup name, saved with the setup and its exported file. Older files have none, and older Telemetry versions ignore it.
+- **Track day uses the garage:** car and track names are suggested, the workbench setup's car is preselected, and a garage track supplies the lane length that is saved with each run.
+
 ## Unreleased · Installers, gear chart and setup sheets
 
 - **Track day:** a new page for the change → drive → enter laps → compare loop at the track.

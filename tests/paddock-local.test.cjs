@@ -21,7 +21,7 @@ test('imports both formats, verifies every hash and maps history-v1 for analysis
  assert.ok(s.requests.some(q=>q.includes('offset=2')));assert.ok(s.requests.some(q=>q.includes('page=')));
  assert.equal((await client.sync()).downloaded,0);
  // Credentials never reach the cache, the settings file or the renderer view.
- for(const file of fs.readdirSync(dir))assert.equal(fs.readFileSync(path.join(dir,file),'utf8').includes(s.token),false,file);
+ for(const file of fs.readdirSync(dir,{recursive:true}).filter(f=>fs.statSync(path.join(dir,f)).isFile()))assert.equal(fs.readFileSync(path.join(dir,file),'utf8').includes(s.token),false,file);
  assert.equal(JSON.stringify(client.status()).includes(s.token),false);assert.equal(JSON.stringify(hosts).includes('127.0.0.1'),false);
 });
 test('corrections replace, withdrawals remove, and a reopened cache is re-verified',async t=>{

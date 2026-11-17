@@ -13,7 +13,10 @@ function sessionsFromFixtures(){
  ];
 }
 async function createHost({sessions=sessionsFromFixtures(),pageSize=1,lapPageSize=2}={}){
- const s={sessions,sequence:1,token:crypto.randomBytes(32).toString('base64url'),instanceId:'instance-1',requests:[],hook:null,tamper:null,recoveryId:'recovery-1'};
+ // Car catalogue: Paddock's scalable-v1 fixtures. car-a has a photo; car-b does not.
+ const listed=read('scalable-car-with-media').cars,profile=read('scalable-profile').profile,media=read('scalable-media');
+ const cars={version:1,list:listed,technical:{'car-a':profile.configuration.technical,'car-b':{motor:'25k',pinion:'10',gear:'28'}},photo:Buffer.from(media.data,'base64'),sequence:1,invalid:[]};
+ const s={cars,sessions,sequence:1,token:crypto.randomBytes(32).toString('base64url'),instanceId:'instance-1',requests:[],hook:null,tamper:null,recoveryId:'recovery-1'};
  const snapshot=()=>'snap-'+s.sequence;
  const accepted=x=>({revision:x.revision,contentHash:x.state==='withdrawn'?hash({withdrawn:x.sessionId,revision:x.revision}):hash(x.full),state:x.state});
  const token=x=>crypto.createHash('sha256').update(JSON.stringify([DB,s.recoveryId,x.sourceId,x.sessionId,accepted(x).contentHash])).digest('hex');
@@ -27,6 +30,19 @@ async function createHost({sessions=sessionsFromFixtures(),pageSize=1,lapPageSiz
   if(url.pathname==='/v1/status'){const st=read('history-status');return send(200,{protocol:2,id:DB,revision:1,name:'Home collection',localInstanceId:s.instanceId,permissions:{browse:true,submit:false,timingResults:true,localImport:true},capabilities:{...(req.headers['x-slotforge-extensions']==='shared-history-v1'?{sharedHistory:{...st.capability,formats:['timing-v1','history-v1']}}:{}),telemetry:{version:1}}});}
   if(req.headers['x-slotforge-database']!==DB)return send(409,{code:'DATABASE_MISMATCH',error:'Wrong database.'});
   if(s.hook)await s.hook(url);
+  if(url.pathname==='/v1/scalable/cars'){
+   const offset=Number(url.searchParams.get('offset')||0),snap='cars-'+cars.sequence;if(url.searchParams.get('snapshot')&&url.searchParams.get('snapshot')!==snap)return send(409,{code:'SNAPSHOT_CHANGED',error:'Restart listing.'});
+   return send(200,{version:1,databaseId:DB,snapshot:snap,cursor:snap,cars:cars.list.slice(offset,offset+1),nextOffset:offset+1<cars.list.length?offset+1:null});
+  }
+  if(url.pathname==='/v1/scalable/changes'){const entries=cars.invalid.map(id=>({carId:id,operation:'invalidate'}));cars.invalid=[];return send(200,{version:1,databaseId:DB,kind:'cars',resetRequired:false,reason:null,cursor:'cars-'+cars.sequence,entries,more:false});}
+  const car=url.pathname.match(/^\/v1\/scalable\/cars\/([\w-]+)\/(profile|media\/([a-f0-9]{64}))$/);
+  if(car){
+   const meta=cars.list.find(c=>c.id===car[1]);if(!meta)return send(404,{code:'CAR_NOT_FOUND',error:'No car.'});
+   if(car[2]==='profile')return send(200,{version:1,profile:{integrationVersion:1,databaseId:DB,databaseRevision:1,car:{...meta,picture:''},configuration:{databaseId:DB,carId:meta.id,kind:'current',technical:cars.technical[meta.id],components:[]}},media:meta.media});
+   // Two chunks, so reassembly is exercised.
+   const offset=Number(url.searchParams.get('offset')||0),half=60,part=offset===0?cars.photo.subarray(0,half):cars.photo.subarray(half);
+   return send(200,{version:1,databaseId:DB,hash:car[3],offset,size:cars.photo.length,data:part.toString('base64'),nextOffset:offset===0?half:null});
+  }
   if(url.pathname==='/v1/shared-history/status')return send(200,{version:1,databaseId:DB,recoveryId:s.recoveryId,capability:{},cursor:snapshot()});
   if(url.pathname==='/v1/shared-history/sessions'){
    let offset=0;const page=url.searchParams.get('page');

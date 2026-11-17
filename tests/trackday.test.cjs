@@ -7,7 +7,7 @@ const laps=text=>ML.parse(text);
 test('a run is saved as an ordinary manual session with the change note and a setup snapshot',()=>{
  const v=T.session({ctx,setup:{...C.EXAMPLE,totalWeight:'80',trackLength:'20.5'},note:'pinion 9 → 10',laps:laps('10.2\n10.1\n10.3'),sequenceConfirmed:true,now:new Date('2026-11-17T14:03:22.456Z'),runNumber:3});
  assert.equal(v.name,'Run 3 · pinion 9 → 10');assert.equal(v.source,'Track day');assert.equal(v.type,'practice');assert.equal(v.lane,1);assert.equal(v.lengthM,20.5);
- assert.equal(v.startedAt,'2026-11-17T14:03:22.000Z');assert.match(v.notes,/^Changed: pinion 9 → 10\nSetup: Example/);
+ assert.equal(v.startedAt,'2026-11-17T14:03:22.456Z','millisecond precision keeps quick successive runs in order');assert.match(v.notes,/^Changed: pinion 9 → 10\nSetup: Example/);
  assert.deepEqual(v.technical,{pinion:'9',gear:'27',rearDiameter:'20',weight:'80',ratedRpm:'21500'});assert.equal(v.laps.length,3);
  const blank=T.session({ctx,setup:C.blank(),laps:laps('9.9'),sequenceConfirmed:false});assert.equal(blank.name,'Run 1 · no change');assert.deepEqual(Object.values(blank.technical),['','','','','']);assert.equal(blank.lengthM,null);
 });
@@ -17,6 +17,9 @@ test('previous and today match car, track and lane, ignoring letter case',()=>{
  assert.equal(T.previous(runs,ctx).startedAt,'2026-11-17T11:00:00.000Z');
  assert.equal(T.previous(runs,ctx,T.previous(runs,ctx).id).startedAt,'2026-11-17T10:00:00.000Z');
  assert.equal(T.today(runs,ctx,new Date('2026-11-17T15:00:00Z')).length,2);assert.equal(T.previous(runs,{...ctx,track:'Elsewhere'}),null);
+ // Same start time: the later save wins.
+ const tie=[{id:'a',car:'Club GT',track:'Home track',lane:1,startedAt:'2026-11-17T10:00:00.000Z',syncedAt:'2026-11-17T10:00:00.100Z'},{id:'b',car:'Club GT',track:'Home track',lane:1,startedAt:'2026-11-17T10:00:00.000Z',syncedAt:'2026-11-17T10:00:00.900Z'}];
+ assert.equal(T.previous(tie,ctx).id,'b');assert.equal(T.previous([...tie].reverse(),ctx).id,'b');
 });
 test('comparison: lower times are better, tiny differences read as the same',()=>{
  const before=T.preview(laps('10.00\n10.20\n10.10\n10.40'),true),faster=T.preview(laps('9.80\n9.90\n9.85\n9.95'),true),same=T.preview(laps('10.01\n10.19\n10.12\n10.39'),true);

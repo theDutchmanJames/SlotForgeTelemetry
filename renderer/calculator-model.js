@@ -7,8 +7,10 @@
   const X = typeof module === 'object' && module.exports ? require('./chassis-test-model.js') : root.ChassisTestModel;
   const A = typeof module === 'object' && module.exports ? require('./prediction-model.js') : root.PredictionModel;
   const EXAMPLE = { name: 'Example · 21,500 RPM / 9:27', pinion: '9', gear: '27', ratedRpm: '21500', ratedVoltage: '12', motorTorque: '285', torqueVoltage: '12', torqueType: 'Stall', motorType: 'Brushed DC', rearDiameter: '20', tyreMode: 'diameter', rimDiameter: '16', tyreThickness: '2' };
-  Object.assign(EXAMPLE, T.defaults(), M.defaults(), W.defaults(), H.defaults(), X.defaults(), A.defaults());
-  const blank = () => ({ ...P.blank(), ...T.defaults(), ...M.defaults(), ...W.defaults(), ...H.defaults(), ...X.defaults(), ...A.defaults(), name: '', pinion: '', gear: '', tyreMode: 'diameter', rimDiameter: '', tyreThickness: '' });
+  Object.assign(EXAMPLE, T.defaults(), M.defaults(), W.defaults(), H.defaults(), X.defaults(), A.defaults(), { carRef: '' });
+  const blank = () => ({ ...P.blank(), ...T.defaults(), ...M.defaults(), ...W.defaults(), ...H.defaults(), ...X.defaults(), ...A.defaults(), name: '', carRef: '', pinion: '', gear: '', tyreMode: 'diameter', rimDiameter: '', tyreThickness: '' });
+  // Optional garage car: "local:<id>" or "paddock:<database>:<car>". Older files have none; older apps ignore it.
+  const CAR_REF = /^(?:local:[A-Za-z0-9_-]{1,100}|paddock:[A-Za-z0-9_-]{1,100}:[A-Za-z0-9_-]{1,100})$/;
   function diameter(input) {
     if (input.tyreMode !== 'rim') return P.positive(input.rearDiameter, 1000);
     const rim = P.positive(input.rimDiameter, 1000), thickness = P.positive(input.tyreThickness, 500);
@@ -24,6 +26,9 @@
     const out = { ...blank(), ...P.baseline({ ...P.blank(), ...data }), ...T.clean(data), ...M.clean(data), ...W.clean(data), ...H.clean(data), ...X.clean(data), ...A.clean(data) };
     if (typeof data.name !== 'string' || data.name.length > 100) throw Error('Setup name must be at most 100 characters.');
     out.name = data.name;
+    const carRef = data.carRef ?? '';
+    if (typeof carRef !== 'string' || (carRef !== '' && !CAR_REF.test(carRef))) throw Error('This setup names an invalid garage car.');
+    out.carRef = carRef;
     if (!['diameter', 'rim'].includes(data.tyreMode)) throw Error('Choose a tyre measurement method.');
     out.tyreMode = data.tyreMode;
     for (const [key, max] of [['rimDiameter', 1000], ['tyreThickness', 500]]) {
@@ -48,6 +53,6 @@
     if(new TextEncoder().encode(text).length>100000)throw Error('This setup exceeds 100 KB. Shorten notes or start a separate test setup before exporting.');
     return text;
   }
-  const api = { EXAMPLE, blank, diameter, inputOf, cleanSetup, decode, encode };
+  const api = { EXAMPLE, blank, diameter, inputOf, cleanSetup, decode, encode, CAR_REF };
   if (typeof module === 'object' && module.exports) module.exports = api; else root.CalculatorModel = api;
 })(globalThis);

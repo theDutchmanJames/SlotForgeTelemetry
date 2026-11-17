@@ -8,8 +8,10 @@
  const localDay=iso=>{const d=new Date(iso);return d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate();};
  // A run belongs to the session when car, track and lane match (names compared without case).
  const sameContext=(run,ctx)=>key(run.car)===key(ctx.car)&&key(run.track)===key(ctx.track)&&run.lane===ctx.lane;
- function previous(runs,ctx,excludeId=null){return runs.filter(r=>sameContext(r,ctx)&&r.id!==excludeId).sort((a,b)=>b.startedAt.localeCompare(a.startedAt))[0]||null;}
- function today(runs,ctx,now=new Date()){const d=localDay(now.toISOString());return runs.filter(r=>sameContext(r,ctx)&&localDay(r.startedAt)===d).sort((a,b)=>b.startedAt.localeCompare(a.startedAt));}
+ // Newest first; runs saved in the same instant fall back to when they were saved.
+ const newest=(a,b)=>b.startedAt.localeCompare(a.startedAt)||String(b.syncedAt||'').localeCompare(String(a.syncedAt||''));
+ function previous(runs,ctx,excludeId=null){return runs.filter(r=>sameContext(r,ctx)&&r.id!==excludeId).sort(newest)[0]||null;}
+ function today(runs,ctx,now=new Date()){const d=localDay(now.toISOString());return runs.filter(r=>sameContext(r,ctx)&&localDay(r.startedAt)===d).sort(newest);}
  // Typed laps → the same lap shape a saved manual session has, for a live preview.
  function preview(laps,sequenceConfirmed){let elapsed=0;return {laps:laps.map((l,i)=>({...l,id:'preview-'+i,stintId:'entered',heatId:'entered',endedAtMs:elapsed+=l.durationMs,recordEligible:l.valid&&!l.pit,sequenceKnown:sequenceConfirmed}))};}
  // Lower lap times are better. Differences under 0.5% of the earlier value read as "about the same".
@@ -28,12 +30,13 @@
  }
  const positive=v=>{const n=Number(v);return v!==''&&v!=null&&Number.isFinite(n)&&n>0;};
  // A manual session for ManualLapsModel.normalize: context, change note and a snapshot of the current setup.
- function session({ctx,setup,note='',laps,sequenceConfirmed,now=new Date(),runNumber=1}){
+ // laneLengthM: from the garage track when known; otherwise the setup's lap distance, if any.
+ function session({ctx,setup,note='',laps,sequenceConfirmed,now=new Date(),runNumber=1,laneLengthM=null}){
   const s=setup||{},change=String(note).trim().slice(0,150),diameter=s.pinion!==undefined?C.diameter(s):null;
   const technical={pinion:/^\d+$/.test(String(s.pinion||''))?String(s.pinion):'',gear:/^\d+$/.test(String(s.gear||''))?String(s.gear):'',rearDiameter:diameter?String(Number(diameter.toPrecision(7))):'',weight:positive(s.totalWeight)?String(s.totalWeight):'',ratedRpm:positive(s.ratedRpm)?String(s.ratedRpm):''};
   return ML.normalize({name:`Run ${runNumber}${change?' · '+change:' · no change'}`.slice(0,200),car:ctx.car,track:ctx.track,driver:ctx.driver||'Unknown driver',source:SOURCE,
    notes:[change?'Changed: '+change:'No change noted.',s.name?'Setup: '+s.name:''].filter(Boolean).join('\n').slice(0,2000),
-   startedAt:new Date(Math.floor(now.getTime()/1000)*1000).toISOString(),type:'practice',lane:ctx.lane,lengthM:positive(s.trackLength)?Number(s.trackLength):null,sequenceConfirmed,technical,laps});
+   startedAt:now.toISOString(),type:'practice',lane:ctx.lane,lengthM:positive(laneLengthM)?Number(laneLengthM):positive(s.trackLength)?Number(s.trackLength):null,sequenceConfirmed,technical,laps});
  }
  // "Changed: …" from a saved Track day run, for the run list and comparisons.
  const changeOf=run=>/^Changed: (.*)$/m.exec(run?.notes||'')?.[1]||(run?.notes?.startsWith('No change')?'No change':'');

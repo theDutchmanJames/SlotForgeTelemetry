@@ -92,6 +92,23 @@ function checkCache(data){
  return data;
 }
 
+// ---------- Paddock car catalogue (scalable-v1, read-only) ----------
+const MAX_PHOTO=8*1024*1024,PHOTO=/^data:image\/(png|jpeg|webp);base64,[A-Za-z0-9+/]+=*$/;
+const short=(v,max=200)=>typeof v==='string'&&v.length<=max;
+function checkTechnical(t){if(t===null)return null;if(!t||typeof t!=='object'||Array.isArray(t)||Object.keys(t).length>100||Object.entries(t).some(([k,v])=>!short(k,100)||!short(v,20000)))throw Error('Invalid car configuration.');return Object.fromEntries(Object.entries(t));}
+function checkCarMeta(m){
+ if(!m||!ID.test(m.id)||!Number.isSafeInteger(m.revision)||m.revision<0||!['name','maker','marque','model','scale','raceClass','availability'].every(k=>short(m[k]??''))||typeof m.archived!=='boolean')throw Error('Invalid Paddock car.');
+ if(m.media!==null&&(!m.media||!HEX.test(m.media.hash)||!['image/png','image/jpeg','image/webp'].includes(m.media.mime)||!Number.isSafeInteger(m.media.size)||m.media.size<1||m.media.size>MAX_PHOTO||m.media.url!==`/v1/scalable/cars/${m.id}/media/${m.media.hash}`))throw Error('Invalid Paddock car photo reference.');
+ return m;
+}
+const carEntry=(m,technical)=>({id:m.id,revision:m.revision,name:m.name,maker:m.maker||'',marque:m.marque||'',model:m.model||'',scale:m.scale||'',raceClass:m.raceClass||'',availability:m.availability||'',archived:m.archived,technical,photo:m.media?{hash:m.media.hash,mime:m.media.mime}:null});
+function checkCars(data){
+ if(data?.version!==1||!Array.isArray(data.hosts)||data.hosts.length>20)throw Error('Invalid Paddock car cache.');
+ for(const h of data.hosts){if(!ID.test(h.id)||!short(h.name)||!Number.isFinite(Date.parse(h.syncedAt))||typeof h.cursor!=='string'||!Array.isArray(h.cars)||h.cars.length>10000)throw Error('Invalid Paddock car cache.');
+  for(const c of h.cars){checkCarMeta({...c,media:null});checkTechnical(c.technical);if(c.photo!==null&&(!HEX.test(c.photo?.hash)||!['image/png','image/jpeg','image/webp'].includes(c.photo.mime)))throw Error('Invalid cached photo.');}}
+ return data;
+}
+
 // ---------- Client ----------
 function changed(message='Paddock changed during the import. Trying again…'){const e=Error(message);e.apiCode='SNAPSHOT_CHANGED';return e;}
 function networkError(e){
@@ -106,6 +123,8 @@ class LocalHistoryClient{
   this.data={version:1,hosts:[]};this.loadError='';this.lastImport=null;
   try{if(fs.existsSync(file)){if(fs.statSync(file).size>MAX_CACHE)throw Error('Cache exceeds 200 MiB.');this.data=checkCache(JSON.parse(fs.readFileSync(file,'utf8')));}}
   catch{this.loadError='The saved races from Paddock on this computer could not be read. They are kept untouched; choose Rebuild to archive them and import again.';}
+  this.carsFile=path.join(path.dirname(file),'paddock-cars-v1.json');this.photoDir=path.join(path.dirname(file),'paddock-car-photos');this.cars={version:1,hosts:[]};this.carsError='';
+  try{if(fs.existsSync(this.carsFile))this.cars=checkCars(JSON.parse(fs.readFileSync(this.carsFile,'utf8')));}catch{this.carsError='Saved Paddock cars could not be read; they will be downloaded again.';}
   this.selected=null;try{const s=JSON.parse(fs.readFileSync(this.settingsFile,'utf8'));if(s?.version===1&&ID.test(s.databaseId)&&typeof s.name==='string'&&s.name.length<=200)this.selected={databaseId:s.databaseId,name:s.name};}catch{/* Nothing selected yet. */}
  }
  // The renderer only ever sees names and IDs, never addresses or tokens.
@@ -209,8 +228,62 @@ class LocalHistoryClient{
   const next={version:1,hosts:[...this.data.hosts.filter(h=>h.id!==c.databaseId),{id:c.databaseId,name:c.name,recoveryId:first.recoveryId,syncedAt:new Date().toISOString(),sessions}]};
   this.persist(next);this.data=next;
   this.lastImport={at:next.hosts.at(-1).syncedAt,sessions:sessions.length,downloaded,skipped,unsupported};
+  // The car catalogue follows the races; a problem there never undoes a completed race import.
+  try{await this.syncCars(c,get);this.carsError='';}catch(e){if(e.name==='AbortError'||this.connection!==c)throw e;this.carsError='Paddock cars could not be refreshed: '+e.message;}
   return {...this.status(),downloaded,skipped,unsupported};
  }
+ // Paddock owns its cars. Telemetry keeps a read-only copy: metadata, current technical configuration and photo.
+ carsView(){return {hosts:this.cars.hosts.map(h=>({id:h.id,name:h.name,syncedAt:h.syncedAt,cars:h.cars})),error:this.carsError};}
+ async syncCars(c,get){
+  const old=this.cars.hosts.find(h=>h.id===c.databaseId),cached=new Map((old?.cars||[]).map(x=>[x.id,x])),invalid=new Set();let reset=!old;
+  // Changes since the last listing: Paddock can change a car's configuration without changing its revision.
+  if(old){try{let cursor=old.cursor;for(let i=0;i<100;i++){const ch=await get('/v1/scalable/changes?kind=cars&cursor='+encodeURIComponent(cursor));if(ch?.version!==1||ch.kind!=='cars'||typeof ch.cursor!=='string'||!Array.isArray(ch.entries))throw Error('Invalid car change feed.');if(ch.resetRequired){reset=true;break;}for(const e of ch.entries)if(ID.test(e?.carId))invalid.add(e.carId);cursor=ch.cursor;if(!ch.more)break;}}
+   catch(e){if(e.name==='AbortError')throw e;reset=true;}}
+  const list=[];let offset=0,snapshot=null,cursor=null,pages=0;
+  do{
+   const page=await get('/v1/scalable/cars'+(snapshot?'?offset='+offset+'&snapshot='+encodeURIComponent(snapshot):''));
+   if(page?.version!==1||page.databaseId!==c.databaseId||typeof page.snapshot!=='string'||typeof page.cursor!=='string'||!Array.isArray(page.cars)||page.cars.length>50||(snapshot!==null&&page.snapshot!==snapshot))throw Error('Invalid Paddock car listing.');
+   if(snapshot===null){snapshot=page.snapshot;cursor=page.cursor;}
+   list.push(...page.cars.map(checkCarMeta));offset=page.nextOffset;
+   if(offset!==null&&(!Number.isSafeInteger(offset)||offset!==list.length))throw Error('Invalid Paddock car pagination.');
+   if(++pages>200)throw Error('Too many Paddock cars.');
+  }while(offset!==null);
+  const cars=[];
+  for(const m of list){
+   const prior=cached.get(m.id);let technical=prior?.technical??null;
+   if(!prior||reset||invalid.has(m.id)||prior.revision!==m.revision){
+    const p=await get('/v1/scalable/cars/'+m.id+'/profile');
+    if(p?.version!==1||p.profile?.car?.id!==m.id||p.profile.databaseId!==c.databaseId)throw Error('Invalid Paddock car profile.');
+    technical=checkTechnical(p.profile.configuration?.technical??null);
+   }
+   if(m.media&&!fs.existsSync(path.join(this.photoDir,m.media.hash+'.txt')))await this.downloadPhoto(m,get);
+   cars.push(carEntry(m,technical));
+  }
+  const next={version:1,hosts:[...this.cars.hosts.filter(h=>h.id!==c.databaseId),{id:c.databaseId,name:c.name,syncedAt:new Date().toISOString(),cursor,cars}]};
+  checkCars(next);this.writeJson(this.carsFile,next);this.cars=next;
+  // Remove photos no collection uses any more.
+  const used=new Set(next.hosts.flatMap(h=>h.cars.map(x=>x.photo?.hash).filter(Boolean)));
+  try{for(const f of fs.readdirSync(this.photoDir))if(/^[a-f0-9]{64}\.txt$/.test(f)&&!used.has(f.slice(0,64)))fs.rmSync(path.join(this.photoDir,f),{force:true});}catch{/* No photos yet. */}
+ }
+ async downloadPhoto(m,get){
+  const chunks=[];let offset=0;
+  for(let i=0;i<64&&offset!==null;i++){
+   const r=await get(m.media.url+'?offset='+offset);
+   if(r?.version!==1||r.hash!==m.media.hash||r.offset!==offset||r.size!==m.media.size||typeof r.data!=='string')throw Error('Invalid Paddock photo chunk.');
+   const bytes=Buffer.from(r.data,'base64');chunks.push(bytes);offset=r.nextOffset;
+   if(offset!==null&&offset!==r.offset+bytes.length)throw Error('Invalid Paddock photo chunk order.');
+  }
+  const all=Buffer.concat(chunks);
+  if(all.length!==m.media.size||crypto.createHash('sha256').update(all).digest('hex')!==m.media.hash)throw Error('A Paddock photo did not match its fingerprint.');
+  const uri=all.toString('utf8');if(!PHOTO.test(uri)||!uri.startsWith('data:'+m.media.mime))throw Error('Unsupported Paddock photo.');
+  fs.mkdirSync(this.photoDir,{recursive:true});this.writeJson(path.join(this.photoDir,m.media.hash+'.txt'),uri,false);
+ }
+ // A verified photo as a data URI, only for a hash the current catalogue uses.
+ photo(hash){
+  if(!HEX.test(hash||'')||!this.cars.hosts.some(h=>h.cars.some(c=>c.photo?.hash===hash)))return null;
+  try{const uri=fs.readFileSync(path.join(this.photoDir,hash+'.txt'),'utf8');return PHOTO.test(uri)&&crypto.createHash('sha256').update(uri).digest('hex')===hash?uri:null;}catch{return null;}
+ }
+ writeJson(file,value,json=true){const text=json?JSON.stringify(value):value;const temp=file+'.'+crypto.randomUUID()+'.tmp';let fd;try{fd=fs.openSync(temp,'wx');fs.writeFileSync(fd,text);fs.fsyncSync(fd);fs.closeSync(fd);fd=undefined;fs.renameSync(temp,file);}catch(e){if(fd!==undefined)fs.closeSync(fd);try{fs.unlinkSync(temp);}catch{}throw e;}}
  async download(c,e,get){
   const base='/v1/shared-history/sessions/'+e.sourceId+'/'+e.sessionId;
   const head=await get(base);

@@ -176,6 +176,16 @@ Save the inputs with a setup, then open **Analyze → Testing & planning** for t
 
 **Gear finder** searches your chosen tooth-count ranges and lists the closest 20 combinations for a target rollout. It can also help compensate for a change in tyre diameter. Check the physical pitch, mesh and fit of any suggested combination before using it.
 
+### Garage: cars and tracks
+
+**Library → Garage** brings your cars and tracks together:
+
+- **Paddock cars** arrive with each import from Paddock on this computer, with their photo and current configuration. They are read-only: edit them in Paddock.
+- **Telemetry cars** can be added for cars that are not in Paddock.
+- **Tracks** store their lanes and lane lengths.
+
+Choose a **Car** for each setup on the workbench. A car's page shows its setups and best laps per track and lane. Track day suggests your garage cars and tracks and fills in the lane length.
+
 ### Track day
 
 Open **Track day** at the track:

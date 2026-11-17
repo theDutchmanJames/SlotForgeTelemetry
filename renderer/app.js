@@ -33,6 +33,7 @@ function readWorkspace() {
   } catch { /* Keep the default appearance if browser storage is unavailable. */ }
 }
 function fillInputs() {
+  GarageUI.fillCarSelect(); // The car list must contain this setup's car before its value is set.
   for (const el of document.querySelectorAll('[name]')) if (Object.hasOwn(state.setup, el.name)) el.value = displayInput(el.name, state.setup[el.name]);
   refresh();
 }
@@ -146,6 +147,6 @@ $('#setup-file').onchange = async event => {
   } catch (error) { toast('Could not open setup: ' + error.message); }
   finally { event.target.value = ''; }
 };
-RaceUI.init(); initializeMagnetic(); WorkshopUI.init(); ChassisUI.init(); ChassisTestUI.init(); PredictionUI.init(); InputHelp.init(); TrackdayUI.init(); initializeDesign(); AnalyzeNav.init(); WorkbenchUI.init(); ResultFolders.init(); WorkbenchLevels.init(); initializeUnits(); readWorkspace(); setupAppearance(); fillInputs(); initializeLibrary(); initializePages();
+RaceUI.init(); initializeMagnetic(); WorkshopUI.init(); ChassisUI.init(); ChassisTestUI.init(); PredictionUI.init(); InputHelp.init(); TrackdayUI.init(); GarageUI.init(); initializeDesign(); AnalyzeNav.init(); WorkbenchUI.init(); ResultFolders.init(); WorkbenchLevels.init(); initializeUnits(); readWorkspace(); setupAppearance(); fillInputs(); initializeLibrary(); initializePages();
 $('#save-copy').onclick=()=>{openLibraryTask('save',activeLibraryId);libraryTask.asCopy=true;$('#library-editor-title').textContent='Save a new copy';$('#library-editor-confirm').textContent='Save new copy';$('#library-save-copy').hidden=true;};
 

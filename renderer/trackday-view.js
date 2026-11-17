@@ -11,9 +11,9 @@ const TrackdayUI=(()=>{
     q('[data-route=telemetry]').insertAdjacentHTML('afterend','<a href="#trackday" data-route="trackday">Track day</a>');
     q('[data-page=telemetry]').insertAdjacentHTML('afterend',`<section data-page="trackday" hidden><div class="page-head"><div><p class="eyebrow">AT THE TRACK</p><h1>Track day</h1><p>Change one thing, drive, enter your laps, see what it did.</p></div></div>
     <section class="panel trackday-context" aria-label="Session"><div class="trackday-context-grid">
-     <label class="field">Car<input id="trackday-car" maxlength="200" autocomplete="off"></label><label class="field">Track<input id="trackday-track" maxlength="200" autocomplete="off"></label>
+     <label class="field">Car<input id="trackday-car" maxlength="200" autocomplete="off" list="trackday-car-list"></label><label class="field">Track<input id="trackday-track" maxlength="200" autocomplete="off" list="trackday-track-list"></label><datalist id="trackday-car-list"></datalist><datalist id="trackday-track-list"></datalist>
      <label class="field">Lane<input id="trackday-lane" type="number" min="1" max="64" step="1" inputmode="numeric"></label><label class="field">Driver · optional<input id="trackday-driver" maxlength="200" autocomplete="off"></label></div>
-     <p class="hint">Runs with the same car, track and lane are compared. These stay filled in on this device.</p></section>
+     <p class="hint">Runs with the same car, track and lane are compared. Names from your garage are suggested. These stay filled in on this device. <span id="trackday-lane-info"></span></p></section>
     <div class="trackday-layout">
      <aside class="panel trackday-setup" data-category="gearing"><div class="section-heading"><h2>Current setup</h2><span class="badge">WORKBENCH</span></div><div id="trackday-setup"></div>
       <div class="actions"><a class="btn" href="#telemetry">Edit in Telemetry</a><button type="button" class="btn" id="trackday-sheet">Setup sheet</button></div></aside>
@@ -33,6 +33,18 @@ const TrackdayUI=(()=>{
     q('#trackday-sheet').onclick=()=>{try{SetupSheet.download(state.setup,{units:Units.prefs});toast('Setup sheet downloaded.');}catch(e){toast('Could not create setup sheet: '+e.message);}};
   }
   const context=()=>({car:ctx.car.trim(),track:ctx.track.trim(),lane:ctx.lane,driver:ctx.driver.trim()});
+  // Garage: suggest car and track names; a known track supplies the lane length.
+  const garageTrack=()=>typeof GarageUI==='undefined'?null:GarageUI.tracks().find(t=>t.name.trim().toLowerCase()===ctx.track.trim().toLowerCase())||null;
+  const laneLength=()=>garageTrack()?.lanes.find(l=>l.lane===ctx.lane)?.lengthM??null;
+  function suggest(){
+    if(!q('#trackday-car-list')||typeof GarageUI==='undefined')return;
+    const opt=v=>`<option value="${esc(v)}"></option>`;
+    q('#trackday-car-list').innerHTML=GarageUI.cars().filter(c=>!c.archived).map(c=>opt(c.name)).join('');q('#trackday-track-list').innerHTML=GarageUI.tracks().map(t=>opt(t.name)).join('');
+    // Start from the workbench setup's car when the session has none yet.
+    const car=GarageUI.byRef(state.setup.carRef||'');if(!ctx.car.trim()&&car){ctx.car=car.name;q('#trackday-car').value=car.name;save();}
+    render();
+  }
+  function useCar(name){ctx.car=name;q('#trackday-car').value=name;save();render();}
   // Typed laps, or null with a message when they cannot be read yet.
   function typed(){const text=q('#trackday-laps').value;if(!text.trim())return {laps:null,error:''};try{return {laps:ManualLapsModel.parse(text),error:''};}catch(e){return {laps:null,error:e.message};}}
   function setupCard(){
@@ -56,6 +68,8 @@ const TrackdayUI=(()=>{
   function render(){
     if(!q('#trackday-setup'))return;
     setupCard();
+    const track=garageTrack(),length=laneLength();
+    q('#trackday-lane-info').textContent=track?(track.lanes.some(l=>l.lane===ctx.lane)?`${track.name}, lane ${ctx.lane}: ${length===null?'length not set in the garage':unitText(length,'m',2)+' per lap'}.`:`${track.name} has lanes ${track.lanes.map(l=>l.lane).join(', ')} in the garage.`):'';
     const c=context(),valid=TrackdayModel.validContext(c),runs=RaceUI.runs(),entry=typed();
     // Live preview of typed laps.
     const current=entry.laps?TrackdayModel.preview(entry.laps,q('#trackday-sequence').checked):null,stats=current?RaceModel.statistics(current):null;
@@ -85,11 +99,11 @@ const TrackdayUI=(()=>{
     busy=true;render();
     try{
       const runNumber=TrackdayModel.today(RaceUI.runs(),c).length+1;
-      const values=TrackdayModel.session({ctx:c,setup:state.setup,note:q('#trackday-change').value,laps:entry.laps,sequenceConfirmed:q('#trackday-sequence').checked,runNumber});
+      const values=TrackdayModel.session({ctx:c,setup:state.setup,note:q('#trackday-change').value,laps:entry.laps,sequenceConfirmed:q('#trackday-sequence').checked,runNumber,laneLengthM:laneLength()});
       const response=await window.manualLaps.save({values});if(!response?.ok)throw Error(response?.error||'The run could not be saved.');
       ManualLapsUI.apply(response.value);q('#trackday-laps').value='';q('#trackday-change').value='';toast(`Run ${runNumber} saved. It is also in Lap analysis.`);
     }catch(e){busy=false;q('#trackday-error').textContent=e.message;q('#trackday-error').hidden=false;q('#trackday-save').disabled=false;return;}
     busy=false;render();
   }
-  return {init,render};
+  return {init,render,suggest,useCar};
 })();
