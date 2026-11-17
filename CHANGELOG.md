@@ -1,5 +1,13 @@
 # Changelog
 
+## Unreleased · New version notice
+
+- **Telemetry tells you when a new version is out,** the same way Paddock does. Installed and portable copies ask GitHub for the newest published release about 15 seconds after start-up, then at most twice a day (every 3 hours after a failed check).
+  - A notice in the top bar offers **Download**, which opens the release page in your browser, and **Not now**, which hides it until an even newer version appears.
+  - Telemetry never downloads or installs anything itself. Only the version number is requested; the page it opens is built from this app's own repository and the checked version number.
+  - Drafts and pre-releases are ignored, and a new release waits an hour so every download is attached first.
+- **Settings → Updates:** this version, the newest version, when it last checked, **Check now**, and a switch to turn automatic checks off. Development copies only check on Check now.
+
 ## Unreleased · README pictures
 
 - **New pictures of the app:** the README now shows the current version, including Track day and the garage.

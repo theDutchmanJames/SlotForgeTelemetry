@@ -344,9 +344,11 @@ Some distributions need FUSE support for AppImages or have additional Electron s
 
 ### Updating and moving to another computer
 
-Back up your setup library and manual laps, then close Telemetry. Download the newer app from Releases. Open the new executable on Windows, replace the app in Applications on Mac, or install the new DEB/replace the AppImage on Linux.
+**Telemetry tells you when a new version is out.** Installed and portable copies ask GitHub for the newest published release about 15 seconds after start-up, and then at most twice a day. When there is a newer one, a notice appears in the top bar with **Download** and **Not now**. Download opens the release page in your browser; Telemetry never downloads or installs anything by itself. Not now hides the notice until an even newer version appears. Only the version number is requested: nothing about you, your setups or your laps is sent. **Settings → Updates** shows the newest version, has **Check now**, and can turn automatic checks off.
 
-Your existing user profile is retained. Check your libraries before removing the old program. Moving to another computer requires separate setup/manual-lap imports and a fresh Paddock import for its results. Earlier local builds used the name **SlotForge Calculator**; that profile folder is deliberately retained.
+To update: make a backup in **Settings → Backups**, then close Telemetry. Download the newer app from Releases. Open the new executable on Windows, replace the app in Applications on Mac, or install the new DEB/replace the AppImage on Linux.
+
+Your existing user profile is retained. Check your libraries before removing the old program. To move to another computer, use **Save a backup as…** in Settings → Backups and **Restore from a file…** on the new computer. Earlier local builds used the name **SlotForge Calculator**; that profile folder is deliberately retained.
 
 For source builds and contributor checks, see the [build guide](docs/BUILDING.md).
 
