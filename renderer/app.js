@@ -15,15 +15,15 @@ function calculationInput() { return CalculatorModel.inputOf(state.setup); }
 function persist() {
   try {
     const text = CalculatorModel.encode(state.setup, state.reference);
-    localStorage.setItem(STORAGE, text);
+    DataStore.setItem(STORAGE, text);
     $('#save-state').textContent = 'Workspace saved on this device';
   } catch (error) {
-    $('#save-state').textContent = error.name === 'QuotaExceededError' || error.name === 'SecurityError' ? 'Local saving unavailable · use Export setup' : 'Invalid inputs · last valid workspace retained';
+    $('#save-state').textContent = error.name === 'QuotaExceededError' || error.name === 'SecurityError' || error.name === 'DataFileError' ? 'Local saving unavailable · use Export setup' : 'Invalid inputs · last valid workspace retained';
   }
   const feedbackStatus=$('#feedback-save-status');if(feedbackStatus)feedbackStatus.textContent=$('#save-state').textContent;
 }
 function readWorkspace() {
-  try { const saved = localStorage.getItem(STORAGE); if (saved) Object.assign(state, CalculatorModel.decode(saved)); }
+  try { const saved = DataStore.getItem(STORAGE); if (saved) Object.assign(state, CalculatorModel.decode(saved)); }
   catch { toast('The saved workspace could not be read. The example is ready; open a saved setup to recover.'); }
   try {
     const appearance = JSON.parse(localStorage.getItem(APPEARANCE) || '{}');
@@ -147,6 +147,6 @@ $('#setup-file').onchange = async event => {
   } catch (error) { toast('Could not open setup: ' + error.message); }
   finally { event.target.value = ''; }
 };
-RaceUI.init(); initializeMagnetic(); WorkshopUI.init(); ChassisUI.init(); ChassisTestUI.init(); PredictionUI.init(); InputHelp.init(); TrackdayUI.init(); GarageUI.init(); initializeDesign(); AnalyzeNav.init(); WorkbenchUI.init(); ResultFolders.init(); WorkbenchLevels.init(); initializeUnits(); readWorkspace(); setupAppearance(); fillInputs(); initializeLibrary(); initializePages();
+RaceUI.init(); initializeMagnetic(); WorkshopUI.init(); ChassisUI.init(); ChassisTestUI.init(); PredictionUI.init(); InputHelp.init(); TrackdayUI.init(); GarageUI.init(); BackupsUI.init(); initializeDesign(); AnalyzeNav.init(); WorkbenchUI.init(); ResultFolders.init(); WorkbenchLevels.init(); initializeUnits(); readWorkspace(); setupAppearance(); fillInputs(); initializeLibrary(); initializePages();
 $('#save-copy').onclick=()=>{openLibraryTask('save',activeLibraryId);libraryTask.asCopy=true;$('#library-editor-title').textContent='Save a new copy';$('#library-editor-confirm').textContent='Save new copy';$('#library-save-copy').hidden=true;};
 

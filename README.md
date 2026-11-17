@@ -38,10 +38,18 @@ The original motor/gearing engine and vector icons come from Paddock. The colour
   </tr>
 </table>
 
-*Screenshots from the app using example setups and sample lap data. Click any image for a closer look.*
+*Screenshots from the app using example setups and sample lap data, made with `npm run screenshots`. Click any image for a closer look.*
 
 <details>
-  <summary><strong>Explore comparisons, lap analysis, Progress and the setup library</strong></summary>
+  <summary><strong>Explore Track day, the garage, comparisons, lap analysis, Progress and the setup library</strong></summary>
+
+<table>
+  <tr><th width="50%">Track day · change one thing, see what it did</th><th width="50%">Your cars and tracks in the garage</th></tr>
+  <tr>
+    <td><a href="docs/screenshots/trackday.png"><img src="docs/screenshots/trackday.png" alt="Track day comparing a run after a pinion change with the previous run" width="100%"></a></td>
+    <td><a href="docs/screenshots/garage.png"><img src="docs/screenshots/garage.png" alt="Garage with cars, a track with lane lengths, and a car's setups and best laps" width="100%"></a></td>
+  </tr>
+</table>
 
 <table>
   <tr><th width="50%">Compare two saved setups</th><th width="50%">Keep your setup experiments</th></tr>
@@ -251,7 +259,17 @@ The working draft is saved automatically on this computer. **Analyze uses saved 
 
 <a id="keep-your-setups-safe"></a>
 
-Backups are separate for each kind of data:
+**Automatic backups cover everything.** Telemetry backs up all its data in one file whenever something changed: shortly after start-up, every 12 hours while open, and when you quit. It keeps the newest 10 backups.
+
+In **Settings → Backups** you can:
+
+- choose an extra folder, such as a USB stick or a cloud-synced folder, that receives a copy of every automatic backup;
+- back up now, or save a backup anywhere;
+- restore a backup from the list or from a file.
+
+Restoring checks every file first and saves your current data as a "before a restore" backup, so a restore can always be undone. Appearance, units and layout preferences are not part of backups.
+
+You can still export each kind of data on its own:
 
 | Data | Backup and recovery |
 | --- | --- |

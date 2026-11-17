@@ -9,6 +9,7 @@ function privateFolder(folder){
  execFileSync('powershell.exe',['-NoProfile','-NonInteractive','-EncodedCommand',Buffer.from(script,'utf16le').toString('base64')],{env:{...process.env,TEST_DIR:folder},windowsHide:true,stdio:'ignore'});
 }
 app.whenReady().then(async()=>{
+ require('../src/storage-ipc.cjs').registerStorage(profile,{schedule:false});
  const host=await createHost(),folder=path.join(profile,'discovery');privateFolder(folder);
  fs.writeFileSync(path.join(folder,'d'.repeat(64)+'.json'),JSON.stringify(host.descriptor()),{mode:0o600});
  const paddock=require('../src/paddock-ipc.cjs').registerPaddock(profile,{localFolder:folder});

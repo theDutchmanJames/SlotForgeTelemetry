@@ -10,6 +10,7 @@ function evidence(id,day,count,duration,lane=1){
 }
 const data={version:1,hosts:[{id:'paddock-demo',name:'Test collection',revision:10,syncedAt:new Date().toISOString(),results:[evidence('A',2,6,10000),evidence('B',3,6,9800),evidence('C',4,1,9000),evidence('D',1,6,10000,2)]}]};checkCache(data);fs.writeFileSync(path.join(profile,'paddock-results-v1.json'),JSON.stringify(data));
 app.whenReady().then(async()=>{
+ require('../src/storage-ipc.cjs').registerStorage(profile,{schedule:false});
  const client=require('../src/paddock-ipc.cjs').registerPaddock(profile),win=new BrowserWindow({show:false,width:1280,height:1100,webPreferences:{preload:path.join(__dirname,'../src/preload.cjs'),sandbox:true,contextIsolation:true,nodeIntegration:false,backgroundThrottling:false,offscreen:true}}),errors=[];
  win.webContents.on('console-message',e=>{if(e.level==='error')errors.push(e.message);});
  const run=s=>win.webContents.executeJavaScript(s,true),pause=()=>new Promise(r=>setTimeout(r,100)),click=s=>run(`document.querySelector(${JSON.stringify(s)}).click()`);

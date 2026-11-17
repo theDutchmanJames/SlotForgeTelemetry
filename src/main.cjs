@@ -23,6 +23,7 @@ app.on('second-instance', () => {
 });
 app.whenReady().then(() => {
   const paddock=require('./paddock-ipc.cjs').registerPaddock(app.getPath('userData'));
+  require('./storage-ipc.cjs').registerStorage(app.getPath('userData'),{version:app.getVersion()});
   app.on('before-quit',()=>paddock.disconnect());
   session.defaultSession.setPermissionRequestHandler((_wc, _permission, callback) => callback(false));
   session.defaultSession.setPermissionCheckHandler(() => false);

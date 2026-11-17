@@ -14,3 +14,6 @@ hr{border:0;border-top:1px solid var(--line);margin:18px 0}#help-try{margin-top:
 .analyze-topics .topic-empty{opacity:.55}
 .analyze-topics .topic-empty:hover,.analyze-topics .topic-empty:focus-visible,.analyze-topics .topic-empty.active{opacity:1}
 @media(max-width:760px){.analyze-modes{gap:8px 12px}.analyze-topics{gap:10px 14px}}
+
+/* Settings → Backups spacing. */
+#settings-backups .actions{margin:10px 0 14px;flex-wrap:wrap}#settings-backups h3{margin:20px 0 6px}

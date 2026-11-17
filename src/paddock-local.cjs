@@ -310,4 +310,4 @@ class LocalHistoryClient{
  persist(data){const text=JSON.stringify(data);if(Buffer.byteLength(text)>MAX_CACHE)throw Error('Imported races exceed 200 MiB.');fs.mkdirSync(path.dirname(this.file),{recursive:true});const temp=this.file+'.'+crypto.randomUUID()+'.tmp';let fd;try{fd=fs.openSync(temp,'wx');fs.writeFileSync(fd,text);fs.fsyncSync(fd);fs.closeSync(fd);fd=undefined;fs.renameSync(temp,this.file);}catch(e){if(fd!==undefined)fs.closeSync(fd);try{fs.unlinkSync(temp);}catch{}throw Error('Could not save imported races. Existing races are unchanged. '+e.message);}}
  rebuild(){if(this.busy)throw Error('Wait for the import to finish.');if(!this.loadError)throw Error('The saved races are readable; rebuilding is unnecessary.');const backup=this.file+'.unreadable-'+Date.now();if(fs.existsSync(this.file))fs.renameSync(this.file,backup);this.data={version:1,hosts:[]};this.loadError='';return {...this.status(),backup};}
 }
-module.exports={LocalHistoryClient,scan,directory,descriptor,checkCache,hash};
+module.exports={LocalHistoryClient,scan,directory,descriptor,checkCache,checkCars,hash};

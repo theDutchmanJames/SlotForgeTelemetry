@@ -2,6 +2,7 @@
 const {app,BrowserWindow,dialog}=require('electron'),fs=require('node:fs'),path=require('node:path'),assert=require('node:assert/strict');
 const output=path.join(__dirname,'../test-results'),profile=path.join(output,'manual-ui-'+Date.now());fs.mkdirSync(profile,{recursive:true});app.setPath('userData',profile);app.disableHardwareAcceleration();fs.writeFileSync(path.join(profile,'manual-laps-v1.json'),'damaged-original');
 app.whenReady().then(async()=>{
+ require('../src/storage-ipc.cjs').registerStorage(profile,{schedule:false});
  const client=require('../src/paddock-ipc.cjs').registerPaddock(profile),win=new BrowserWindow({show:false,width:1280,height:1000,webPreferences:{preload:path.join(__dirname,'../src/preload.cjs'),sandbox:true,contextIsolation:true,nodeIntegration:false,backgroundThrottling:false,offscreen:true}}),errors=[];
  win.webContents.on('console-message',e=>{if(e.level==='error'){errors.push(e.message);console.error('Renderer:',e.message);}});
  const run=s=>win.webContents.executeJavaScript(s,true).catch(e=>{console.error("Failed script:",s);throw e;}),pause=()=>new Promise(r=>setTimeout(r,150)),click=s=>run(`document.querySelector(${JSON.stringify(s)}).click()`),set=(id,value)=>run(`{const e=document.getElementById(${JSON.stringify(id)});e.value=${JSON.stringify(value)};e.dispatchEvent(new Event('input',{bubbles:true}));e.dispatchEvent(new Event('change',{bubbles:true}));}`),route=async hash=>{await run(`location.hash=${JSON.stringify(hash)};void 0`);await pause();};

@@ -1,5 +1,18 @@
 # Changelog
 
+## Unreleased · README pictures
+
+- **New pictures of the app:** the README now shows the current version, including Track day and the garage.
+- **`npm run screenshots`:** remakes every README picture from the real app, in a temporary profile filled with example setups, cars and laps only.
+
+## Unreleased · Backups and file storage
+
+- **Automatic backups of everything:** one backup file holds all Telemetry data (saved setups, workbench draft, manual and Track day laps, garage, imported races and the Paddock car catalogue).
+  - A backup is made when data changed: shortly after start-up, every 12 hours while open, and when quitting. The newest 10 are kept.
+  - Optionally, each one is also copied to a folder of your choice, such as a USB stick or a cloud-synced folder.
+- **Settings → Backups:** Back up now, Save a backup as…, Restore from a file…, Open backup folder, and a list of recent backups to restore. Before anything is replaced, every file in a backup is checked against its fingerprint and its own validator, and the current data is saved as a "before a restore" backup. Telemetry restarts afterwards.
+- **Setups are plain files now:** the setup library, active setup and workbench draft live in Telemetry's profile folder next to the other data, written atomically. On first start they are copied from window storage, including unreadable data so recovery can still offer it, and the old copy is left in place as a safety net. Library rules, recovery and file formats are unchanged.
+
 ## Unreleased · Garage
 
 - **Garage (Library → Garage):** cars and tracks in one place.
@@ -190,3 +203,4 @@ See [the review report](docs/REVIEW.md) for validation and outstanding platform/
 ### Limits
 
 Physical outputs are idealized estimates, not measured on-track performance. No live timing/sensor input or automatic cross-app synchronization is included. Windows is the manually exercised desktop environment; Linux/macOS packages require testing on users' specific systems. Windows is unsigned; macOS is ad-hoc signed and not notarized. Linux downloads target x64; ARM64 Linux source builds are supported separately.
+

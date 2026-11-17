@@ -3,12 +3,12 @@ const LIBRARY_KEY='slotforge.telemetry.library.v1',ACTIVE_KEY='slotforge.telemet
 let library=[],libraryRaw=null,libraryError='',activeLibraryId=null,libraryTask=null,deletedEntry=null;
 function readLibrary() {
   libraryRaw=null;
-  try {libraryRaw=localStorage.getItem(LIBRARY_KEY);library=libraryRaw===null?[]:LibraryModel.decode(libraryRaw);libraryError='';}
+  try {libraryRaw=DataStore.getItem(LIBRARY_KEY);library=libraryRaw===null?[]:LibraryModel.decode(libraryRaw);libraryError='';}
   catch {library=[];libraryError='The library could not be read. Its stored data has been left untouched. Export the unreadable data for safekeeping, then restore a valid library backup.';}
 }
 function bindLibrary(id) {
   activeLibraryId=id;
-  try {if(id)localStorage.setItem(ACTIVE_KEY,id);else localStorage.removeItem(ACTIVE_KEY);}catch {/* Library saving reports storage errors separately. */}
+  try {if(id)DataStore.setItem(ACTIVE_KEY,id);else DataStore.removeItem(ACTIVE_KEY);}catch {/* Library saving reports storage errors separately. */}
   updateLibraryStatus();
 }
 function updateLibraryStatus() {
@@ -23,12 +23,12 @@ function updateLibraryStatus() {
 }
 function commitLibrary(next,{recover=false}={}) {
   if(libraryError&&!recover)throw Error(libraryError);
-  if(localStorage.getItem(LIBRARY_KEY)!==libraryRaw){readLibrary();renderLibrary();throw Error('The library changed in another window. Review it and try again.');}
+  if(DataStore.getItem(LIBRARY_KEY)!==libraryRaw){readLibrary();renderLibrary();throw Error('The library changed in another window. Review it and try again.');}
   const text=LibraryModel.encode(next);
-  localStorage.setItem(LIBRARY_KEY,text); // Commit before updating memory or reporting success.
+  DataStore.setItem(LIBRARY_KEY,text); // Commit before updating memory or reporting success.
   library=next;libraryRaw=text;libraryError='';renderLibrary();updateLibraryStatus();
 }
-function libraryFailure(error) {return ['QuotaExceededError','SecurityError'].includes(error.name)?'Could not save the library on this device. Your saved entries are unchanged; export your setup as a file.':error.message;}
+function libraryFailure(error) {return ['QuotaExceededError','SecurityError','DataFileError'].includes(error.name)?'Could not save the library on this device. Your saved entries are unchanged; export your setup as a file.':error.message;}
 function libraryNotice(message) {$('#library-message').textContent=message;}
 function renderLibraryTable(entries){
   if(!entries.some(e=>e.id===selectedLibraryId))selectedLibraryId=entries[0]?.id||null;
@@ -66,7 +66,7 @@ function completeLibraryTask(asCopy=false) {
   const task=libraryTask;if(!task)return;
   try {
     if(task.kind==='replace-workbench'){applyWorkbench(task.next);$('#library-editor').close();if(task.afterRoute)navigate(task.afterRoute);if(task.focus)focusSetupInput(task.focus);return;}
-    if(task.raw!==libraryRaw||localStorage.getItem(LIBRARY_KEY)!==task.raw){readLibrary();renderLibrary();throw Error('The library changed. Close this dialog and try again.');}
+    if(task.raw!==libraryRaw||DataStore.getItem(LIBRARY_KEY)!==task.raw){readLibrary();renderLibrary();throw Error('The library changed. Close this dialog and try again.');}
     const now=new Date().toISOString(),item=library.find(e=>e.id===task.id);
     if(task.kind==='save') {
       const setup=CalculatorModel.cleanSetup({...state.setup,name:LibraryModel.name($('#library-entry-name').value)}),id=asCopy||task.asCopy?null:task.id,newId=crypto.randomUUID();
@@ -90,7 +90,7 @@ function completeLibraryTask(asCopy=false) {
   } catch(error){$('#library-editor-error').textContent=libraryFailure(error);}
 }
 function initializeLibrary() {
-  readLibrary();try{activeLibraryId=localStorage.getItem(ACTIVE_KEY);}catch{}
+  readLibrary();try{activeLibraryId=DataStore.getItem(ACTIVE_KEY);}catch{}
   if(!library.some(e=>e.id===activeLibraryId))activeLibraryId=null;
   $('#library-button').onclick=()=>navigate('library');
   $('#save-library').onclick=()=>openLibraryTask('save',activeLibraryId);
