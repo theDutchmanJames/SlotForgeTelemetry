@@ -62,8 +62,11 @@ test('descriptors follow the local-library-v1 contract; discovery needs a privat
  assert.deepEqual(await scan({folder:path.join(dir,'missing')}),[]);
  const put=(name,text)=>fs.writeFileSync(path.join(dir,name),text,{mode:0o600});
  put('b'.repeat(64)+'.json',JSON.stringify(d));put('c'.repeat(64)+'.json','{bad json');put('ignored.tmp','x');
- const found=await scan({folder:dir,checkWindows:async(f,names)=>names});assert.equal(found.length,1);assert.equal(found[0].databaseId,d.databaseId);
- await assert.rejects(()=>scan({folder:dir,checkWindows:async()=>{throw Error('not private');}}),/not private/);
+ // On Mac and Linux this runs the real owner and mode checks; the Windows check is covered below.
+ const found=await scan({folder:dir,...(process.platform==='win32'?{checkWindows:async(f,names)=>names}:{})});assert.equal(found.length,1);assert.equal(found[0].databaseId,d.databaseId);
+ // The Windows permission check, on any platform: its verdict decides, and a refusal is not ignored.
+ assert.equal((await scan({folder:dir,platform:'win32',checkWindows:async(f,names)=>names})).length,1);
+ await assert.rejects(()=>scan({folder:dir,platform:'win32',checkWindows:async()=>{throw Error('not private');}}),/not private/);
 });
 test('historical history-v1 gaps stay unknown instead of becoming numbers',()=>{
  const bundle=structuredClone(read('history-create').bundle);bundle.provenance.kind='historical';bundle.race.startedAt=null;bundle.context.savedAt='2026-10-01T00:00:00.000Z';
