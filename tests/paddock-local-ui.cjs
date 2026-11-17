@@ -1,19 +1,11 @@
 // Desktop flow for "Paddock on this computer": real preload/IPC bridge, real private-folder discovery,
 // a stand-in shared-history host serving Paddock's own fixtures, and an isolated profile.
-const {app,BrowserWindow}=require('electron'),fs=require('node:fs'),path=require('node:path'),assert=require('node:assert/strict'),{execFileSync}=require('node:child_process');
+const {app,BrowserWindow}=require('electron'),fs=require('node:fs'),path=require('node:path'),assert=require('node:assert/strict');
 const output=path.join(__dirname,'../test-results'),profile=path.join(output,'paddock-local-ui-'+Date.now());fs.mkdirSync(profile,{recursive:true});app.setPath('userData',profile);app.disableHardwareAcceleration();
-const {createHost,read}=require('./support/shared-history-host.cjs');
-// Paddock publishes descriptors only in a folder private to this user; make the test folder private the same way.
-function privateFolder(folder){
- fs.mkdirSync(folder,{recursive:true,mode:0o700});
- if(process.platform!=='win32'){fs.chmodSync(folder,0o700);return;}
- const script=`$ErrorActionPreference='Stop';$ProgressPreference='SilentlyContinue';$d=$env:TEST_DIR;$sid=[Security.Principal.WindowsIdentity]::GetCurrent().User;$acl=New-Object Security.AccessControl.DirectorySecurity;$acl.SetOwner($sid);$acl.SetAccessRuleProtection($true,$false);$acl.AddAccessRule((New-Object Security.AccessControl.FileSystemAccessRule($sid,'FullControl','ContainerInherit,ObjectInherit','None','Allow')));[IO.Directory]::SetAccessControl($d,$acl)`;
- execFileSync('powershell.exe',['-NoProfile','-NonInteractive','-EncodedCommand',Buffer.from(script,'utf16le').toString('base64')],{env:{...process.env,TEST_DIR:folder},windowsHide:true,stdio:'ignore'});
-}
+const {createHost,read}=require('./support/shared-history-host.cjs'),{publishDescriptor}=require('./support/local-descriptor.cjs');
 app.whenReady().then(async()=>{
  require('../src/storage-ipc.cjs').registerStorage(profile,{schedule:false});
- const host=await createHost(),folder=path.join(profile,'discovery');privateFolder(folder);
- fs.writeFileSync(path.join(folder,'d'.repeat(64)+'.json'),JSON.stringify(host.descriptor()),{mode:0o600});
+ const host=await createHost(),folder=path.join(profile,'discovery');publishDescriptor(folder,host.descriptor());
  const paddock=require('../src/paddock-ipc.cjs').registerPaddock(profile,{localFolder:folder});
  const win=new BrowserWindow({show:false,width:1280,height:1100,webPreferences:{preload:path.join(__dirname,'../src/preload.cjs'),sandbox:true,contextIsolation:true,nodeIntegration:false,backgroundThrottling:false,offscreen:true}}),errors=[];
  win.webContents.on('console-message',e=>{if(e.level==='error')errors.push(e.message);});

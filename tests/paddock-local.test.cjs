@@ -56,9 +56,12 @@ test('unknown formats are reported, not guessed; a busy client refuses parallel 
 test('descriptors follow the local-library-v1 contract; discovery needs a private folder',async t=>{
  const d=read('discovery');assert.equal(descriptor(d).databaseId,d.databaseId);
  for(const bad of [{...d,address:'http://192.168.1.2:5000'},{...d,token:'short'},{...d,extra:true},{...d,format:'other'}])assert.throws(()=>descriptor(bad));
- const dir=fs.mkdtempSync(path.join(os.tmpdir(),'telemetry-scan-'));t.after(()=>fs.rmSync(dir,{recursive:true,force:true}));
+ // The real path, like Paddock's own folder: macOS reaches its temp folder through the /var → /private/var link,
+ // which discovery rightly refuses. Files are private to this user, as Paddock writes them.
+ const dir=fs.mkdtempSync(path.join(fs.realpathSync(os.tmpdir()),'telemetry-scan-'));t.after(()=>fs.rmSync(dir,{recursive:true,force:true}));
  assert.deepEqual(await scan({folder:path.join(dir,'missing')}),[]);
- fs.writeFileSync(path.join(dir,'b'.repeat(64)+'.json'),JSON.stringify(d));fs.writeFileSync(path.join(dir,'c'.repeat(64)+'.json'),'{bad json');fs.writeFileSync(path.join(dir,'ignored.tmp'),'x');
+ const put=(name,text)=>fs.writeFileSync(path.join(dir,name),text,{mode:0o600});
+ put('b'.repeat(64)+'.json',JSON.stringify(d));put('c'.repeat(64)+'.json','{bad json');put('ignored.tmp','x');
  const found=await scan({folder:dir,checkWindows:async(f,names)=>names});assert.equal(found.length,1);assert.equal(found[0].databaseId,d.databaseId);
  await assert.rejects(()=>scan({folder:dir,checkWindows:async()=>{throw Error('not private');}}),/not private/);
 });
