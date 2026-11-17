@@ -1,6 +1,8 @@
 # Changelog
 
-## Unreleased · New version notice
+## 0.14.0 — 17 November 2026 · Track day, Garage and backups
+
+### New version notice
 
 - **Telemetry tells you when a new version is out,** the same way Paddock does. Installed and portable copies ask GitHub for the newest published release about 15 seconds after start-up, then at most twice a day (every 3 hours after a failed check).
   - A notice in the top bar offers **Download**, which opens the release page in your browser, and **Not now**, which hides it until an even newer version appears.
@@ -8,12 +10,12 @@
   - Drafts and pre-releases are ignored, and a new release waits an hour so every download is attached first.
 - **Settings → Updates:** this version, the newest version, when it last checked, **Check now**, and a switch to turn automatic checks off. Development copies only check on Check now.
 
-## Unreleased · README pictures
+### README pictures
 
 - **New pictures of the app:** the README now shows the current version, including Track day and the garage.
 - **`npm run screenshots`:** remakes every README picture from the real app, in a temporary profile filled with example setups, cars and laps only.
 
-## Unreleased · Backups and file storage
+### Backups and file storage
 
 - **Automatic backups of everything:** one backup file holds all Telemetry data (saved setups, workbench draft, manual and Track day laps, garage, imported races and the Paddock car catalogue).
   - A backup is made when data changed: shortly after start-up, every 12 hours while open, and when quitting. The newest 10 are kept.
@@ -21,7 +23,7 @@
 - **Settings → Backups:** Back up now, Save a backup as…, Restore from a file…, Open backup folder, and a list of recent backups to restore. Before anything is replaced, every file in a backup is checked against its fingerprint and its own validator, and the current data is saved as a "before a restore" backup. Telemetry restarts afterwards.
 - **Setups are plain files now:** the setup library, active setup and workbench draft live in Telemetry's profile folder next to the other data, written atomically. On first start they are copied from window storage, including unreadable data so recovery can still offer it, and the old copy is left in place as a safety net. Library rules, recovery and file formats are unchanged.
 
-## Unreleased · Garage
+### Garage
 
 - **Garage (Library → Garage):** cars and tracks in one place.
   - **Paddock cars** come in with each import from Paddock on this computer: name, maker, class, availability, current technical configuration and photo. They are read-only; edit them in Paddock. The catalogue is incremental, following Paddock's car change feed, and photos are verified against their SHA-256 fingerprint before use.
@@ -31,7 +33,7 @@
 - **Setups name their car:** a **Car** choice next to the setup name, saved with the setup and its exported file. Older files have none, and older Telemetry versions ignore it.
 - **Track day uses the garage:** car and track names are suggested, the workbench setup's car is preselected, and a garage track supplies the lane length that is saved with each run.
 
-## Unreleased · Installers, gear chart and setup sheets
+### Installers, gear chart and setup sheets
 
 - **Track day:** a new page for the change → drive → enter laps → compare loop at the track.
   - Set the car, track, lane and driver once; they are remembered on this device.
