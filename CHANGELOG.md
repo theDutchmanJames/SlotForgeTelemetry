@@ -43,13 +43,15 @@ Measured with 200 setups, 300 imported races, 300 lap sessions and 40 cars:
 - **Setups name their car:** a **Car** choice next to the setup name, saved with the setup and its exported file. Older files have none, and older Telemetry versions ignore it.
 - **Track day uses the garage:** car and track names are suggested, the workbench setup's car is preselected, and a garage track supplies the lane length that is saved with each run.
 
-### Installers, gear chart and setup sheets
+### Track day
 
 - **Track day:** a new page for the change → drive → enter laps → compare loop at the track.
   - Set the car, track, lane and driver once; they are remembered on this device.
   - See the current workbench setup in large figures, note what you changed and type or paste lap times, with a live best, typical and spread preview.
   - **Compare with last run** shows a plain verdict ("typical pace faster by 0.250 s") with a better/worse table and the setup differences, even before you save.
   - Saved runs are ordinary manual lap sessions, with the gearing, tyre, weight and RPM snapshot attached, so Lap analysis, Progress, Compare runs and Records include them. **Today's runs** lists them with their change notes.
+
+### Simpler workbench and Analyze
 
 - **Simpler workbench:** a level switch above the inputs.
   - **Quick setup** (default) shows only gearing, motor, rear tyres and weight, with their results.
@@ -61,10 +63,14 @@ Measured with 200 setups, 300 imported races, 300 lap sessions and 40 cars:
 - **Simpler Analyze navigation:** the six modes sit in two labelled groups, *Setups* (Analysis · Compare) and *Track laps* (Laps · Compare · Progress · Records). The eight setup topics are grouped as *Essentials*, *Measurements* and *Planning*. Topics with nothing saved for the selected setup are dimmed but still open, so it is clear where there is something to look at.
 - Input examples are lighter: an empty field shows one short "Example, not used" line, and the example folds away once a value is entered.
 
+### Units
+
 - **Units:** **Settings → Units** offers Metric, Imperial or a custom mix of speed (km/h, mph), weight (g, oz), motor torque (gf·cm, oz·in, mN·m), small lengths (mm, in) and lap distance (m, ft).
   - The workbench inputs, live results, Analyze, the gear chart and Gear finder, setup comparison, the library and setup sheets follow the choice. Power-to-weight becomes W/lb with ounces.
   - Saved setups, files and backups always stay metric, so they remain compatible. A value typed in another unit is stored in metric.
   - Specialist tools (chassis geometry, magnetic downforce, Testing & planning, Driver Feedback) and Calculations explained stay metric for now.
+
+### Paddock on this computer
 
 - **Paddock on this computer:** connect to the Paddock collection on the same computer with one click and no password, and import every race in it. That includes races Timing saved to a Shared library (`history-v1`), which never appeared before.
   - Discovery uses Paddock's private local connection file, and the credential stays in the main process.
@@ -73,15 +79,19 @@ Measured with 200 setups, 300 imported races, 300 lap sessions and 40 cars:
   - Records use the track-record flag; a run's best lap uses the personal-record flag.
   - Historical gaps (unknown times, lanes or dates) stay unknown and never count towards pace.
   - Tested against Paddock's contract fixtures and, optionally, against Paddock's real local service (`SLOTFORGE_PADDOCK_SOURCE`).
-
-- **Gear chart:** a pinion × driven-gear grid over the Gear finder ranges, showing rollout, no-load speed or ratio. Cells within 1% / 3% of the target rollout are highlighted and the current gearing is outlined. On the workbench it is a live result group; clicking a cell applies that gearing to the draft. In Analyze → Gear finder, clicking opens the saved setup with that gearing. Large ranges are capped at 30 × 60 with a visible note.
 - **Paddock connection touch-up:**
   - The connection steps now follow Paddock's current menus (Connections → Dealership Mode) and drop the retired legacy-sharing wording.
   - Telemetry remembers the last collection and address (never the password) and finds the collection again when Paddock restarts on a new port. **Forget** clears it.
   - Connecting imports results straight away.
   - Unreachable hosts get plain explanations instead of "fetch failed", and an empty search explains the usual causes.
   - A full notification queue on Paddock no longer locks the host for 60 seconds.
+
+### Gear chart and setup sheet
+
+- **Gear chart:** a pinion × driven-gear grid over the Gear finder ranges, showing rollout, no-load speed or ratio. Cells within 1% / 3% of the target rollout are highlighted and the current gearing is outlined. On the workbench it is a live result group; clicking a cell applies that gearing to the draft. In Analyze → Gear finder, clicking opens the saved setup with that gearing. Large ranges are capped at 30 × 60 with a visible note.
 - **Setup sheet:** download a printable one-page sheet of the workbench draft (**Setup sheet** next to Export file) or a saved setup (**Library → Setup sheet**). It includes inputs, calculated results, notes, a nearby-gearing table and an area for handwritten track notes. Print it or save it as PDF from the browser's print dialog.
+
+### Installers
 
 - Add a Windows installer (`…-windows-x64-Setup.exe`) next to the portable executable. It offers a current-user or all-users install, a choice of folder, Start menu and desktop shortcuts, and an uninstaller that keeps saved setups and laps.
 - Every platform now has a portable app and an installer: Windows Portable.exe / Setup.exe, macOS ZIP / DMG, Linux AppImage / DEB.
