@@ -48,6 +48,7 @@ function renderLibrary() {
   $('#library-recover-export').hidden=!libraryError||libraryRaw===null;
   const entries=LibraryModel.search(library,$('#library-search').value,$('#library-sort').value);
   renderLibraryTable(entries);
+  if(typeof LibraryUI!=='undefined')LibraryUI.status('setups',libraryError?'Needs attention':library.length===1?'1 saved setup':library.length?library.length+' saved setups':'No setups yet');
   $('#library-undo').hidden=!deletedEntry;
 }
 function openLibraryTask(kind,id=null) {

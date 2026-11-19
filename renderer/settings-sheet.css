@@ -1,17 +1,17 @@
 /* Settings in the SlotForge Restyle look: Paddock Rail (side list with status lines) and Settings Sheet.
    Loaded after restyle.css. Markup comes from settings-sheet.js and the modules' own section strings. */
 
-/* ---------- The side list ---------- */
+/* ---------- The side list (also the Library's, .library-rail) ---------- */
 .settings-layout{display:grid;grid-template-columns:250px minmax(0,1fr);gap:28px;align-items:start}
-.settings-nav[data-rail]{position:sticky;top:16px;display:flex;flex-direction:column;gap:2px;padding:14px 10px 16px;border:1px solid var(--line);border-radius:12px;background:color-mix(in srgb,var(--bg) 55%,var(--panel))}
+:is(.settings-nav[data-rail],.library-rail){position:sticky;top:16px;display:flex;flex-direction:column;gap:2px;padding:14px 10px 16px;border:1px solid var(--line);border-radius:12px;background:color-mix(in srgb,var(--bg) 55%,var(--panel))}
 .rail-group{display:flex;flex-direction:column;gap:2px}
 .rail-group+.rail-group{margin-top:14px}
 .rail-label{margin:0 10px 6px;font:600 10.5px/1.3 'Segoe UI',system-ui,sans-serif;letter-spacing:.14em;text-transform:uppercase;color:color-mix(in srgb,var(--muted) 80%,var(--bg))}
-.settings-nav a.rail-item{display:flex;align-items:center;gap:11px;width:100%;min-height:44px;padding:7px 10px;border:0;border-radius:8px;background:transparent;box-shadow:none;color:color-mix(in srgb,var(--ink) 82%,var(--muted));font-size:13.5px;font-weight:400;line-height:1.25;text-decoration:none}
-.settings-nav a.rail-item:hover{background:color-mix(in srgb,var(--ink) 6%,transparent)}
-.settings-nav a.rail-item[aria-current=page]{background:color-mix(in srgb,var(--ink) 10%,var(--panel));border:0;box-shadow:none;color:var(--ink);font-weight:600}
-.settings-nav a.rail-item>.sf-icon{width:18px;height:18px;flex:none;color:var(--muted)}
-.settings-nav a.rail-item[aria-current=page]>.sf-icon{color:var(--accent-text,var(--accent))}
+:is(.settings-nav,.library-rail) a.rail-item{display:flex;align-items:center;gap:11px;width:100%;min-height:44px;padding:7px 10px;border:0;border-radius:8px;background:transparent;box-shadow:none;color:color-mix(in srgb,var(--ink) 82%,var(--muted));font-size:13.5px;font-weight:400;line-height:1.25;text-decoration:none}
+:is(.settings-nav,.library-rail) a.rail-item:hover{background:color-mix(in srgb,var(--ink) 6%,transparent)}
+:is(.settings-nav,.library-rail) a.rail-item[aria-current=page]{background:color-mix(in srgb,var(--ink) 10%,var(--panel));border:0;box-shadow:none;color:var(--ink);font-weight:600}
+:is(.settings-nav,.library-rail) a.rail-item>.sf-icon{width:18px;height:18px;flex:none;color:var(--muted)}
+:is(.settings-nav,.library-rail) a.rail-item[aria-current=page]>.sf-icon{color:var(--accent-text,var(--accent))}
 .rail-text{display:flex;flex-direction:column;min-width:0;flex:1}
 .rail-text small{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:11.5px;font-weight:400;color:var(--muted)}
 
@@ -75,11 +75,11 @@ input.ss-switch:disabled{opacity:.45;cursor:not-allowed}
 
 @media(max-width:760px){
   .settings-layout{grid-template-columns:minmax(0,1fr);gap:18px}
-  .settings-nav[data-rail]{position:static;flex-direction:row;flex-wrap:wrap;padding:8px}
+  :is(.settings-nav[data-rail],.library-rail){position:static;flex-direction:row;flex-wrap:wrap;padding:8px}
   .rail-group{flex-direction:row;flex-wrap:wrap}
   .rail-group+.rail-group{margin-top:0}
   .rail-label,.rail-text small{display:none}
-  .settings-nav a.rail-item{width:auto;min-height:36px;flex:0 1 auto}
+  :is(.settings-nav,.library-rail) a.rail-item{width:auto;min-height:36px;flex:0 1 auto}
   .ss-row{grid-template-columns:minmax(0,1fr)}
   .ss-c{justify-content:flex-start}
   .ss-c input:not([type=checkbox]):not([type=color]){width:100%}

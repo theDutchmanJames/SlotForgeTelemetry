@@ -47,7 +47,16 @@ app.whenReady().then(async()=>{
   await win.loadFile(path.join(__dirname,'../renderer/index.html'));await pause();await wait("document.querySelector('[name=carRef]').value==='paddock:paddock-demo:car-a'",'linked car after reload');
   await run("location.hash='library/garage'");await wait("document.querySelectorAll('[data-garage-car]').length===3");
   await click('[data-tone-choice=light]');await click('[data-garage-car="paddock:paddock-demo:car-a"]');await shot('light');
+  // SlotForge Restyle: the Library's sections are a side list with status lines; the setup tools are one Control Strip.
+  assert.deepEqual(await run("[...document.querySelectorAll('.library-shell>.library-rail a')].map(a=>a.hash)"),['#library','#library/races','#library/garage']);
+  assert.equal(await run("document.querySelector('.library-rail a[aria-current=page]').hash"),'#library/garage');
+  assert.equal(await text('[data-rail-status=garage]'),'3 cars · 1 track');assert.match(await text('[data-rail-status=setups]'),/^\d+ saved setups?$/);
+  assert.equal(await run("!!document.querySelector('.library-main #setup-library')&&!!document.querySelector('.library-main #race-library')&&!!document.querySelector('.library-main #garage')"),true);
+  assert.deepEqual(await run("[...document.querySelectorAll('.control-strip .strip-tools .btn')].map(b=>b.id||b.textContent.trim())"),['Open workbench','library-import','library-backup']);
+  assert.equal(await run("!!document.querySelector('.control-strip .strip-controls #library-search')&&!!document.querySelector('.control-strip .strip-controls #library-sort')"),true);
+  assert.equal(await run("document.querySelector('#library-search').labels[0].textContent.trim()"),'Search names & notes','search keeps its name for screen readers');
   win.setSize(390,1000);await pause();assert.equal(await run('document.documentElement.scrollWidth>innerWidth'),false);await shot('narrow');
+  await run("location.hash='library'");await pause();assert.equal(await run('document.documentElement.scrollWidth>innerWidth'),false);await shot('library-narrow');
   assert.deepEqual(errors,[]);console.log('Garage passed: Paddock cars and photos, local car and track, setup link and export, car detail with setups and best laps, Track day lane length, persistence, light/dark and narrow layouts.');
  }finally{paddock.disconnect();host.close();win.destroy();app.quit();}
 }).catch(e=>{console.error(e);app.exit(1);});

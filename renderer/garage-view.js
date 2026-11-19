@@ -39,6 +39,7 @@ const GarageUI=(()=>{
     for(const b of document.querySelectorAll('[data-garage-car]')){b.onclick=()=>{selected=b.dataset.garageCar;render();};photo(b.querySelector('img').dataset.photo,b.querySelector('img'));}
     q('#garage-tracks').innerHTML=tracks().length?`<div class="table-wrap"><table><thead><tr><th>Track</th><th>Lanes</th><th></th></tr></thead><tbody>${tracks().map(t=>`<tr><th>${esc(t.name)}${t.notes?`<small>${esc(t.notes)}</small>`:''}</th><td>${t.lanes.map(l=>`${l.lane}: ${l.lengthM===null?'length not set':unitText(l.lengthM,'m',2)}`).join(' · ')}</td><td><button type="button" class="btn small" data-garage-edit-track="${esc(t.id)}">Edit</button></td></tr>`).join('')}</tbody></table></div>`:'<p class="hint">Add your tracks with their lane lengths. Track day uses them to fill in the lane length.</p>';
     for(const b of document.querySelectorAll('[data-garage-edit-track]'))b.onclick=()=>openEditor('track',tracks().find(t=>t.id===b.dataset.garageEditTrack));
+    if(typeof LibraryUI!=='undefined'){const t=tracks().length;LibraryUI.status('garage',`${list.length} car${list.length===1?'':'s'} · ${t} track${t===1?'':'s'}`);}
     detail();
   }
   function detail(){
@@ -85,7 +86,7 @@ const GarageUI=(()=>{
     // Workbench: choose the car next to the setup name.
     q('[name=name]').closest('label').insertAdjacentHTML('afterend','<label class="field garage-car-field">Car<select name="carRef"></select><small class="hint">From your garage: Paddock cars and cars added in Library → Garage.</small></label>');
     q('.race-library-nav').insertAdjacentHTML('beforeend','<a href="#library/garage">Garage</a>');
-    q('[data-page=library]').insertAdjacentHTML('beforeend',`<section id="garage" hidden><div class="section-heading"><div><h2>Garage</h2><p class="hint" id="garage-source"></p></div><div class="actions"><button type="button" class="btn" id="garage-add-car">Add car</button><button type="button" class="btn" id="garage-add-track">Add track</button></div></div>
+    q('[data-page=library]').insertAdjacentHTML('beforeend',`<section id="garage" hidden><div class="section-heading"><div><h2>Garage</h2><p class="hint" id="garage-source"></p></div><div class="actions"><button type="button" class="btn primary" id="garage-add-car">Add car</button><button type="button" class="btn" id="garage-add-track">Add track</button></div></div>
      <p id="garage-error" class="note" role="alert" hidden></p><button type="button" class="btn" id="garage-reset" hidden>Archive unreadable garage and start again</button>
      <div class="garage-layout"><div><h3>Cars</h3><div id="garage-cars" class="garage-cars"></div><h3>Tracks</h3><div id="garage-tracks"></div></div><aside id="garage-detail" class="panel" hidden></aside></div></section>
      <dialog id="garage-editor" aria-labelledby="garage-editor-title"><div class="dialog-head"><h2 id="garage-editor-title"></h2></div><div class="dialog-body"><div id="garage-editor-body"></div><p id="garage-editor-error" class="note" role="alert"></p><div class="actions"><button type="button" class="btn primary" id="garage-editor-save">Save</button><button type="button" class="btn danger" id="garage-editor-delete">Delete</button><button type="button" class="btn" id="garage-editor-cancel">Cancel</button></div></div></dialog>`);
