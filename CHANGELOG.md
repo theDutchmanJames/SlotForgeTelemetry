@@ -36,6 +36,12 @@ Telemetry starts to follow the new shared SlotForge look of Timing and Paddock (
 - **Garage cards:** each car shows its photo edge to edge, or a car icon when there is none, with the name in capitals, maker and class, setups and runs, and where it comes from. *Add car* is the main button of the Garage.
 - The selected setup's buttons are plain: no more coloured edges on Analyze and Compare.
 
+### Workbench in the new look
+
+- **The setup bar:** the setup name is large, in the title type, and you edit it in place. Its state shows next to the buttons: a yellow dot for a draft or unsaved changes, a green tick once it is saved in the library. *Save setup* is the one main button; New, Open, Export and Setup sheet are outline buttons.
+- **Quick setup / Measure the car / Plan & test / Everything** is a quiet switch: the chosen level is lifted in grey, not outlined in red.
+- **Input and result folders** are plain boxes with their name in the title type and a chevron. An open folder gets a thin accent line on its left and shows its icon in colour; closed folders are grey. Pinned result groups show a grey Pin.
+
 ## 0.14.0 — 17 November 2026 · Track day, Garage and backups
 
 ### Faster with a full library

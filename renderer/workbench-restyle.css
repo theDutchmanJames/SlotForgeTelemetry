@@ -1,0 +1,45 @@
+/* The workbench in the SlotForge Restyle look: the setup bar as a Pit Board, the level switch as a Gear Selector,
+   and the input and result folders as Folders (quiet box, Barlow title, chevron, a thin accent mark when open).
+   Colour stays on the icon of an open folder. Loaded after library-shell.css. */
+
+/* ---------- Pit Board: big name, saved state, tools, Save ---------- */
+.workbench-toolbar{background:var(--panel);border:1px solid var(--line);border-radius:12px}
+.workbench-toolbar .setup-panel h2{font:600 10.5px/1.3 'Segoe UI',system-ui,sans-serif;font-style:normal;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.workbench-toolbar .setup-panel h2 .sf-icon{display:none}
+.workbench-toolbar #name{height:44px;padding:0 10px;margin-left:-10px;width:calc(100% + 10px);border-color:transparent;background:transparent;font:italic 700 28px/1 var(--sf-title);letter-spacing:.01em}
+.workbench-toolbar #name:hover{border-color:var(--line)}
+.workbench-toolbar #name:focus{border-color:color-mix(in srgb,var(--ink) 30%,var(--line));background:var(--bg)}
+.workbench-toolbar .actions{justify-content:flex-end}
+.save-state{flex-basis:100%;margin:0 0 4px;padding:0;text-align:right;font-size:12px;color:var(--muted)}
+.save-state::before{content:'●';margin-right:6px;font-size:10px;vertical-align:1px}
+.workbench-toolbar .save-state[data-save-status]{margin:0 0 4px;padding:0}
+.save-state[data-save-status=draft]{color:var(--amber)}
+.save-state[data-save-status=saved]{color:var(--green)}
+.save-state[data-save-status=saved]::before{content:'✓';font-size:12px;vertical-align:0}
+.save-state[data-save-status=error]{color:var(--accent-text,var(--accent))}
+
+/* ---------- Gear Selector: the workbench levels ---------- */
+.level-switch{padding:3px;gap:3px;border:1px solid var(--line);border-radius:10px;background:var(--bg)}
+.level-switch button{border:0;border-radius:7px;background:transparent;color:var(--muted);font-weight:400;box-shadow:none}
+.level-switch button .sf-icon{color:var(--muted)}
+.level-switch button:hover{color:var(--ink);background:color-mix(in srgb,var(--ink) 6%,transparent)}
+.level-switch button[aria-pressed=true]{border:0;background:color-mix(in srgb,var(--ink) 13%,var(--panel));color:var(--ink);font-weight:600;box-shadow:none}
+.level-switch button[aria-pressed=true] .sf-icon{color:var(--ink)}
+
+/* ---------- Folder: input folders and result folders ---------- */
+.workbench-folder,.result-group{border:1px solid var(--line);border-radius:10px;background:var(--panel);box-shadow:none}
+.workbench-folder[open],.result-group:has(>.result-folder[open]){box-shadow:inset 2px 0 0 var(--accent)}
+.workbench-folder>summary,.result-folder>summary{background:none}
+.workbench-folder[open]>summary{background:none;border-bottom:1px solid var(--line);border-radius:0;margin-bottom:12px}
+.result-folder[open]>summary{background:none;border-bottom:1px solid var(--line)}
+.workbench-folder>summary:after,.result-folder>summary:after{color:var(--muted)}
+/* Barlow titles; the values line under them stays in the plain type. */
+.workbench-folder .folder-heading,.result-folder .result-title{display:flex;align-items:center;gap:9px;font:italic 700 17px/1.15 var(--sf-title);text-transform:uppercase;letter-spacing:.02em;color:var(--ink)}
+.workbench-folder .folder-heading .step{display:none}
+/* Paint: the icon of an open folder only. */
+.workbench-folder .folder-heading .sf-icon,.result-folder .result-title .sf-icon{color:var(--muted)}
+.workbench-folder[open] .folder-heading .sf-icon,.result-folder[open] .result-title .sf-icon{color:var(--category,var(--accent))}
+.result-pin[aria-pressed=true]{color:var(--ink);border-color:transparent;background:color-mix(in srgb,var(--ink) 16%,var(--btn-mix,var(--panel)))}
+.workbench-results>summary{color:var(--muted)}
+/* The drivetrain picture keeps its colours; its box is plain. */
+.drivetrain{border-top:1px solid var(--line)}

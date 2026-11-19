@@ -2,6 +2,10 @@
 function initializeDesign(){
   const homeHead=document.querySelector('[data-page=telemetry] .page-head'),setupPanel=document.querySelector('.setup-panel');
   homeHead.classList.add('workbench-toolbar');homeHead.firstElementChild.replaceChildren(setupPanel);
+  // SlotForge Restyle (Pit Board): the saved state sits with the buttons, the file tools are outline buttons, Save is the one main action.
+  const tools=homeHead.querySelector('.actions'),saved=document.querySelector('#library-workspace-status');
+  if(tools&&saved){saved.classList.add('save-state');tools.prepend(saved);}
+  for(const id of ['new-setup','open-setup','save-setup','setup-sheet'])document.getElementById(id)?.classList.add('ghost');
   const decorate=(selector,name)=>{for(const el of document.querySelectorAll(selector))el.insertAdjacentHTML('afterbegin',sfIcon(name));};
   document.querySelector('.brand-mark').innerHTML='<img src="../assets/icon.svg" alt="" width="42" height="42">';
   for(const [route,name] of Object.entries({telemetry:'setup',trackday:'history',analyze:'timer',feedback:'list',library:'library',settings:'settings'})){
