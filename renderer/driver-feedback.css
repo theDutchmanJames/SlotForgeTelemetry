@@ -12,3 +12,33 @@
 .df-basis{display:block;color:var(--df-accent);font-size:11px;margin-bottom:7px}.df-advice .df-finding{color:var(--ink)}.df-advice .btn{margin:12px 8px 0 0}.df-next{border-left:3px solid var(--df-accent);margin:0 0 24px}.df-next>small{display:block;color:var(--muted);margin-bottom:7px}.df-check-row{padding:16px 0;border-bottom:1px solid var(--line)}.df-check-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}.df-check-actions [aria-pressed=true]{border-color:var(--df-accent);background:var(--df-tint)}.df-evidence{border-top:1px solid var(--line);margin-top:14px;padding-top:14px}.df-evidence a{overflow-wrap:anywhere}
 
 .df-header-actions{display:flex;align-items:center;gap:16px;flex-wrap:wrap}.df-header-actions .btn{white-space:nowrap}
+
+/* SlotForge Restyle. One accent: the main buttons use the theme accent; Driver Feedback's green (its Paint) stays
+   on icons, the open step's number and the advice tiles. The steps are a side list like Settings and the Library. */
+.main-nav a[data-route=feedback][aria-current=page]{color:var(--ink);border-color:var(--accent);background:none}
+.main-nav a[data-route=feedback] .sf-icon{color:inherit}
+.df-note{max-width:none;margin:0 0 22px}
+.df-note .sn-tile{background:color-mix(in srgb,var(--df-accent) 16%,var(--panel));color:var(--df-accent)}
+.df-journey{position:sticky;top:16px;padding:14px 10px 16px;border:1px solid var(--line);border-radius:12px;background:color-mix(in srgb,var(--bg) 55%,var(--panel))}
+.df-journey>.eyebrow{margin:0 10px 6px;font:600 10.5px/1.3 'Segoe UI',system-ui,sans-serif;letter-spacing:.14em;color:color-mix(in srgb,var(--muted) 80%,var(--bg))}
+.df-journey ol{margin:4px 0 0}
+.df-journey button{padding:8px 10px;margin:0 0 2px;color:color-mix(in srgb,var(--ink) 82%,var(--muted))}
+.df-journey button:hover{background:color-mix(in srgb,var(--ink) 6%,transparent)}
+.df-journey [aria-current=step]{background:color-mix(in srgb,var(--ink) 10%,var(--panel));color:var(--ink)}
+.df-journey [aria-current=step] strong{font-weight:700}
+.df-journey-note{margin:14px 0 8px;padding:14px 10px 4px}
+.df-journey .help-link{margin:0 10px}
+.df-level{font:700 11px/1.4 'Segoe UI',system-ui,sans-serif;letter-spacing:.14em;color:var(--muted)}
+.df-sheet .btn{min-height:36px;padding-top:6px;padding-bottom:6px}
+.df-sheet .btn.primary{background:var(--accent-fill,var(--accent));border-color:transparent;color:var(--on-accent)}
+.df-sheet .btn.primary:hover{filter:none;background:var(--accent)}
+/* Folders inside a sheet: plain names with a chevron, not blue links. */
+.df-sheet summary{color:var(--ink);font-weight:600}
+.df-sheet summary::marker{color:var(--muted)}
+/* A note is a quiet box with a thin accent rule, not a coloured panel. */
+.df-entry{border-left:1px solid var(--line);box-shadow:inset 2px 0 0 var(--accent)}
+.df-callout{background:color-mix(in srgb,var(--ink) 4%,var(--panel))}
+@media(max-width:760px){.df-journey{position:static}}
+.sn.df-note{max-width:1200px;margin:0 auto 22px}
+@media(min-width:761px){.df-layout{grid-template-columns:236px minmax(0,1fr)}}
+.df-next{border-left:1px solid var(--line);box-shadow:inset 2px 0 0 var(--accent)}

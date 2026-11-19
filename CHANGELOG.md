@@ -49,6 +49,14 @@ Telemetry starts to follow the new shared SlotForge look of Timing and Paddock (
 - **Compare with last run** and **Today's runs** are quiet tables: small grey column names, thin lines and times in the numbers type. Each change shows as a small green (faster) or red (slower) chip.
 - *Save run* is a normal-height button, and lap times are typed in the numbers type.
 
+### Driver Feedback in the new look
+
+- **A short note under the title** says what the page does, that measurements are optional, and that your answers are saved with the setup on the workbench.
+- **The five steps** are a side list like Settings and the Library. The open step is lifted in grey, with its number in Driver Feedback's green.
+- **One accent:** the main buttons (*Show my first checks*, *Use my setup*…) use the theme's accent like every other page, instead of green. Green stays on icons and the open step.
+- Optional sections open from plain names with a small arrow instead of blue links. *Next useful question* and *How does your car behave?* (on the workbench) are quiet boxes with a thin accent line.
+- In the top menu, Driver Feedback is marked like the other pages when it is open.
+
 ## 0.14.0 — 17 November 2026 · Track day, Garage and backups
 
 ### Faster with a full library
