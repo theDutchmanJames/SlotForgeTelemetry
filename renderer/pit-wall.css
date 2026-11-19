@@ -1,0 +1,61 @@
+/* SlotForge Restyle "Pit Wall": the main menu as one slim bar that never wraps on a desktop window. Three groups of tabs
+   on a dark track, the open tab lifted with its icon in the accent, status lights and the colour mode on the right.
+   Narrower windows first lose the words of the lights, then the tab names (the icons stay, names as tooltips).
+   Markup from pitWall() in design.js. Loaded last, so it overrides the older header rules. */
+
+html .app-header{flex-wrap:nowrap;min-height:60px;height:60px;padding:0 18px;gap:18px;background:color-mix(in srgb,var(--bg) 40%,var(--panel));border-bottom:1px solid var(--line)}
+html .app-header .brand{gap:10px;flex:none}
+html .app-header .brand-mark{width:36px;height:36px}
+html .app-header .brand-copy{height:36px;gap:4px}
+html .app-header .brand-wordmark{width:130px}
+html .app-header .brand-copy small{font-size:8.5px;line-height:10px;letter-spacing:.2em}
+
+/* ---------- Tabs in three groups ---------- */
+html .app-header .main-nav{order:0;flex:none;flex-basis:auto;display:flex;align-items:center;align-self:center;justify-content:flex-start;flex-wrap:nowrap;gap:6px;min-height:0;margin:0 0 0 10px;min-width:0}
+.main-nav .nav-group{display:flex;align-items:center;gap:2px;height:38px;padding:3px;border-radius:10px;background:rgba(0,0,0,.22)}
+[data-tone="light"] .main-nav .nav-group{background:color-mix(in srgb,var(--ink) 7%,transparent)}
+.main-nav .nav-group+.nav-group{margin-left:6px}
+html .main-nav a[data-route]{display:flex;align-items:center;gap:8px;height:100%;padding:0 12px;border:0;border-radius:8px;background:none;color:var(--muted);font:600 13px/1 'Segoe UI',system-ui,sans-serif;text-decoration:none;white-space:nowrap}
+html .main-nav a[data-route]:hover{color:var(--ink);background:color-mix(in srgb,var(--ink) 6%,transparent)}
+html .main-nav a[data-route][aria-current=page]{color:var(--ink);background:color-mix(in srgb,var(--ink) 12%,var(--panel));border:0;font-weight:600}
+html .main-nav a[data-route] .sf-icon{width:18px;height:18px;color:var(--muted)}
+html .main-nav a[data-route][aria-current=page] .sf-icon{color:var(--accent-text,var(--accent))}
+html .main-nav a[data-route] small{display:inline-grid;place-items:center;min-width:18px;height:18px;padding:0 5px;border-radius:999px;background:var(--line);color:var(--muted);font:600 10.5px/1 'Segoe UI',system-ui,sans-serif}
+
+/* ---------- Status lights and colour mode ---------- */
+.status-lights{margin-left:auto;flex:0 1 auto;display:flex;align-items:center;gap:12px;height:34px;padding:0 14px;border-radius:999px;background:rgba(0,0,0,.22);color:var(--muted);font-size:12px;white-space:nowrap;min-width:0}
+[data-tone="light"] .status-lights{background:color-mix(in srgb,var(--ink) 7%,transparent)}
+.status-lights>span{display:block;min-width:0;max-width:230px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.status-lights .dot{width:7px;height:7px;margin:0 7px 0 0;vertical-align:1px}
+.status-lights #save-state{padding-left:12px;border-left:1px solid var(--line)}
+html .app-header .theme-switch{flex:none;margin-left:0;height:34px;padding:2px;border-radius:8px}
+html .app-header .theme-switch button{height:28px;padding:0 12px;border-radius:6px;font-size:12.5px}
+html .app-header .theme-switch button[aria-pressed=true]{background:color-mix(in srgb,var(--ink) 13%,var(--panel));color:var(--ink);font-weight:600}
+
+/* ---------- The strip under the bar: only for an update notice ---------- */
+.workspace-bar.pit-strip:not(:has(.update-notice)){display:none}
+.workspace-bar.pit-strip{align-items:center;min-height:40px;padding:4px 18px;background:linear-gradient(90deg,color-mix(in srgb,var(--accent) 18%,var(--bg)),var(--bg) 60%);font-size:12.5px}
+.workspace-bar.pit-strip .version{display:none}
+.workspace-bar.pit-strip .update-notice{margin:0;font-size:12.5px}
+
+/* ---------- Narrower windows ---------- */
+@media(max-width:1480px){.status-lights #save-state{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;padding:0;border:0}}
+@media(max-width:1320px){
+  .status-lights #save-state{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;padding:0;border:0}
+  .status-lights{padding:0 12px}
+  #paddock-global-status{font-size:0}
+  #paddock-global-status .dot{margin:0;vertical-align:middle}
+  .status-lights>span{max-width:none;overflow:visible}
+}
+@media(max-width:1180px){
+  html .main-nav .nav-word{display:none}
+  html .main-nav a[data-route]{padding:0 10px}
+  html .app-header .brand-copy small{display:none}
+}
+@media(max-width:860px){
+  html .app-header{height:auto;flex-wrap:wrap;padding:10px 14px;gap:10px}
+  html .app-header .main-nav{order:3;flex:1 1 100%;margin:0;justify-content:space-between;gap:6px}
+  .main-nav .nav-group{flex:1;justify-content:space-around}
+  .main-nav .nav-group+.nav-group{margin-left:0}
+  html .main-nav a[data-route] small{display:none}
+}

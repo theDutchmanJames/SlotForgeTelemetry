@@ -22,6 +22,10 @@ app.whenReady().then(async()=>{
   assert.equal(await text('#ratio-inline'),'3.000:1');assert.match(await text('#stats'),/27.02/);
   assert.equal(await run(`document.querySelectorAll('[data-page=telemetry] .performance-curve').length`),0);
   assert.equal(await run(`document.querySelectorAll('.main-nav a').length`),6);
+  // SlotForge Restyle (Pit Wall): three tab groups, status lights in the bar, the strip under it only for an update notice.
+  assert.deepEqual(await run(`[...document.querySelectorAll('.main-nav .nav-group')].map(g=>[...g.querySelectorAll('a')].map(a=>a.dataset.route).join(' '))`),['telemetry trackday','analyze feedback','library settings']);
+  assert.equal(await run(`!!document.querySelector('.app-header .status-lights #paddock-global-status')&&!!document.querySelector('.app-header .status-lights #save-state')`),true);
+  assert.equal(await run(`getComputedStyle(document.querySelector('.workspace-bar')).display`),'none');
   assert.equal(await run(`document.querySelectorAll('[data-input-jump]').length`),9);
   assert.equal(await run(`document.querySelector('[name=wheelbase]').closest('details').className`),'workbench-folder');
   assert.equal(await run(`document.querySelector('[name=gearDiameter]').closest('.input-column')!==null`),true);

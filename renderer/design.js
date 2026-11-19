@@ -1,4 +1,22 @@
 // Shared presentation only; calculation and saved-setup behaviour live elsewhere.
+// SlotForge Restyle (Pit Wall): the main menu is one slim bar. The six tabs sit in three groups on a dark track, the
+// connection and save status are small lights on the right, and the bar under it only appears for an update notice.
+function pitWall(){
+  const nav=document.querySelector('.main-nav'),header=document.querySelector('.app-header'),bar=document.querySelector('.workspace-bar');
+  const link=route=>nav.querySelector(`[data-route="${route}"]`);
+  const groups=[['Build','telemetry','trackday'],['Understand','analyze','feedback'],['Keep','library','settings']].map(([label,...routes])=>{
+    const group=document.createElement('div');group.className='nav-group';group.setAttribute('role','group');group.setAttribute('aria-label',label);
+    for(const route of routes){const a=link(route);if(!a)continue;group.append(a);
+      for(const node of [...a.childNodes])if(node.nodeType===3&&node.textContent.trim()){const word=document.createElement('span');word.className='nav-word';word.textContent=node.textContent.trim();node.replaceWith(word);a.title=word.textContent;}}
+    return group;
+  });
+  const rest=[...nav.children].filter(el=>!el.classList.contains('nav-group'));nav.replaceChildren(...groups.filter(g=>g.children.length),...rest);
+  const lights=document.createElement('div');lights.className='status-lights';
+  for(const id of ['paddock-global-status','save-state']){const el=document.getElementById(id);if(!el)continue;lights.append(el);
+    const tip=()=>{el.title=el.textContent.trim();};tip();new MutationObserver(tip).observe(el,{childList:true,characterData:true,subtree:true});}
+  header.querySelector('.theme-switch').before(lights);
+  bar?.classList.add('pit-strip');
+}
 function initializeDesign(){
   const homeHead=document.querySelector('[data-page=telemetry] .page-head'),setupPanel=document.querySelector('.setup-panel');
   homeHead.classList.add('workbench-toolbar');homeHead.firstElementChild.replaceChildren(setupPanel);
@@ -48,6 +66,7 @@ function initializeDesign(){
     const [tone,name]=topicStyle[button.dataset.analysisTopic];button.dataset.category=tone;button.insertAdjacentHTML('afterbegin',sfIcon(name));
   }
   for(const link of document.querySelectorAll('[data-analysis-mode]')){const mode=link.dataset.analysisMode;link.dataset.category=['compare','racecompare'].includes(mode)?'tyres':mode==='overview'?'gearing':mode==='records'?'speed':mode==='progress'?'weight':'motor';link.insertAdjacentHTML('afterbegin',sfIcon(['compare','racecompare'].includes(mode)?'transfer':mode==='records'?'list':mode==='progress'?'history':'timer'));}
+  pitWall();
   for(const link of document.querySelectorAll('.settings-nav a')){const help=link.hash.includes('calculations'),paddock=link.hash.includes('paddock'),backups=link.hash.includes('backups'),updates=link.hash.includes('updates');link.dataset.category=paddock?'weight':help?'motor':backups?'speed':updates?'gearing':'tyres';link.insertAdjacentHTML('afterbegin',sfIcon(paddock?'transfer':help?'list':backups?'history':updates?'download':'palette'));}
   for(const panel of document.querySelectorAll('[data-analysis-panel]'))panel.dataset.category=topicStyle[panel.dataset.analysisPanel][0];
   document.querySelector('#settings-appearance').dataset.category='tyres';
