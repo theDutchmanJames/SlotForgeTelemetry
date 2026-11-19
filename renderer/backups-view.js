@@ -32,10 +32,10 @@ const BackupsUI=(()=>{
     q('#settings-appearance').parentElement.insertAdjacentHTML('beforeend',`<section class="panel" id="settings-backups" hidden><h2>Backups</h2>
      <p class="muted">One backup holds all your Telemetry data: saved setups and the workbench draft, manual and Track day laps, the garage, and races imported from Paddock.</p>
      <p id="backup-summary" class="hint"></p><p id="backup-error" class="note" role="alert" hidden></p>
-     <div class="actions"><button type="button" class="btn primary" id="backup-now">Back up now</button><button type="button" class="btn" id="backup-export">Save a backup as…</button><button type="button" class="btn" id="backup-restore-file">Restore from a file…</button><button type="button" class="btn" id="backup-open">Open backup folder</button></div>
+     <div class="actions"><button type="button" class="btn primary" id="backup-now">Back up now</button><button type="button" class="btn" id="backup-export">Save a backup as…</button><button type="button" class="btn" id="backup-restore-file">Restore from a file…</button><button type="button" class="btn ghost" id="backup-open">Open backup folder</button></div>
      <p id="backup-message" class="note" role="status" hidden></p>
      <h3>Extra copy</h3><p class="hint">Keep a copy away from this computer: choose a USB stick or a cloud-synced folder, and every automatic backup is copied there too.</p><p id="backup-extra" class="hint"></p>
-     <div class="actions"><button type="button" class="btn" id="backup-choose">Choose folder…</button><button type="button" class="btn" id="backup-clear">Stop copying</button></div>
+     <div class="actions"><button type="button" class="btn ghost" id="backup-choose">Choose folder…</button><button type="button" class="btn ghost" id="backup-clear">Stop copying</button></div>
      <h3>Backups on this computer</h3><div id="backup-list"></div>
      <p class="hint">Restoring replaces all Telemetry data with the backup’s, after saving your current data as a “before a restore” backup, then restarts Telemetry. Every file in a backup is checked before anything is replaced. Appearance, units and layout preferences are not part of backups.</p></section>`);
     q('#backup-now').onclick=()=>act('now',undefined,()=>'Backup made.');

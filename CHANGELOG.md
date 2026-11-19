@@ -1,5 +1,17 @@
 # Changelog
 
+## Unreleased
+
+### SlotForge look, first step
+
+Telemetry starts to follow the new shared SlotForge look of Timing and Paddock (`SlotForgeRestyle.md`). This step changes the foundations; the page layouts follow page by page.
+
+- **Titles** of pages, panels and windows are in Barlow Condensed: bold, italic and in capitals. **Results and figures** such as ratios, speeds, power and the gear chart are in Roboto Mono, with their units in the normal type. Both fonts are bundled (SIL Open Font License).
+- **One flat button family:** the main action of a screen is filled in the accent, normal actions are flat grey, occasional tools are outlined, and Delete and Remove are red text. Small buttons are 28 px high, the others 32 px.
+- **One blue focus ring** for keyboard use everywhere.
+- The accent is kept for the main action, the selected thing and focus: a highlighted figure is no longer red.
+- Thin scroll bars and file buttons in the theme's colours.
+
 ## 0.14.0 — 17 November 2026 · Track day, Garage and backups
 
 ### Faster with a full library

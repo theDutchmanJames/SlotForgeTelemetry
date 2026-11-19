@@ -24,6 +24,14 @@ radial tyre-thickness conversion, setup JSON format, local persistence,
 appearance UI, responsive layout, tests, launch and packaging scripts.
 renderer/styles.css follows Paddock's palette, typography and control styling.
 
+renderer/restyle.css: the shared SlotForge Restyle foundations (Type Trio,
+Pit Buttons, Graphite extras, Finishing Touches) from SlotForge Timing's
+SlotForgeRestyle.md, Timing commit 3e4962d48f98a0fb3238f59629f28b5b22ad5594.
+renderer/fonts/: Barlow Condensed (Bold, Bold Italic) and Roboto Mono, copied
+from SlotForge Timing's bundled Google Fonts files. Both are under the SIL
+Open Font License 1.1 (OFL.txt in each folder); sources.json lists each
+file's origin and SHA-256.
+
 Family references inspected:
 SlotForge Timing commit 34124924815c1a38607d89e0743da5d895602b50
 SlotForge Track Builder commit 99c1caaed62864037d90a0e39911dcc3ba79d75f
