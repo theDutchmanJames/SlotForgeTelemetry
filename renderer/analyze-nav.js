@@ -31,6 +31,25 @@ const AnalyzeNav=(()=>{
       const rest=[...topics.children].filter(e=>e.matches('[data-analysis-topic]'));
       if(rest.length){const group=document.createElement('div');group.className='nav-group';group.innerHTML='<span class="nav-group-label">More</span>';group.append(...rest);topics.append(group);}
     }
+    shell(modes,topics);
+  }
+  // SlotForge Restyle (Paddock Rail): the modes in a side list beside the page, the topics nested under Analysis.
+  function shell(modes,topics){
+    const page=q('[data-page=analyze]'),head=page?.querySelector(':scope>.page-head');
+    if(!page||!head||!modes||page.querySelector('.analyze-shell'))return;
+    const box=document.createElement('div');box.className='analyze-shell';
+    const rail=document.createElement('nav');rail.className='analyze-rail';rail.setAttribute('aria-label','Analyze');
+    const main=document.createElement('div');main.className='analyze-main';
+    for(const el of [...page.children])if(el!==head)main.append(el);
+    modes.classList.remove('segmented');rail.append(modes);
+    const analysis=modes.querySelector('[data-analysis-mode="overview"]');
+    if(topics&&analysis){topics.classList.remove('tabs');analysis.after(topics);}
+    box.append(rail,main);head.after(box);
+  }
+  // The topics belong to Analysis: shown only while it is open.
+  function route(page,sub){
+    const topics=q('.analyze-rail .analyze-topics');if(!topics)return;
+    topics.hidden=!(page==='analyze'&&!['compare','races','racecompare','records','progress'].includes(sub));
   }
   // Which topics hold saved values for this setup. Dimmed topics remain clickable.
   function availability(setup){
@@ -47,5 +66,5 @@ const AnalyzeNav=(()=>{
       if(empty)b.title='Nothing saved for this topic in this setup yet. Open it to see what to measure.';else b.removeAttribute('title');
     }
   }
-  return {init,refresh,availability,MODES,TOPICS};
+  return {init,refresh,route,availability,MODES,TOPICS};
 })();

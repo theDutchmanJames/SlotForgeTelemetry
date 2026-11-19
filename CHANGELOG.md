@@ -22,6 +22,13 @@ Telemetry starts to follow the new shared SlotForge look of Timing and Paddock (
   - Connect to Paddock separates *this computer* from *another computer*, with the address and password as rows.
 - On a narrow window the side list becomes a row of buttons on top.
 
+### Analyze in the new look
+
+- **A side list** beside the page holds the modes: *Setups* (Analysis, Compare) and *Track laps* (Laps, Compare, Progress, Records). The topics of Analysis sit right under it in their three groups, so the page itself starts with the setup and its results.
+- Topics with nothing saved for the setup are shown in a lighter grey and still open.
+- **Calmer cards and charts:** result cards, charts, lap summaries and side panels have plain borders. Colour stays on the small icon tiles and the open item's icon.
+- On a narrow window the side list becomes rows of buttons above the page.
+
 ## 0.14.0 — 17 November 2026 · Track day, Garage and backups
 
 ### Faster with a full library

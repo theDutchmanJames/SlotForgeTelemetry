@@ -1,0 +1,47 @@
+/* Analyze in the SlotForge Restyle look: the modes and topics in a side list (Paddock Rail),
+   and neutral cards and panels with colour only on icons (Paint). Loaded after settings-sheet.css. */
+
+/* ---------- The side list ---------- */
+.analyze-shell{display:grid;grid-template-columns:236px minmax(0,1fr);gap:28px;align-items:start}
+.analyze-main{min-width:0}
+.analyze-rail{position:sticky;top:16px;padding:14px 10px 16px;border:1px solid var(--line);border-radius:12px;background:color-mix(in srgb,var(--bg) 55%,var(--panel))}
+.analyze-rail .analyze-modes{display:flex;flex-direction:column;align-items:stretch;gap:14px;margin:0;padding:0;border:0;background:none}
+.analyze-rail .nav-group{display:flex;flex-direction:column;align-items:stretch;gap:2px;margin:0}
+.analyze-rail .nav-group-label{display:block;margin:0 10px 6px;font:600 10.5px/1.3 'Segoe UI',system-ui,sans-serif;letter-spacing:.14em;text-transform:uppercase;color:color-mix(in srgb,var(--muted) 80%,var(--bg))}
+.analyze-rail .nav-group>:is(a,button){display:flex;align-items:center;gap:11px;width:100%;min-height:38px;margin:0;padding:7px 10px;border:0;border-radius:8px;background:transparent;box-shadow:none;color:color-mix(in srgb,var(--ink) 82%,var(--muted));font:400 13.5px/1.25 'Segoe UI',system-ui,sans-serif;text-align:left;text-decoration:none;white-space:normal;flex:none}
+.analyze-rail .nav-group>:is(a,button):hover{background:color-mix(in srgb,var(--ink) 6%,transparent);border:0}
+.analyze-rail .nav-group>a[aria-current=page],.analyze-rail .nav-group>button.active{background:color-mix(in srgb,var(--ink) 10%,var(--panel));border:0;box-shadow:none;color:var(--ink);font-weight:600}
+.analyze-rail .nav-group>:is(a,button)>.sf-icon{width:18px;height:18px;flex:none;color:var(--muted)}
+/* Paint on the open item only. */
+.analyze-rail .nav-group>:is(a[aria-current=page],button.active)>.sf-icon{color:var(--category,var(--accent))}
+
+/* The topics of Analysis, nested under it. */
+.analyze-rail .analyze-topics{display:flex;flex-direction:column;align-items:stretch;gap:10px;margin:4px 0 8px 19px;padding:4px 0 2px 8px;border:0;border-left:1px solid var(--line);background:none;overflow:visible}
+.analyze-rail .analyze-topics[hidden]{display:none}
+.analyze-rail .analyze-topics .nav-group-label{margin:0 8px 4px;font-size:10px}
+.analyze-rail .analyze-topics .nav-group>button{min-height:32px;padding:6px 8px;gap:9px;font-size:13px}
+.analyze-rail .analyze-topics .nav-group>button>.sf-icon{width:16px;height:16px}
+.analyze-rail .analyze-topics .topic-empty{opacity:1;color:color-mix(in srgb,var(--muted) 85%,var(--bg))}
+.analyze-rail .analyze-topics .topic-empty>.sf-icon{opacity:.6}
+
+/* ---------- Neutral surfaces: colour stays on the icon tiles ---------- */
+.analyze-main .performance-stat,.analyze-main .performance-stat:nth-child(3){border:1px solid var(--line)!important;background:var(--panel)!important}
+.analyze-main .performance-stat strong{color:var(--ink)}
+.analyze-main .performance-curve:is(:has(.torque),:has(.power)){border-top:1px solid var(--line)!important}
+.analyze-main .analysis-toolbar,.analyze-main .compare-selectors{border:1px solid var(--line);background:var(--panel)}
+.analyze-main .telemetry-results .table-wrap,.analyze-main .calculation-detail{border-top:1px solid var(--line)}
+.analyze-main :is(.race-layout aside .panel,#race-overlay,#race-stints,.race-progress-chartpanel,#race-run-findings,#race-compare-findings){border-top:1px solid var(--line)}
+.analyze-main .race-findings article{border-top:1px solid var(--line)}
+.analyze-main .race-view-switch [aria-pressed=true]{border-color:var(--line);box-shadow:none;background:color-mix(in srgb,var(--ink) 13%,var(--panel))}
+
+@media(max-width:760px){
+  .analyze-shell{grid-template-columns:minmax(0,1fr);gap:18px}
+  .analyze-rail{position:static;padding:8px}
+  .analyze-rail .analyze-modes{flex-direction:row;flex-wrap:wrap;gap:4px 10px}
+  .analyze-rail .nav-group{flex-direction:row;flex-wrap:wrap;align-items:center}
+  .analyze-rail .nav-group-label{width:100%;margin:4px 6px 2px}
+  .analyze-rail .nav-group>:is(a,button){width:auto;min-height:34px}
+  .analyze-rail .analyze-topics .nav-group-label{display:none}
+  .analyze-rail .analyze-topics{width:100%;margin:4px 0;padding:6px 0 0;border-left:0;border-top:1px solid var(--line);flex-direction:row;flex-wrap:wrap}
+}
+.analyze-main .analysis-input-link .btn{border-color:transparent}

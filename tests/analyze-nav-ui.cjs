@@ -14,8 +14,12 @@ app.whenReady().then(async()=>{
   await click('#save-library');await pause();await click('#library-editor-confirm');await pause();
   await run("location.hash='analyze'");await pause();
   // Modes: two labelled groups with short names; every original link is still present.
-  assert.deepEqual(await run(`[...document.querySelectorAll('.analyze-modes .nav-group')].map(g=>g.querySelector('.nav-group-label').textContent+': '+[...g.querySelectorAll('a')].map(a=>a.textContent.trim()).join(' / '))`),['Setups: Analysis / Compare','Track laps: Laps / Compare / Progress / Records']);
+  assert.deepEqual(await run(`[...document.querySelectorAll('.analyze-modes>.nav-group')].map(g=>g.querySelector('.nav-group-label').textContent+': '+[...g.querySelectorAll('a')].map(a=>a.textContent.trim()).join(' / '))`),['Setups: Analysis / Compare','Track laps: Laps / Compare / Progress / Records']);
   assert.equal(await run(`document.querySelectorAll('[data-analysis-mode]').length`),6);
+  // SlotForge Restyle: the modes are a side list beside the page, with the topics nested right under Analysis.
+  assert.equal(await run(`!!document.querySelector('.analyze-shell>.analyze-rail .analyze-modes')&&!!document.querySelector('.analyze-shell>.analyze-main #analysis-content')&&!!document.querySelector('.analyze-main #race-analysis')`),true);
+  assert.equal(await run(`document.querySelector('[data-analysis-mode=overview]').nextElementSibling.classList.contains('analyze-topics')`),true);
+  assert.equal(await run(`document.querySelector('.analyze-topics').hidden`),false);
   // Topics: three clusters holding all eight topics.
   assert.deepEqual(await run(`[...document.querySelectorAll('.analyze-topics .nav-group')].map(g=>g.querySelector('.nav-group-label').textContent+':'+g.querySelectorAll('[data-analysis-topic]').length)`),['Essentials:2','Measurements:4','Planning:2']);
   // The example has no weight, wear, chassis, magnetic, lap or test data saved: those topics are dimmed.
@@ -29,10 +33,11 @@ app.whenReady().then(async()=>{
   await run("location.hash='analyze'");await pause();assert.deepEqual(await dimmed(),['chassis','magnetic','wear','workshop']);
   // Routing is unchanged.
   await click('[data-analysis-mode=races]');await pause();assert.equal(await run(`document.querySelector('#race-analysis').hidden`),false);assert.equal(await run(`document.querySelector('[data-analysis-mode=races]').getAttribute('aria-current')`),'page');
-  await click('[data-analysis-mode=compare]');await pause();assert.equal(await run(`document.querySelector('#analysis-compare').hidden`),false);
-  await click('[data-analysis-mode=overview]');await pause();
+  assert.equal(await run(`document.querySelector('.analyze-topics').hidden`),true,'topics belong to Analysis only');
+  await click('[data-analysis-mode=compare]');await pause();assert.equal(await run(`document.querySelector('#analysis-compare').hidden`),false);assert.equal(await run(`document.querySelector('.analyze-topics').hidden`),true);
+  await click('[data-analysis-mode=overview]');await pause();assert.equal(await run(`document.querySelector('.analyze-topics').hidden`),false);
   await click('[data-tone-choice=light]');await shot('topics-light');
   win.setSize(390,1000);await pause();assert.equal(await run('document.documentElement.scrollWidth>innerWidth'),false);await shot('topics-narrow');
-  assert.deepEqual(errors,[]);console.log('Analyze navigation passed: grouped modes and topics, dimmed topics without data, usable dimmed topics, routing, light/dark and narrow layouts.');
+  assert.deepEqual(errors,[]);console.log('Analyze navigation passed: grouped modes and topics, dimmed topics without data, usable dimmed topics, routing, side list with nested topics, light/dark and narrow layouts.');
  }finally{win.destroy();app.quit();}
 }).catch(e=>{console.error(e);app.exit(1);});
