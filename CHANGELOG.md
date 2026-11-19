@@ -42,6 +42,13 @@ Telemetry starts to follow the new shared SlotForge look of Timing and Paddock (
 - **Quick setup / Measure the car / Plan & test / Everything** is a quiet switch: the chosen level is lifted in grey, not outlined in red.
 - **Input and result folders** are plain boxes with their name in the title type and a chevron. An open folder gets a thin accent line on its left and shows its icon in colour; closed folders are grey. Pinned result groups show a grey Pin.
 
+### Track day in the new look
+
+- **A short note under the title** explains the page: change one thing, drive, enter your laps. Each run is compared with the one before it, and saved runs also appear in Analyze.
+- **Current setup** is a list of rows, with the name on the left and the value on the right in the numbers type, so long values such as the rollout stay on one line.
+- **Compare with last run** and **Today's runs** are quiet tables: small grey column names, thin lines and times in the numbers type. Each change shows as a small green (faster) or red (slower) chip.
+- *Save run* is a normal-height button, and lap times are typed in the numbers type.
+
 ## 0.14.0 — 17 November 2026 · Track day, Garage and backups
 
 ### Faster with a full library

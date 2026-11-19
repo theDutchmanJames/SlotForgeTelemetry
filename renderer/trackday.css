@@ -20,3 +20,16 @@
 .trackday-today{margin-top:16px}
 @media(max-width:1100px){.trackday-layout{grid-template-columns:1fr 1fr}.trackday-compare{grid-column:1/-1}}
 @media(max-width:760px){.trackday-layout{grid-template-columns:1fr}.trackday-context-grid{grid-template-columns:1fr 1fr;gap:10px}}
+
+/* SlotForge Restyle: the setup as detail rows (name left, value right in Roboto Mono), a calmer Save run,
+   the compare and Today's runs tables as Race Sheets (see restyle.css). */
+.trackday-setup-name{font:italic 700 20px/1.15 var(--sf-title);text-transform:uppercase;letter-spacing:.02em}
+.trackday-figures{grid-template-columns:1fr;gap:0}
+.trackday-figures div{display:flex;align-items:baseline;justify-content:space-between;gap:12px;padding:8px 0;border-bottom:1px solid color-mix(in srgb,var(--line) 65%,transparent)}
+.trackday-figures div:last-child{border-bottom:0}
+.trackday-figures dt{font-size:12.5px;letter-spacing:0;text-transform:none}
+.trackday-figures dd{margin:0;font:500 15px var(--sf-mono);white-space:nowrap;text-align:right}
+.trackday-figures dd small{display:inline;margin-left:6px;font:400 12px 'Segoe UI',system-ui,sans-serif}
+.trackday-log .btn.primary{min-height:40px;padding:0 14px;font-size:14px}
+.trackday-log textarea{font-family:var(--sf-mono);font-size:14px}
+.trackday-compare td:is(.good,.bad){font-weight:400}
