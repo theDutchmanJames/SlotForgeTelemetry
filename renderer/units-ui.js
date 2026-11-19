@@ -29,14 +29,22 @@ function setUnits(prefs){
 function renderUnitSettings(){
  const box=document.querySelector('#unit-settings');if(!box)return;
  const preset=Object.entries(UnitSystem.PRESETS).find(([,p])=>Object.entries(p).every(([q,k])=>Units.prefs[q]===k))?.[0]||'custom';
- box.innerHTML=`<div class="segmented unit-presets" role="group" aria-label="Unit system">${[['metric','Metric'],['imperial','Imperial'],['custom','Custom']].map(([k,l])=>`<button type="button" class="btn small" data-unit-preset="${k}" aria-pressed="${preset===k}">${l}</button>`).join('')}</div>
-  <div class="form-grid unit-grid">${Object.entries(UnitSystem.QUANTITIES).map(([q,{title,choices}])=>`<label class="field">${title}<select data-unit-quantity="${q}">${choices.map(([k,l])=>`<option value="${k}"${Units.prefs[q]===k?' selected':''}>${l}</option>`).join('')}</select></label>`).join('')}</div>`;
+ // A Settings Sheet: the system as a segmented choice, then one row per quantity. Each row's drop-down stays in the
+ // page, hidden, and its segments set it, so the change handler (and anything that sets the list directly) is unchanged.
+ const seg=(label,items)=>`<span class="ss-seg" role="group" aria-label="${label}">${items}</span>`;
+ const rows=Object.entries(UnitSystem.QUANTITIES).map(([q,{title,choices}])=>{const [name,detail]=title.split(/ \((.*)\)$/);
+  return SettingsUI.row(esc(name),detail?esc(detail[0].toUpperCase()+detail.slice(1)):'',seg(name,choices.map(([k,l])=>`<button type="button" data-unit-choice="${q}" data-value="${k}" aria-pressed="${Units.prefs[q]===k}">${l}</button>`).join(''))+`<select data-unit-quantity="${q}" aria-label="${esc(name)}" hidden>${choices.map(([k,l])=>`<option value="${k}"${Units.prefs[q]===k?' selected':''}>${l}</option>`).join('')}</select>`);}).join('');
+ box.innerHTML=SettingsUI.group('Unit system')+`<div class="ss-sheet">${SettingsUI.row('Units','Metric, imperial, or your own mix below.',seg('Unit system',[['metric','Metric'],['imperial','Imperial'],['custom','Custom']].map(([k,l])=>`<button type="button" data-unit-preset="${k}" aria-pressed="${preset===k}">${l}</button>`).join('')))}</div>`
+  +SettingsUI.group('Each value')+`<div class="ss-sheet">${rows}</div>`;
  for(const b of box.querySelectorAll('[data-unit-preset]'))b.onclick=()=>{if(b.dataset.unitPreset!=='custom')setUnits(UnitSystem.PRESETS[b.dataset.unitPreset]);};
  for(const s of box.querySelectorAll('[data-unit-quantity]'))s.onchange=()=>setUnits({...Units.prefs,[s.dataset.unitQuantity]:s.value});
+ for(const b of box.querySelectorAll('[data-unit-choice]'))b.onclick=()=>{const s=box.querySelector(`[data-unit-quantity="${b.dataset.unitChoice}"]`);if(s.value===b.dataset.value)return;s.value=b.dataset.value;s.dispatchEvent(new Event('change'));};
+ SettingsUI.status('units',preset==='metric'?'Metric':preset==='imperial'?'Imperial':'Custom mix');
 }
 function initializeUnits(){
  const appearance=document.querySelector('#settings-appearance');
- appearance.insertAdjacentHTML('beforeend',`<h2 class="units-title">Units</h2><p class="muted">Choose how speeds, weights, torque and lengths are shown and entered. Saved setups and files always store metric values, so they stay compatible with every SlotForge app.</p><div id="unit-settings"></div><p class="hint">Applies to the workbench, results, Analyze, setup comparison, the library and setup sheets. Specialist tools (chassis geometry, magnetic downforce, Testing &amp; planning, Driver Feedback) and Calculations explained stay metric for now.</p>`);
+ document.querySelector('.settings-nav').insertAdjacentHTML('beforeend','<a href="#settings/units">Units</a>');
+ appearance.insertAdjacentHTML('afterend',`<section class="panel" id="settings-units" hidden>${SettingsUI.head('units','Units','How speeds, weights, torque and lengths are shown and entered.')}<div id="unit-settings"></div><p class="ss-note">Saved setups, files and backups always store metric values, so they stay compatible with every SlotForge app. Specialist tools (chassis geometry, magnetic downforce, Testing &amp; planning, Driver Feedback) and Calculations explained stay metric for now.</p></section>`);
  document.querySelector('.input-column').insertAdjacentHTML('afterbegin','<p class="hint units-note" id="units-note" hidden>Specialist tools below the main inputs use metric units.</p>');
  renderUnitSettings();applyUnitLabels();
 }

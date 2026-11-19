@@ -1,0 +1,86 @@
+/* Settings in the SlotForge Restyle look: Paddock Rail (side list with status lines) and Settings Sheet.
+   Loaded after restyle.css. Markup comes from settings-sheet.js and the modules' own section strings. */
+
+/* ---------- The side list ---------- */
+.settings-layout{display:grid;grid-template-columns:250px minmax(0,1fr);gap:28px;align-items:start}
+.settings-nav[data-rail]{position:sticky;top:16px;display:flex;flex-direction:column;gap:2px;padding:14px 10px 16px;border:1px solid var(--line);border-radius:12px;background:color-mix(in srgb,var(--bg) 55%,var(--panel))}
+.rail-group{display:flex;flex-direction:column;gap:2px}
+.rail-group+.rail-group{margin-top:14px}
+.rail-label{margin:0 10px 6px;font:600 10.5px/1.3 'Segoe UI',system-ui,sans-serif;letter-spacing:.14em;text-transform:uppercase;color:color-mix(in srgb,var(--muted) 80%,var(--bg))}
+.settings-nav a.rail-item{display:flex;align-items:center;gap:11px;width:100%;min-height:44px;padding:7px 10px;border:0;border-radius:8px;background:transparent;box-shadow:none;color:color-mix(in srgb,var(--ink) 82%,var(--muted));font-size:13.5px;font-weight:400;line-height:1.25;text-decoration:none}
+.settings-nav a.rail-item:hover{background:color-mix(in srgb,var(--ink) 6%,transparent)}
+.settings-nav a.rail-item[aria-current=page]{background:color-mix(in srgb,var(--ink) 10%,var(--panel));border:0;box-shadow:none;color:var(--ink);font-weight:600}
+.settings-nav a.rail-item>.sf-icon{width:18px;height:18px;flex:none;color:var(--muted)}
+.settings-nav a.rail-item[aria-current=page]>.sf-icon{color:var(--accent-text,var(--accent))}
+.rail-text{display:flex;flex-direction:column;min-width:0;flex:1}
+.rail-text small{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:11.5px;font-weight:400;color:var(--muted)}
+
+/* ---------- The canvas: one section at a time, no box around it ---------- */
+.settings-canvas{min-width:0}
+.settings-canvas>section.panel{background:none;border:0;border-radius:0;padding:0;box-shadow:none}
+/* The old category line across the top of Appearance and Paddock (id rules) goes: colour is for icons only. */
+.settings-canvas>section:is(#settings-appearance,#settings-paddock){border-top:0}
+.ss-head{display:flex;align-items:center;gap:14px;margin:0 0 8px}
+.ss-tile{display:grid;place-items:center;width:42px;height:42px;flex:none;border-radius:10px;background:color-mix(in srgb,var(--accent) 14%,var(--panel));color:var(--accent-text,var(--accent))}
+.ss-tile .sf-icon{width:22px;height:22px}
+.settings-canvas .ss-head h2{margin:0;font-size:28px}
+.ss-head p{margin:3px 0 0;font-size:13px;color:var(--muted);max-width:72ch}
+
+/* ---------- Settings Sheet: groups of slim two-half rows ---------- */
+main .ss-gh{margin:24px 2px 8px;font:600 10.5px/1.3 'Segoe UI',system-ui,sans-serif;font-style:normal;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.ss-sheet{margin:0 0 14px;border:1px solid var(--line);border-radius:10px;background:var(--panel);overflow:hidden}
+.ss-row{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:8px 20px;min-height:52px;padding:10px 16px;border-top:1px solid color-mix(in srgb,var(--line) 70%,transparent)}
+.ss-sheet>.ss-row:first-child,.ss-sheet>[hidden]:first-child+.ss-row,.ss-sheet>#update-facts:first-child>.ss-row:first-child{border-top:0}
+.ss-row[hidden]{display:none}
+.ss-t{display:flex;flex-direction:column;gap:2px;min-width:0}
+.ss-t>b{font-size:13.5px;font-weight:600;color:var(--ink)}
+.ss-desc{font-size:12.5px;line-height:1.5;color:var(--muted)}
+.ss-desc strong{color:var(--ink);font-weight:600}
+.ss-c{display:flex;align-items:center;justify-content:flex-end;flex-wrap:wrap;gap:8px;min-width:0}
+.ss-c input:not([type=checkbox]):not([type=color]){width:280px;max-width:100%;height:32px;padding:0 10px}
+.ss-actions{display:flex;justify-content:flex-end;flex-wrap:wrap;gap:8px;min-height:0}
+.ss-body{padding:0 16px}
+.ss-body:empty{display:none}
+.ss-body>*:first-child{margin-top:0}
+.ss-body>.note{margin:0 0 14px}
+.ss-body>.note:empty,.ss-body>.race-hosts:empty{display:none}
+.ss-pad{padding:16px}
+.ss-note{margin:-4px 2px 18px;font-size:12.5px;line-height:1.6;color:var(--muted)}
+ol.ss-note{padding-left:20px}
+.ss-note strong{color:var(--ink);font-weight:600}
+.ss-mono,.ss-path{font-family:var(--sf-mono);font-size:12.5px;font-weight:500}
+.ss-path{overflow-wrap:anywhere;color:var(--ink)}
+.settings-canvas>section>.note{margin:14px 0}
+
+/* The control kit, 30px high. */
+.ss-seg{display:inline-flex;gap:2px;padding:2px;border:1px solid var(--line);border-radius:8px;background:var(--bg)}
+.ss-seg>button{min-height:26px;padding:0 12px;border:0;border-radius:6px;background:transparent;color:var(--muted);font:400 13px/1 'Segoe UI',system-ui,sans-serif;white-space:nowrap}
+.ss-seg>button:hover{color:var(--ink);background:color-mix(in srgb,var(--ink) 6%,transparent)}
+.ss-seg>button[aria-pressed=true]{background:color-mix(in srgb,var(--ink) 13%,var(--panel));color:var(--ink);font-weight:600}
+input.ss-switch{appearance:none;position:relative;width:34px;height:20px;min-width:34px;margin:0;padding:0;border:0;border-radius:10px;background:var(--line);cursor:pointer;transition:background .12s}
+input.ss-switch::before{content:'';position:absolute;top:3px;left:3px;width:14px;height:14px;border-radius:50%;background:var(--panel);box-shadow:0 1px 2px #0004;transition:transform .12s}
+input.ss-switch:checked{background:var(--accent-fill,var(--accent))}
+input.ss-switch:checked::before{transform:translateX(14px);background:#fff}
+input.ss-switch:disabled{opacity:.45;cursor:not-allowed}
+.ss-pill{display:inline-flex;align-items:center;min-height:22px;padding:0 10px;border-radius:11px;background:color-mix(in srgb,var(--ink) 8%,var(--panel));font-size:12px;color:var(--ink);white-space:nowrap}
+.ss-pill.ok{background:color-mix(in srgb,var(--green) 16%,var(--panel));color:var(--green)}
+.ss-pill.warn{background:color-mix(in srgb,var(--amber) 18%,var(--panel));color:var(--amber)}
+
+/* The Paddock box and the theme tiles live inside sheets now. */
+.ss-sheet.paddock-local{margin:0 0 14px;padding:0;border:1px solid var(--line);border-radius:10px;background:var(--panel)}
+.ss-sheet .race-hosts{margin:0 0 14px}
+.ss-sheet .theme-grid{margin:0}
+.ss-table{margin-bottom:14px}
+#backup-list>.hint{margin:0 2px 14px}
+
+@media(max-width:760px){
+  .settings-layout{grid-template-columns:minmax(0,1fr);gap:18px}
+  .settings-nav[data-rail]{position:static;flex-direction:row;flex-wrap:wrap;padding:8px}
+  .rail-group{flex-direction:row;flex-wrap:wrap}
+  .rail-group+.rail-group{margin-top:0}
+  .rail-label,.rail-text small{display:none}
+  .settings-nav a.rail-item{width:auto;min-height:36px;flex:0 1 auto}
+  .ss-row{grid-template-columns:minmax(0,1fr)}
+  .ss-c{justify-content:flex-start}
+  .ss-c input:not([type=checkbox]):not([type=color]){width:100%}
+}

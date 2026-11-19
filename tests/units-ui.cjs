@@ -38,6 +38,17 @@ app.whenReady().then(async()=>{
   assert.equal(await run("document.querySelector('[data-unit-preset=custom]').getAttribute('aria-pressed')"),'true');
   await run("location.hash='telemetry'");await pause();assert.equal(await value('rearDiameter'),'20.32');
   await run("location.hash='settings'");await pause();await click('[data-unit-preset=metric]');await pause();await run("location.hash='telemetry'");await pause();assert.match(await text('[data-performance-result=speedKmh]'),/km\/h/);
-  assert.deepEqual(errors,[]);console.log('Units UI passed: metric default, imperial and custom choices, unit-aware inputs stored as metric, converted limits, Analyze/compare, persistence.');
+  // Settings → Units is a section of its own in the side list; its segments set the hidden list, and the list's status follows.
+  await run("location.hash='settings/units'");await pause();
+  assert.equal(await run("document.querySelector('#settings-units').hidden"),false);assert.equal(await run("document.querySelector('#settings-appearance').hidden"),true);
+  assert.deepEqual(await run("[...document.querySelectorAll('.settings-nav .rail-label')].map(l=>l.textContent)"),['Workbench','Data and connections']);
+  assert.deepEqual(await run("[...document.querySelectorAll('.settings-nav a')].map(a=>a.hash)"),['#settings/appearance','#settings/units','#settings/calculations/gearing','#settings/paddock','#settings/backups','#settings/updates']);
+  assert.equal(await run("document.querySelector('.settings-nav a[aria-current=page]').hash"),'#settings/units');
+  assert.equal(await text('[data-rail-status=units]'),'Metric');
+  await click('[data-unit-choice=speed][data-value=mph]');await pause();
+  assert.equal(await run("document.querySelector('[data-unit-quantity=speed]').value"),'mph');assert.equal(await run("document.querySelector('[data-unit-choice=speed][data-value=mph]').getAttribute('aria-pressed')"),'true');
+  assert.equal(await text('[data-rail-status=units]'),'Custom mix');
+  await click('[data-unit-preset=metric]');await pause();assert.equal(await text('[data-rail-status=units]'),'Metric');
+  assert.deepEqual(errors,[]);console.log('Units UI passed: metric default, imperial and custom choices, unit-aware inputs stored as metric, converted limits, Analyze/compare, persistence, Settings → Units sheet and side list.');
  }finally{win.destroy();app.quit();}
 }).catch(e=>{console.error(e);app.exit(1);});

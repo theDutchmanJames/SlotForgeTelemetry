@@ -25,7 +25,7 @@ function renderRoute(){
     for(const link of document.querySelectorAll('[data-analysis-mode]')){if(link.dataset.analysisMode===(sub||'overview'))link.setAttribute('aria-current','page');else link.removeAttribute('aria-current');}
   }
   if(page==='settings'){
-    const help=sub==='calculations';$('#settings-appearance').hidden=help;$('#settings-calculations').hidden=!help;
+    const help=sub==='calculations';SettingsUI.route(page,sub);
     for(const link of document.querySelectorAll('.settings-nav a')){if(link.hash.split('/')[1]===(sub||'appearance'))link.setAttribute('aria-current','page');else link.removeAttribute('aria-current');}
     if(help)renderHelp(topic);
   }

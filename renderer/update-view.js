@@ -26,10 +26,12 @@ const UpdatesUI=(()=>{
     q('#update-summary').textContent=how+' It only asks GitHub for the newest version number; nothing about you, your setups or your laps is sent. Telemetry never installs anything by itself.';
     const error=s.lastError&&!s.checking?s.lastError:'';q('#update-error').textContent=error;q('#update-error').hidden=!error;
     const newest=s.checking?'Checking…':s.latest?`Version ${s.latest.version} is available`:s.upToDate?'You have the latest version':'Not checked yet';
-    q('#update-facts').innerHTML=[['This version',s.current],['Newest version',newest],['Last checked',s.lastCheck?when(s.lastCheck):'Never']].map(([k,v])=>`<tr><th>${k}</th><td>${esc(v)}</td></tr>`).join('');
+    const pill=s.latest?'warn':s.upToDate?'ok':'';
+    q('#update-facts').innerHTML=[['This version',`<span class="ss-mono">${esc(s.current)}</span>`],['Newest version',`<span class="ss-pill ${pill}">${esc(newest)}</span>`],['Last checked',esc(s.lastCheck?when(s.lastCheck):'Never')]].map(([k,v])=>SettingsUI.row(k,'',v)).join('');
+    SettingsUI.status('updates',s.latest?`${s.latest.version} is available`:`${s.current}${s.upToDate?' · up to date':''}`);
     const open=q('#update-download');open.hidden=!s.latest;open.textContent=s.latest?'Download '+s.latest.version:'Download';
     q('#update-after').hidden=!s.latest;
-    const toggle=q('#update-toggle');toggle.hidden=!s.automatic;toggle.textContent=s.enabled?'Turn off automatic checks':'Turn on automatic checks';
+    q('#update-auto-row').hidden=!s.automatic;const toggle=q('#update-toggle');toggle.checked=!!s.enabled;toggle.disabled=busy;
     q('#update-check').disabled=busy||s.checking;
   }
   function render(){notice();settings();}
@@ -39,11 +41,12 @@ const UpdatesUI=(()=>{
   }
   function init(){
     q('.settings-nav').insertAdjacentHTML('beforeend','<a href="#settings/updates">Updates</a>');
-    q('#settings-appearance').parentElement.insertAdjacentHTML('beforeend',`<section class="panel" id="settings-updates" hidden><h2>Updates</h2>
-     <p id="update-summary" class="hint"></p><p id="update-error" class="note" role="alert" hidden></p>
-     <div class="table-wrap"><table><tbody id="update-facts"></tbody></table></div>
-     <div class="actions"><button type="button" class="btn primary" id="update-download" hidden>Download</button><button type="button" class="btn" id="update-check">Check now</button><button type="button" class="btn" id="update-toggle" hidden>Turn off automatic checks</button></div>
-     <p id="update-after" class="hint" hidden>Download opens the release page in your browser. Make a backup (Settings → Backups), close Telemetry, then install the new version as before; your data stays where it is.</p></section>`);
+    q('#settings-appearance').parentElement.insertAdjacentHTML('beforeend',`<section class="panel" id="settings-updates" hidden>${SettingsUI.head('updates','Updates','Telemetry tells you when a new version is out. Nothing is downloaded or installed by itself.')}
+     <p id="update-error" class="note" role="alert" hidden></p>
+     ${SettingsUI.group('This copy')}<div class="ss-sheet"><div id="update-facts"></div>
+     ${SettingsUI.row('Check for a new version','',`<button type="button" class="btn primary" id="update-download" hidden>Download</button><button type="button" class="btn" id="update-check">Check now</button>`)}
+     ${SettingsUI.row('Automatic checks','<span id="update-summary"></span>','<input type="checkbox" class="ss-switch" id="update-toggle" aria-label="Automatic checks">','id="update-auto-row" hidden')}</div>
+     <p id="update-after" class="ss-note" hidden>Download opens the release page in your browser. Make a backup (Settings → Backups), close Telemetry, then install the new version as before; your data stays where it is.</p></section>`);
     q('#update-download').onclick=()=>window.updates?.open().then(r=>{if(!r?.ok)toast(r?.error||'Could not open the release page.');});
     q('#update-check').onclick=()=>act('check',undefined,s=>s.latest?`Version ${s.latest.version} is available.`:'You have the latest version.');
     q('#update-toggle').onclick=()=>act('enable',{enabled:!state?.enabled});

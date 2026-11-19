@@ -12,6 +12,16 @@ Telemetry starts to follow the new shared SlotForge look of Timing and Paddock (
 - The accent is kept for the main action, the selected thing and focus: a highlighted figure is no longer red.
 - Thin scroll bars and file buttons in the theme's colours.
 
+### Settings in the new look
+
+- **A side list** groups the sections into *Workbench* (Appearance, Units, Calculations explained) and *Data and connections* (Connect to Paddock, Backups, Updates). Under each name a short line shows its state, such as the theme, "Metric", "Not connected", the last backup or the version.
+- **Units** is a section of its own. Each value is a small segmented choice (km/h · mph, g · oz…) instead of a drop-down list.
+- **Every section is one calm sheet:** a head that says what it is for, then groups of slim rows with the name and one line on the left and the control on the right.
+  - Backups puts *Back up now*, the backup folder, the extra copy and *Save* / *Restore* in their own rows.
+  - Updates shows the version facts as rows, the newest version as a small status pill, and automatic checks as a switch.
+  - Connect to Paddock separates *this computer* from *another computer*, with the address and password as rows.
+- On a narrow window the side list becomes a row of buttons on top.
+
 ## 0.14.0 — 17 November 2026 · Track day, Garage and backups
 
 ### Faster with a full library
