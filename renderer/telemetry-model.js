@@ -70,13 +70,17 @@
     const m=calculate(input),target=m.targetRollout??m.motor.rollout;
     const current={pinion:P.number(input.pinion,999999,false),gear:P.number(input.gear,999999,false)};
     if(![m.pinionMin,m.pinionMax,m.gearMin,m.gearMax].every(Number.isInteger)||m.pinionMin>m.pinionMax||m.gearMin>m.gearMax)return {pinions:[],gears:[],cells:[],target,current,truncated:false};
-    const span=(a,b,limit)=>Array.from({length:Math.min(b-a+1,limit)},(_,i)=>a+i);
-    const pinions=span(m.pinionMin,m.pinionMax,CHART_LIMIT.pinions),gearList=span(m.gearMin,m.gearMax,CHART_LIMIT.gears);
+    // The current gearing is always on the chart: the ranges widen to include it.
+    const has=v=>Number.isInteger(v)&&v>0,extended=(has(current.pinion)&&(current.pinion<m.pinionMin||current.pinion>m.pinionMax))||(has(current.gear)&&(current.gear<m.gearMin||current.gear>m.gearMax));
+    const pMin=has(current.pinion)?Math.min(m.pinionMin,current.pinion):m.pinionMin,pMax=has(current.pinion)?Math.max(m.pinionMax,current.pinion):m.pinionMax;
+    const gMin=has(current.gear)?Math.min(m.gearMin,current.gear):m.gearMin,gMax=has(current.gear)?Math.max(m.gearMax,current.gear):m.gearMax;
+    const span=(a,b,limit,keep)=>{let start=a;if(has(keep)&&keep-a+1>limit)start=Math.min(keep,b)-limit+1;return Array.from({length:Math.min(b-a+1,limit)},(_,i)=>start+i);};
+    const pinions=span(pMin,pMax,CHART_LIMIT.pinions,current.pinion),gearList=span(gMin,gMax,CHART_LIMIT.gears,current.gear);
     const cells=pinions.map(p=>gearList.map(g=>{
       const r=P.calculate({...input,pinion:String(p),gear:String(g)});
       return {pinion:p,gear:g,ratio:r.ratio,rollout:r.rollout,speedKmh:r.speedKmh,errorPercent:target&&r.rollout!==null?(r.rollout-target)/target*100:null};
     }));
-    return {pinions,gears:gearList,cells,target,current,truncated:pinions.length<m.pinionMax-m.pinionMin+1||gearList.length<m.gearMax-m.gearMin+1};
+    return {pinions,gears:gearList,cells,target,current,extended,truncated:pinions.length<pMax-pMin+1||gearList.length<gMax-gMin+1};
   }
   const api={fields,defaults,number,clean,calculate,gears,gearChart,CHART_LIMIT};
   if(typeof module==='object'&&module.exports)module.exports=api;else root.TelemetryModel=api;

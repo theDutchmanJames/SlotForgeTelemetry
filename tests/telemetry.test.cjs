@@ -41,6 +41,14 @@ test('gear chart covers the full range, agrees with the single-setup model and m
   const cell=c.cells[1][3];assert.deepEqual([cell.pinion,cell.gear],[9,27]);close(cell.rollout,P.calculate(s).rollout);close(cell.errorPercent,0);
   const other=c.cells[4][12];close(other.ratio,36/12);close(other.speedKmh,P.calculate({...s,pinion:'12',gear:'36'}).speedKmh);
   close(T.gearChart({...s,targetRollout:'20'}).cells[1][3].errorPercent,(Math.PI*20/3-20)/20*100);
+  assert.equal(c.extended,false);
+});
+test('gear chart always includes the current gearing, even outside the Gear finder ranges',()=>{
+  const c=T.gearChart({...example(),pinion:'13',gear:'40'});
+  assert.equal(c.extended,true);assert.deepEqual(c.pinions,[8,9,10,11,12,13]);assert.equal(c.gears.at(0),24);assert.equal(c.gears.at(-1),40);
+  assert.ok(c.cells.flat().some(x=>x.pinion===13&&x.gear===40));
+  const capped=T.gearChart({...example(),pinion:'60',gear:'27',pinionMin:'8',pinionMax:'12'});
+  assert.equal(capped.pinions.length,T.CHART_LIMIT.pinions);assert.equal(capped.pinions.at(-1),60,'a capped chart still shows the current pinion');assert.equal(capped.truncated,true);
 });
 test('gear chart rejects invalid ranges and caps large ones visibly',()=>{
   assert.equal(T.gearChart({...example(),pinionMin:'12',pinionMax:'8'}).cells.length,0);

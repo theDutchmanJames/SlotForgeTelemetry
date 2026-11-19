@@ -18,6 +18,14 @@
 .help-example{border-left-color:var(--line)}
 .help-formula{border-color:var(--line);background:color-mix(in srgb,var(--ink) 3%,var(--bg))}
 
+/* ---------- Gear chart: the current gearing stands out ---------- */
+.gear-chart td.gear-cell-current{box-shadow:inset 0 0 0 2px var(--ink);position:relative}
+.gear-chart td.gear-cell-current button{font-weight:700;color:var(--ink)}
+.gear-chart td.gear-cell-current::after{content:'';position:absolute;top:3px;right:3px;width:6px;height:6px;border-radius:50%;background:var(--accent);pointer-events:none}
+.gear-key.gear-cell-current{box-shadow:inset 0 0 0 2px var(--ink);position:relative}
+.gear-chart tbody th.gear-axis-current,.gear-chart thead th.gear-axis-current{color:var(--ink);font-weight:700;box-shadow:inset 0 -2px 0 var(--ink)}
+.gear-chart tbody th.gear-axis-current{box-shadow:inset -2px 0 0 var(--ink)}
+
 /* ---------- Race Sheet for every table ---------- */
 .table-wrap{border-radius:10px}
 .table-wrap table:not(.gear-chart){background:none}

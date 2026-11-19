@@ -3,10 +3,10 @@
 const WorkbenchLevels=(()=>{
   const KEY='slotforge.telemetry.workbench-level.v1',q=s=>document.querySelector(s);
   const LEVELS=[
-    ['setup','Quick setup','setup','The essentials: gearing, motor, tyres and weight. Everything else is optional.'],
-    ['measure','Measure the car','scales','Optional measurements: tyre wear and clearance, axle loads, chassis geometry and magnetic downforce.'],
-    ['plan','Plan & test','timer','Choose gears, work out lap speed and plan track tests.'],
-    ['all','Everything','list','Every input and result on one page.']
+    ['setup','Quick setup','setup','The essentials: gearing, motor, tyres and weight. Everything else is optional.','Gearing, motor, tyres, weight'],
+    ['measure','Measure the car','scales','Optional measurements: tyre wear and clearance, axle loads, chassis geometry and magnetic downforce.','Wear, axle loads, chassis, magnets'],
+    ['plan','Plan & test','timer','Choose gears, work out lap speed and plan track tests.','Gear chart, lap speed, track tests'],
+    ['all','Everything','list','Every input and result on one page.','All inputs and results']
   ];
   // Input folders and result groups per level. Anything not listed shows at every level.
   const FOLDERS={pinion:['setup'],ratedRpm:['setup'],tyreMode:['setup','measure'],totalWeight:['setup','measure'],chassisGuideSpan:['measure'],magneticReadings:['measure'],targetRollout:['plan'],trackLength:['plan'],workshop:['plan']};
@@ -15,7 +15,8 @@ const WorkbenchLevels=(()=>{
   const shows=(map,key,at=level)=>at==='all'||!map[key]||map[key].includes(at);
   function init(){
     try{const saved=localStorage.getItem(KEY);if(LEVELS.some(([k])=>k===saved))level=saved;}catch{/* Default level. */}
-    q('.workbench-folder-tools').insertAdjacentHTML('beforebegin',`<div class="workbench-levels"><div class="segmented level-switch" role="group" aria-label="Workbench level">${LEVELS.map(([key,label,icon])=>`<button type="button" data-workbench-level="${key}" aria-pressed="false">${sfIcon(icon)}${label}</button>`).join('')}</div><p class="hint" id="workbench-level-hint"></p></div>`);
+    // A row of view tabs above inputs and results: each says what it shows.
+    q('.calculator-layout').insertAdjacentHTML('beforebegin',`<div class="workbench-levels"><span class="levels-label" id="workbench-level-label">Show</span><div class="level-switch level-tabs" role="group" aria-labelledby="workbench-level-label">${LEVELS.map(([key,label,icon,,short])=>`<button type="button" data-workbench-level="${key}" aria-pressed="false">${sfIcon(icon)}<span class="level-text"><strong>${label}</strong><small>${short}</small></span></button>`).join('')}</div><p class="sr-only" id="workbench-level-hint" aria-live="polite"></p></div>`);
     for(const b of document.querySelectorAll('[data-workbench-level]'))b.onclick=()=>set(b.dataset.workbenchLevel);
     apply();
   }

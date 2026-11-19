@@ -38,8 +38,9 @@ Telemetry starts to follow the new shared SlotForge look of Timing and Paddock (
 
 ### Workbench in the new look
 
-- **The setup bar:** the setup name is large, in the title type, and you edit it in place. Its state shows next to the buttons: a yellow dot for a draft or unsaved changes, a green tick once it is saved in the library. *Save setup* is the one main button; New, Open, Export and Setup sheet are outline buttons.
-- **Quick setup / Measure the car / Plan & test / Everything** is a quiet switch: the chosen level is lifted in grey, not outlined in red.
+- **The setup bar:** the setup name is large, in the title type, in a field with a pencil, so it is clear you can type in it. The car sits under it with a *Manage cars* link to the Garage. The saved state is a small tag in the top corner: a yellow dot for a draft or unsaved changes, a green tick once it is saved in the library. Underneath, one row holds every tool: New setup, *Load example* (no longer a small floating link), Open file, Export file and Setup sheet on the left, *Save as copy* and *Save setup* on the right.
+- **Quick setup / Measure the car / Plan & test / Everything** is now a row of tabs above both inputs and results. Each tab says what it shows, such as "Gear chart, lap speed, track tests", and the open one is underlined in the accent colour.
+- **The gear chart always shows your current gearing**, even when it is outside the Gear finder ranges: the chart widens to include it and says so. The current cell has a clear outline and a dot, and its pinion and gear are marked at the edges of the chart.
 - **Input and result folders** are plain boxes with their name in the title type and a chevron. An open folder gets a thin accent line on its left and shows its icon in colour; closed folders are grey. Pinned result groups show a grey Pin.
 
 ### Track day in the new look

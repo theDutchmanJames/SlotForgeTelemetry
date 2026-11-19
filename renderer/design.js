@@ -2,9 +2,26 @@
 function initializeDesign(){
   const homeHead=document.querySelector('[data-page=telemetry] .page-head'),setupPanel=document.querySelector('.setup-panel');
   homeHead.classList.add('workbench-toolbar');homeHead.firstElementChild.replaceChildren(setupPanel);
-  // SlotForge Restyle (Pit Board): the saved state sits with the buttons, the file tools are outline buttons, Save is the one main action.
-  const tools=homeHead.querySelector('.actions'),saved=document.querySelector('#library-workspace-status');
-  if(tools&&saved){saved.classList.add('save-state');tools.prepend(saved);}
+  // SlotForge Restyle (Pit Board): the name reads as an editable title, the car sits under it, the saved state
+  // top right, and one row of tools below with Save as the one main action. Elements move, so ids and handlers stay.
+  const tools=homeHead.querySelector('.actions'),saved=document.querySelector('#library-workspace-status'),name=document.querySelector('#name');
+  const nameField=name.closest('label'),carField=document.querySelector('.garage-car-field'),example=document.querySelector('#load-example');
+  setupPanel.querySelector('.section-heading').classList.add('sr-only');
+  nameField.classList.add('setup-name-field');const edit=document.createElement('span');edit.className='setup-name-edit';name.replaceWith(edit);edit.append(name);
+  edit.insertAdjacentHTML('beforeend',sfIcon('edit'));name.placeholder='Name this setup';
+  if(saved){saved.classList.add('save-state');setupPanel.prepend(saved);}
+  if(carField){
+    const row=document.createElement('div');row.className='setup-car-row';carField.replaceWith(row);row.append(carField);
+    const hint=carField.querySelector('small');if(hint)hint.remove();
+    row.insertAdjacentHTML('beforeend','<a class="text-button setup-car-link" href="#library/garage" title="Paddock cars and cars added in Library → Garage">Manage cars</a>');
+  }
+  if(tools){
+    example.className='btn ghost';
+    const left=document.createElement('div'),right=document.createElement('div');left.className='pit-tools';right.className='pit-save';
+    for(const id of ['new-setup','load-example','open-setup','save-setup','setup-sheet'])left.append(document.getElementById(id));
+    for(const id of ['save-copy','save-library'])right.append(document.getElementById(id));
+    tools.classList.add('pit-actions');tools.replaceChildren(left,right);
+  }
   for(const id of ['new-setup','open-setup','save-setup','setup-sheet'])document.getElementById(id)?.classList.add('ghost');
   const decorate=(selector,name)=>{for(const el of document.querySelectorAll(selector))el.insertAdjacentHTML('afterbegin',sfIcon(name));};
   document.querySelector('.brand-mark').innerHTML='<img src="../assets/icon.svg" alt="" width="42" height="42">';
@@ -25,7 +42,7 @@ function initializeDesign(){
   }
   const flow=document.querySelector('.drive-flow');
   flow.innerHTML=`<div data-category="motor"><div class="part-illustration" role="img" aria-label="Motor">${sfIcon('short-can-motor')}</div><span>Motor</span><strong id="flow-rpm"></strong></div><span class="flow-link">${sfIcon('next')}</span><div data-category="gearing"><div class="part-illustration gear-pair" role="img" aria-label="Pinion and driven gear">${sfIcon('motor-pinion')}${sfIcon('spur-gear')}</div><span>Gearing</span><strong id="flow-gearing"></strong></div><span class="flow-link">${sfIcon('next')}</span><div data-category="tyres"><div class="part-illustration" role="img" aria-label="Rear wheel and tyre">${sfIcon('wheel-tyre-set')}</div><span>Rear tyre</span><strong id="flow-tyre"></strong></div>`;
-  for(const [id,name] of Object.entries({'new-setup':'plus','open-setup':'download','save-setup':'upload','setup-sheet':'list','save-copy':'plus','save-library':'check','library-import':'download','library-backup':'upload','analysis-edit':'edit','library-undo':'history'}))decorate('#'+id,name);
+  for(const [id,name] of Object.entries({'new-setup':'plus','open-setup':'download','save-setup':'upload','setup-sheet':'list','save-copy':'plus','save-library':'check','library-import':'download','library-backup':'upload','analysis-edit':'edit','library-undo':'history','load-example':'car'}))decorate('#'+id,name);
   decorate('.setup-panel h2','setup');decorate('.next-step h3','timer');decorate('.help-link','list');
   for(const button of document.querySelectorAll('[data-analysis-topic]')){
     const [tone,name]=topicStyle[button.dataset.analysisTopic];button.dataset.category=tone;button.insertAdjacentHTML('afterbegin',sfIcon(name));

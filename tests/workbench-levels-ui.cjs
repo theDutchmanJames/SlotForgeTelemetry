@@ -31,6 +31,16 @@ app.whenReady().then(async()=>{
   await run("focusSetupInput('totalWeight')");await pause();assert.equal(await run('WorkbenchLevels.get()'),'measure','a level that already shows the input is kept');
   await run("focusSetupInput('pinion')");await pause();assert.equal(await run('WorkbenchLevels.get()'),'setup');
   await run("focusSetupInput('trackLength')");await pause();assert.equal(await run('WorkbenchLevels.get()'),'plan');
+  // SlotForge Restyle: the levels are one row of view tabs above inputs and results; the setup bar is a Pit Board.
+  assert.equal(await run("document.querySelector('.workbench-levels').nextElementSibling.classList.contains('calculator-layout')"),true);
+  assert.equal(await run("document.querySelectorAll('.level-tabs [data-workbench-level] small').length"),4);
+  assert.deepEqual(await run("[...document.querySelectorAll('.pit-actions .pit-tools .btn')].map(b=>b.id)"),['new-setup','load-example','open-setup','save-setup','setup-sheet']);
+  assert.deepEqual(await run("[...document.querySelectorAll('.pit-actions .pit-save .btn')].map(b=>b.id)"),['save-copy','save-library']);
+  assert.equal(await run("!!document.querySelector('.setup-name-edit #name')&&!!document.querySelector('.setup-car-row [name=carRef]')"),true);
+  // The gear chart always marks the current gearing, even outside the Gear finder ranges.
+  await run("(()=>{for(const [n,v] of [['pinion','13'],['gear','30']]){const e=document.querySelector('[name='+n+']');e.value=v;e.dispatchEvent(new Event('input',{bubbles:true}));}})()");
+  await run("document.querySelector('[data-result-group=gears] summary').click()");await pause();
+  assert.equal(await run("document.querySelector('#live-gears td.gear-cell-current button').dataset.pinion+'/'+document.querySelector('#live-gears td.gear-cell-current button').dataset.gear"),'13/30');
   await click('[data-workbench-level=all]');await pause();assert.equal((await visible('.workbench-folder')).length,9);assert.equal((await visible('[data-result-group]')).length,8);
   // The choice is remembered on this device.
   await win.loadFile(path.join(__dirname,'../renderer/index.html'));await pause();assert.equal(await run('WorkbenchLevels.get()'),'all');
