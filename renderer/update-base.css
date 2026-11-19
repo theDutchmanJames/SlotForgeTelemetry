@@ -1,0 +1,31 @@
+/* The SlotForge Restyle basics that the shared update window (update-window.css, update-ui.js) sits on and that
+   Telemetry did not have yet, taken from SlotForge Circuit's style.css (Workshop Window, Pit Buttons, Settings Sheet)
+   and mapped to Telemetry's own colours. Loaded before update-window.css. */
+:root{--ui-focus:#4c9aff;--ui-success:var(--green);--ui-good:var(--green);--ui-warning:var(--amber);--font-numbers:var(--sf-mono)}
+
+/* ---------- Workshop Window: the dialog base ---------- */
+dialog.update-dialog{border-radius:14px;max-height:90dvh;overflow:auto;font-size:14px}
+dialog.update-dialog:focus{outline:none}
+.update-dialog .dialog-heading{display:flex;justify-content:space-between;align-items:center;gap:12px;margin:0 0 14px;padding-bottom:12px;border-bottom:1px solid var(--line)}
+.update-dialog .dialog-actions{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:8px;margin:14px 0 0;padding-top:14px;border-top:1px solid var(--line)}
+
+/* ---------- Pit Buttons: the quiet ✕ ---------- */
+.btn.quiet{background:transparent;border-color:transparent;min-width:32px;padding:6px 10px;color:var(--muted)}
+.btn.quiet:hover:not(:disabled){background:color-mix(in srgb,var(--ink) 8%,transparent);color:var(--ink)}
+
+/* ---------- Settings Sheet rows ---------- */
+.ss-ctl{display:flex;align-items:center;justify-content:flex-end;gap:8px;flex-wrap:wrap}
+.ss-ctl>.btn{min-height:30px}
+.ss-val{font:500 13px var(--font-numbers,monospace);color:var(--ink)}
+.ss-note.warn{color:var(--ui-warning)}
+.ss-pill{gap:6px}
+.ss-pill.good,.ss-pill.needs{background:none;border:1px solid var(--line)}
+.ss-pill.good::before,.ss-pill.needs::before{content:'';width:7px;height:7px;border-radius:50%;background:currentColor}
+.ss-pill.good{color:var(--ink);border-color:color-mix(in srgb,var(--ui-good) 45%,var(--line))}
+.ss-pill.good::before{background:var(--ui-good)}
+.ss-pill.needs{color:var(--ui-warning);border-color:color-mix(in srgb,var(--ui-warning) 45%,var(--line))}
+/* In Telemetry the section sits on the Updates page, which already has its title from the Settings sheet. */
+#settings-updates .update-card>h2{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+#settings-updates .update-card .ss-sheet{margin-bottom:18px}
+#settings-updates .update-card .ss-note{padding-left:2px}
+@media(max-width:640px){.ss-ctl{justify-content:flex-start}}

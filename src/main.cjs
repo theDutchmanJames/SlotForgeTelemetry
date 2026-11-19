@@ -27,8 +27,12 @@ app.whenReady().then(() => {
   createWindow();
   const paddock=require('./paddock-ipc.cjs').registerPaddock(app.getPath('userData'));
   require('./storage-ipc.cjs').registerStorage(app.getPath('userData'),{version:app.getVersion()});
-  // "A new version is available": installed/portable apps ask GitHub by themselves; development copies only on "Check now".
-  const updates=require('./update-ipc.cjs').registerUpdates(app.getPath('userData'),{current:app.getVersion(),homepage:require('../package.json').homepage,fetch:(url,init)=>net.fetch(url,init),automatic:app.isPackaged});
+  // "A new version is available": installed/portable apps ask GitHub once at start; development copies,
+  // automated runs and SLOTFORGE_NO_UPDATE_CHECK only check when Check now is clicked.
+  const updates=require('./update-ipc.cjs').registerUpdates(app.getPath('userData'),{current:app.getVersion(),homepage:require('../package.json').homepage,
+    fetch:(url,init)=>net.fetch(url,init),downloads:app.getPath('downloads'),
+    edition:{platform:process.platform,arch:process.arch,portable:!!process.env.PORTABLE_EXECUTABLE_FILE,appImage:!!process.env.APPIMAGE},
+    automatic:app.isPackaged&&!process.env.SLOTFORGE_NO_UPDATE_CHECK});
   app.on('before-quit',()=>{paddock.disconnect();updates.dispose();});
   session.defaultSession.setPermissionRequestHandler((_wc, _permission, callback) => callback(false));
   session.defaultSession.setPermissionCheckHandler(() => false);

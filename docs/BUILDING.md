@@ -8,7 +8,7 @@ Every platform gets a **portable app** (runs without installing) and an **instal
 
 | Platform | Portable app | Installer |
 | --- | --- | --- |
-| Windows x64 | `dist/SlotForgeTelemetry-<version>-windows-x64-Portable.exe` | `dist/SlotForgeTelemetry-<version>-windows-x64-Setup.exe` |
+| Windows x64 | `dist/SlotForgeTelemetry-<version>-Portable-x64.exe` | `dist/SlotForgeTelemetry-<version>-Setup-x64.exe` |
 | macOS universal | `dist/mac/SlotForgeTelemetry-<version>-mac-universal.zip` | `dist/mac/SlotForgeTelemetry-<version>-mac-universal.dmg` (drag to Applications) |
 | Linux x64/arm64 | `dist/linux/SlotForgeTelemetry-<version>-linux-<arch>.AppImage` | `dist/linux/SlotForgeTelemetry-<version>-linux-<arch>.deb` |
 

@@ -1,6 +1,6 @@
 // Shared presentation only; calculation and saved-setup behaviour live elsewhere.
 // SlotForge Restyle (Pit Wall): the main menu is one slim bar. The six tabs sit in three groups on a dark track, the
-// connection and save status are small lights on the right, and the bar under it only appears for an update notice.
+// connection and save status are small lights on the right, and the old grey line under it is gone (a new version opens its own window).
 function pitWall(){
   const nav=document.querySelector('.main-nav'),header=document.querySelector('.app-header'),bar=document.querySelector('.workspace-bar');
   const link=route=>nav.querySelector(`[data-route="${route}"]`);
@@ -15,7 +15,8 @@ function pitWall(){
   for(const id of ['paddock-global-status','save-state']){const el=document.getElementById(id);if(!el)continue;lights.append(el);
     const tip=()=>{el.title=el.textContent.trim();};tip();new MutationObserver(tip).observe(el,{childList:true,characterData:true,subtree:true});}
   header.querySelector('.theme-switch').before(lights);
-  bar?.classList.add('pit-strip');
+  // Everything in the old grey line under the menu now lives in the bar (the version is in the footer).
+  bar?.remove();
 }
 function initializeDesign(){
   const homeHead=document.querySelector('[data-page=telemetry] .page-head'),setupPanel=document.querySelector('.setup-panel');

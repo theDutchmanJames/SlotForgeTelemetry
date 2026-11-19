@@ -301,7 +301,7 @@ Open the **[latest GitHub release](https://github.com/theDutchmanJames/SlotForge
 
 | Your computer | Choose this file |
 | --- | --- |
-| **Windows · Intel/AMD 64-bit** | The file ending in **windows-x64-Portable.exe**. |
+| **Windows · Intel/AMD 64-bit** | The file ending in **Portable-x64.exe** (or **Setup-x64.exe** to install it). |
 | **macOS · Intel or Apple Silicon** | The file ending in **mac-universal.dmg**. One download supports both processors; a ZIP of the same app is also available. |
 | **Linux · Ubuntu/Debian/Mint, 64-bit Intel/AMD** | The file ending in **linux-amd64.deb**. |
 | **Linux · other compatible distributions, 64-bit Intel/AMD** | The file ending in **linux-x86_64.AppImage**. |

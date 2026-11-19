@@ -62,7 +62,16 @@ Telemetry starts to follow the new shared SlotForge look of Timing and Paddock (
 
 - **One slim bar:** the six pages sit in three groups on a dark track: Telemetry and Track day, Analyze and Driver Feedback, Library and Settings. The open page is lifted in grey with its icon in the accent colour.
 - **Status lights on the right:** the Paddock connection and the save state are a small pill next to Light / Dark, so the separate grey line under the menu is gone. In narrower windows the words go first (hover the light to read them), then the page names; the icons always stay.
-- The line under the bar only appears when a new version is available, with *Download* and *Not now*.
+- The grey line under the menu is gone; the version number stays in the footer.
+
+### New versions, the same way as every SlotForge app
+
+- **Once at start:** Telemetry looks for a new version about five seconds after it opens, and not again until the next start. When nothing is new, nothing happens.
+- **A window shows a new version:** its number, a few lines on what is new, your copy (for example *Windows · installer*), the release date and the file for your copy with its size. It replaces the small notice in the top bar.
+- **Download** saves that file in your Downloads folder, shows its progress (with *Cancel*), checks that it is complete and matches the release, then offers *Show in folder* and one line on how to install it. Telemetry never runs or installs anything by itself.
+- **Skip this version** keeps the window away until an even newer version is out. Closing the window only hides it until the next start.
+- **Settings → Updates** shows this version, the newest version, when Telemetry last looked, a switch for the check at start, *Check now* (which always shows the window when there is something newer, even a skipped version) and a button to open the window again.
+- The Windows downloads are now called `SlotForgeTelemetry-X.Y.Z-Setup-x64.exe` and `…-Portable-x64.exe`, like the other SlotForge apps.
 
 ### Finishing touches
 

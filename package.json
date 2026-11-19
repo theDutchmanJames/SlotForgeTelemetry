@@ -75,7 +75,7 @@
       "shortcutName": "SlotForge Telemetry",
       "uninstallDisplayName": "SlotForge Telemetry",
       "deleteAppDataOnUninstall": false,
-      "artifactName": "SlotForgeTelemetry-${version}-windows-${arch}-Setup.${ext}"
+      "artifactName": "SlotForgeTelemetry-${version}-Setup-${arch}.${ext}"
     },
     "mac": {
       "target": [
@@ -110,7 +110,7 @@
       "artifactName": "SlotForgeTelemetry-${version}-linux-${arch}.${ext}"
     },
     "portable": {
-      "artifactName": "SlotForgeTelemetry-${version}-windows-${arch}-Portable.${ext}"
+      "artifactName": "SlotForgeTelemetry-${version}-Portable-${arch}.${ext}"
     }
   },
   "homepage": "https://github.com/theDutchmanJames/SlotForgeTelemetry",

@@ -32,11 +32,6 @@ html .app-header .theme-switch{flex:none;margin-left:0;height:34px;padding:2px;b
 html .app-header .theme-switch button{height:28px;padding:0 12px;border-radius:6px;font-size:12.5px}
 html .app-header .theme-switch button[aria-pressed=true]{background:color-mix(in srgb,var(--ink) 13%,var(--panel));color:var(--ink);font-weight:600}
 
-/* ---------- The strip under the bar: only for an update notice ---------- */
-.workspace-bar.pit-strip:not(:has(.update-notice)){display:none}
-.workspace-bar.pit-strip{align-items:center;min-height:40px;padding:4px 18px;background:linear-gradient(90deg,color-mix(in srgb,var(--accent) 18%,var(--bg)),var(--bg) 60%);font-size:12.5px}
-.workspace-bar.pit-strip .version{display:none}
-.workspace-bar.pit-strip .update-notice{margin:0;font-size:12.5px}
 
 /* ---------- Narrower windows ---------- */
 @media(max-width:1480px){.status-lights #save-state{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;padding:0;border:0}}

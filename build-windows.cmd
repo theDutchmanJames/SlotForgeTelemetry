@@ -9,8 +9,8 @@ where node >nul 2>&1 || (echo Node.js is missing. Install Node.js 22.12 or newer
 where npm >nul 2>&1 || (echo npm is missing. Reinstall Node.js with npm included. & goto :fail)
 node -e "const [m,n]=process.versions.node.split('.').map(Number);process.exit(m>22||(m===22&&n>=12)?0:1)" || (echo Node.js 22.12 or newer is required. & goto :fail)
 for /f "delims=" %%v in ('node -p "require('./package.json').version"') do set "VERSION=%%v"
-set "PORTABLE=dist\SlotForgeTelemetry-%VERSION%-windows-x64-Portable.exe"
-set "SETUP=dist\SlotForgeTelemetry-%VERSION%-windows-x64-Setup.exe"
+set "PORTABLE=dist\SlotForgeTelemetry-%VERSION%-Portable-x64.exe"
+set "SETUP=dist\SlotForgeTelemetry-%VERSION%-Setup-x64.exe"
 echo.
 echo Building SlotForge Telemetry %VERSION% for Windows
 if "%QUICK%"=="1" if exist "node_modules\electron\dist\electron.exe" (
