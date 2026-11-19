@@ -57,6 +57,12 @@ Telemetry starts to follow the new shared SlotForge look of Timing and Paddock (
 - Optional sections open from plain names with a small arrow instead of blue links. *Next useful question* and *How does your car behave?* (on the workbench) are quiet boxes with a thin accent line.
 - In the top menu, Driver Feedback is marked like the other pages when it is open.
 
+### Finishing touches
+
+- **Every table** has the same quiet look: small grey capitals over the columns, thin lines between rows and a light highlight on hover. The selected setup in the Library is lifted in grey. The gear chart keeps its own grid.
+- **Calculations explained** reads more calmly: the topics are small grey chips, with the open topic lifted and its icon in colour. Formulas, examples and limits sit in plain boxes.
+- The last coloured edges are gone. *A useful starting point*, *Ready to look deeper?*, chassis snapshots and the ballast planner are quiet boxes, some with a thin accent line.
+
 ## 0.14.0 — 17 November 2026 · Track day, Garage and backups
 
 ### Faster with a full library
