@@ -1,0 +1,249 @@
+<!doctype html>
+<html lang="en" data-tone="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Driver Feedback rework</title>
+<style>
+@font-face{font-family:'SF Mono';src:url('../../../renderer/fonts/robotomono/RobotoMono[wght].ttf') format('truetype');font-weight:100 700}
+@font-face{font-family:'SF Cond';src:url('../../../renderer/fonts/barlowcondensed/BarlowCondensed-Bold.ttf') format('truetype');font-weight:700}
+@font-face{font-family:'SF Cond';src:url('../../../renderer/fonts/barlowcondensed/BarlowCondensed-BoldItalic.ttf') format('truetype');font-weight:700;font-style:italic}
+:root{--bg:#171b21;--panel:#222831;--panel2:#1c2129;--raised:#2a313b;--ink:#e8e6e1;--ink2:#c4c8ce;--muted:#98a0ab;--faint:#6b7380;--line:#343b47;--line2:#2b313b;
+ --accent:#e5484d;--accent-text:#f06b6f;--good:#3ecf8e;--warn:#f2b705;--rec:#a855f7;--blue:#5aa9e6;--page:#0f1216;
+ --ui:'Segoe UI',system-ui,sans-serif;--cond:'SF Cond','Bahnschrift',sans-serif;--mono:'SF Mono',Consolas,monospace}
+[data-tone=light]{--bg:#f1efea;--panel:#ffffff;--panel2:#f7f5f1;--raised:#ecebe6;--ink:#1d2229;--ink2:#3a414b;--muted:#656c76;--faint:#8b929b;--line:#d9d6cf;--line2:#e6e3dd;
+ --accent:#d62828;--accent-text:#c21f1f;--good:#187a50;--warn:#956000;--rec:#7c3aed;--blue:#1f6fb2;--page:#e4e1da}
+*{box-sizing:border-box}
+body{margin:0;background:var(--page);color:var(--ink);font:13.5px/1.45 var(--ui)}
+.wrap{max-width:1460px;margin:0 auto;padding:26px 20px 90px}
+h1{font:italic 700 42px/1 var(--cond);text-transform:uppercase;margin:0 0 6px}
+.lead{color:var(--muted);margin:0 0 12px;max-width:110ch;font-size:14px}
+ul.why{margin:0 0 6px;padding-left:18px;color:var(--ink2);max-width:120ch;font-size:14px}ul.why li{margin:3px 0}
+.bar{position:sticky;top:0;z-index:20;display:flex;flex-wrap:wrap;align-items:center;gap:10px 18px;margin:14px -20px 18px;padding:12px 20px;background:color-mix(in srgb,var(--page) 88%,transparent);backdrop-filter:blur(6px);border-bottom:1px solid var(--line2)}
+.bar b{font:600 10.5px var(--ui);letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.sg{display:inline-flex;gap:2px;padding:2px;border:1px solid var(--line);border-radius:8px;background:var(--bg)}
+.sg button{height:30px;padding:0 14px;border:0;border-radius:6px;background:transparent;color:var(--muted);font:500 13px var(--ui);cursor:pointer}
+.sg button.on{background:color-mix(in srgb,var(--ink) 13%,var(--panel));color:var(--ink);font-weight:650}
+.opt-note{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:0 0 18px}
+.opt-note>div{border:1px solid var(--line);border-radius:10px;padding:14px 16px;background:var(--panel2)}
+.opt-note>div.on{border-color:var(--ink2)}
+.opt-note h3{margin:0 0 4px;font:italic 700 22px/1 var(--cond);text-transform:uppercase}
+.opt-note p{margin:0 0 6px;color:var(--muted)}.opt-note ul{margin:0;padding-left:18px;color:var(--ink2)}
+.mono{font-family:var(--mono)}
+/* the app frame */
+.app{border:1px solid var(--line);border-radius:12px;overflow:hidden;background:var(--bg)}
+.top{display:flex;align-items:center;gap:14px;height:56px;padding:0 16px;background:var(--panel2);border-bottom:1px solid var(--line)}
+.logo{display:flex;align-items:center;gap:9px;font:italic 700 21px/1 var(--cond);letter-spacing:.02em}
+.logo i{width:30px;height:30px;border-radius:8px;background:var(--accent)}
+.tabs{display:flex;gap:6px;margin-left:10px}
+.tabs span{display:inline-flex;gap:2px;padding:3px;border-radius:9px;background:rgba(0,0,0,.22)}
+[data-tone=light] .tabs span{background:rgba(0,0,0,.06)}
+.tabs a{padding:6px 11px;border-radius:7px;color:var(--muted);font-size:13px;text-decoration:none}
+.tabs a.on{background:color-mix(in srgb,var(--ink) 12%,transparent);color:var(--ink);font-weight:600}
+.lights{margin-left:auto;font-size:12px;color:var(--muted);display:flex;gap:6px;align-items:center}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--good);display:inline-block}
+.page{padding:22px 24px 28px}
+.eyebrow{font:600 11px var(--ui);letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.ph{display:flex;align-items:flex-end;gap:14px;margin-bottom:16px}
+.ph h2{font:italic 700 34px/1 var(--cond);text-transform:uppercase;margin:4px 0 0}
+.ph .grow{flex:1}
+.btn{display:inline-flex;align-items:center;gap:6px;height:34px;padding:0 13px;border:1px solid var(--line);border-radius:7px;background:var(--raised);color:var(--ink);font:500 13px var(--ui);cursor:pointer;white-space:nowrap}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:600}
+.btn.ghost{background:transparent}.btn.small{height:28px;padding:0 10px;font-size:12.5px}
+.chip{display:inline-flex;align-items:center;gap:5px;height:24px;padding:0 9px;border-radius:999px;border:1px solid var(--line);color:var(--ink2);font-size:12px;background:var(--panel2);white-space:nowrap}
+.chip.on{background:color-mix(in srgb,var(--ink) 12%,var(--panel));color:var(--ink);border-color:var(--ink2)}
+.tag{font:600 10.5px var(--ui);letter-spacing:.08em;text-transform:uppercase;padding:2px 7px;border-radius:5px;border:1px solid var(--line);color:var(--muted)}
+.tag.club{color:var(--blue);border-color:color-mix(in srgb,var(--blue) 45%,var(--line))}
+.tag.test{color:var(--warn);border-color:color-mix(in srgb,var(--warn) 45%,var(--line))}
+.tag.rec{color:var(--rec);border-color:color-mix(in srgb,var(--rec) 55%,var(--line))}
+.change{display:inline-flex;align-items:center;gap:5px;font-size:12px;color:var(--ink);background:color-mix(in srgb,var(--warn) 14%,transparent);border-radius:5px;padding:1px 7px}
+.change.none{background:transparent;color:var(--faint);padding:0}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:10px}
+.k{font:600 10.5px var(--ui);letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.big{font:600 26px/1.1 var(--mono)}
+.better{color:var(--good)}.worse{color:var(--accent-text)}
+.note-new{display:inline-block;font:700 9.5px var(--ui);letter-spacing:.1em;text-transform:uppercase;color:#fff;background:var(--rec);padding:1px 6px;border-radius:4px;vertical-align:2px;margin-left:6px}
+
+.hidden{display:none!important}
+.h5{margin:0 0 6px;font:italic 700 19px/1.1 var(--cond);text-transform:uppercase}
+.sub{color:var(--muted);font-size:12.5px;margin:0 0 12px}
+.q{font-size:15px;font-weight:600;margin:14px 0 8px}
+.answers{display:flex;flex-wrap:wrap;gap:8px}
+.ans{padding:9px 14px;border-radius:10px;border:1px solid var(--line);background:var(--panel2);font-size:13.5px}
+.ans.on{border-color:var(--ink2);background:color-mix(in srgb,var(--ink) 12%,var(--panel));font-weight:600}
+.ans.skip{border-style:dashed;color:var(--muted)}
+/* ---------- A: Symptom Cards ---------- */
+.symgrid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px}
+.sym{padding:12px;border-radius:12px;border:1px solid var(--line);background:var(--panel);text-align:center}
+.sym svg{width:100%;height:70px;color:var(--ink2)}
+.sym b{display:block;font-size:13.5px;margin-top:4px}.sym small{color:var(--muted);font-size:11.5px}
+.sym.on{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent);background:color-mix(in srgb,var(--accent) 6%,var(--panel))}
+.sym.on svg{color:var(--accent-text)}
+.thread{display:grid;gap:12px;margin-top:14px}
+.stepcard{padding:16px 18px}
+.stepcard .num{display:inline-grid;place-items:center;width:24px;height:24px;border-radius:50%;background:var(--ink);color:var(--bg);font:700 12px var(--mono);margin-right:8px}
+.stepcard h4{display:flex;align-items:center;margin:0 0 4px;font:italic 700 19px/1 var(--cond);text-transform:uppercase}
+.todo{display:grid;gap:6px}
+.trow{display:grid;grid-template-columns:28px minmax(0,1fr) auto;gap:12px;align-items:center;padding:10px 12px;border:1px solid var(--line2);border-radius:10px}
+.trow .tk{width:22px;height:22px;border-radius:6px;border:1.5px solid var(--muted);display:grid;place-items:center;font-size:12px}
+.trow.ok .tk{background:var(--good);border-color:var(--good);color:#06150e}
+.trow.bad .tk{background:var(--accent);border-color:var(--accent);color:#fff}
+.trow b{font-size:13.5px}.trow small{display:block;color:var(--muted);font-size:12px}
+.seg2{display:inline-flex;gap:2px;padding:2px;border:1px solid var(--line);border-radius:8px;background:var(--bg)}
+.seg2 span{padding:5px 10px;border-radius:6px;font-size:12px;color:var(--muted)}
+.seg2 span.ok{background:color-mix(in srgb,var(--good) 20%,transparent);color:var(--good);font-weight:600}
+.seg2 span.bad{background:color-mix(in srgb,var(--accent) 20%,transparent);color:var(--accent-text);font-weight:600}
+.tries{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.try{padding:14px;border:1px solid var(--line);border-radius:12px;background:var(--panel2);display:flex;flex-direction:column;gap:8px}
+.try b{font-size:14px}.try p{margin:0;font-size:12.5px;color:var(--muted)}
+.try .why{font-size:11.5px;color:var(--faint)}
+.try.first{border-color:var(--ink2)}
+.chg{display:inline-block;font:12px var(--mono);background:color-mix(in srgb,var(--warn) 16%,transparent);padding:1px 7px;border-radius:5px}
+/* ---------- B: Case File ---------- */
+.b-grid{display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:14px;align-items:start}
+.corner{padding:16px 18px}
+.corner svg{width:100%;height:auto;display:block}
+.zone{cursor:pointer}
+.zone circle{fill:var(--panel2);stroke:var(--muted);stroke-width:2}
+.zone.on circle{fill:var(--accent);stroke:var(--accent)}
+.zone text{font:600 12px var(--ui);fill:var(--ink2)}
+.zone.on text{fill:var(--ink)}
+.does{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px;margin-top:6px}
+.does .sym{padding:8px}.does .sym svg{height:46px}
+.casefile{padding:16px 18px}
+.case-h{display:flex;align-items:baseline;gap:8px;margin-bottom:6px}
+.case-h b{font:italic 700 22px/1 var(--cond);text-transform:uppercase}
+.fact{display:flex;justify-content:space-between;gap:10px;padding:6px 0;border-bottom:1px solid var(--line2);font-size:13px}.fact span{color:var(--muted)}
+.log{margin-top:12px;display:grid;gap:0}
+.entry{display:grid;grid-template-columns:16px 1fr;gap:10px;padding:8px 0;position:relative}
+.entry::before{content:'';position:absolute;left:7px;top:22px;bottom:-8px;width:2px;background:var(--line)}
+.entry:last-child::before{display:none}
+.entry i{width:16px;height:16px;border-radius:50%;margin-top:3px;background:var(--line)}
+.entry.ok i{background:var(--good)}.entry.bad i{background:var(--accent)}.entry.now i{background:var(--warn);box-shadow:0 0 0 4px color-mix(in srgb,var(--warn) 25%,transparent)}
+.entry b{font-size:13px}.entry small{display:block;color:var(--muted);font-size:12px}
+.cases{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+@media(max-width:1100px){.symgrid,.does{grid-template-columns:repeat(3,1fr)}.tries,.b-grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute">
+ <!-- Simple side and top views; the arrows say what the car does. -->
+ <symbol id="s-tip" viewBox="0 0 120 70"><path d="M10 60h100" stroke="currentColor" stroke-width="2"/><g transform="rotate(-24 60 55)"><rect x="30" y="34" width="56" height="16" rx="5" fill="none" stroke="currentColor" stroke-width="3"/><circle cx="40" cy="54" r="6" fill="none" stroke="currentColor" stroke-width="3"/><circle cx="76" cy="54" r="6" fill="none" stroke="currentColor" stroke-width="3"/></g><path d="M92 18c8 6 10 14 8 22" fill="none" stroke="currentColor" stroke-width="2.5" marker-end="url(#ar)"/></symbol>
+ <symbol id="s-slide" viewBox="0 0 120 70"><path d="M20 62C40 20 80 20 100 62" fill="none" stroke="currentColor" stroke-width="2" stroke-dasharray="4 4"/><g transform="rotate(30 60 30)"><rect x="46" y="14" width="28" height="40" rx="6" fill="none" stroke="currentColor" stroke-width="3"/></g><path d="M44 52c-10 4-18 2-24-4" fill="none" stroke="currentColor" stroke-width="2.5"/><path d="M22 44l-3 6 7 0" fill="none" stroke="currentColor" stroke-width="2.5"/></symbol>
+ <symbol id="s-snap" viewBox="0 0 120 70"><path d="M20 62C40 20 80 20 100 62" fill="none" stroke="currentColor" stroke-width="2" stroke-dasharray="4 4"/><rect x="46" y="14" width="28" height="40" rx="6" fill="none" stroke="currentColor" stroke-width="3"/><path d="M30 20l8 8-8 8M90 20l-8 8 8 8" fill="none" stroke="currentColor" stroke-width="3"/></symbol>
+ <symbol id="s-guide" viewBox="0 0 120 70"><path d="M10 60h100" stroke="currentColor" stroke-width="2"/><path d="M58 60v-4M62 60v-4" stroke="currentColor" stroke-width="2"/><g transform="rotate(12 30 50)"><rect x="24" y="30" width="62" height="16" rx="5" fill="none" stroke="currentColor" stroke-width="3"/><path d="M84 46v8" stroke="currentColor" stroke-width="3"/></g><path d="M96 34v-16m-5 5 5-5 5 5" fill="none" stroke="currentColor" stroke-width="2.5"/></symbol>
+ <symbol id="s-hop" viewBox="0 0 120 70"><path d="M10 62h100" stroke="currentColor" stroke-width="2"/><rect x="32" y="26" width="56" height="16" rx="5" fill="none" stroke="currentColor" stroke-width="3"/><circle cx="42" cy="46" r="6" fill="none" stroke="currentColor" stroke-width="3"/><circle cx="78" cy="46" r="6" fill="none" stroke="currentColor" stroke-width="3"/><path d="M36 58l4-4 4 4 4-4M72 58l4-4 4 4 4-4" fill="none" stroke="currentColor" stroke-width="2"/></symbol>
+ <symbol id="s-slow" viewBox="0 0 120 70"><path d="M20 50a40 40 0 0 1 80 0" fill="none" stroke="currentColor" stroke-width="3"/><path d="M60 50 38 30" stroke="currentColor" stroke-width="4" stroke-linecap="round"/><circle cx="60" cy="50" r="4" fill="currentColor"/></symbol>
+ <symbol id="s-brake" viewBox="0 0 120 70"><rect x="20" y="26" width="56" height="16" rx="5" fill="none" stroke="currentColor" stroke-width="3"/><path d="M84 34h24M84 26h16M84 42h16" stroke="currentColor" stroke-width="2.5"/><path d="M10 54h100" stroke="currentColor" stroke-width="2"/></symbol>
+ <symbol id="s-fade" viewBox="0 0 120 70"><path d="M12 20h20l12 8 14 6 16 10 14 6 20 4" fill="none" stroke="currentColor" stroke-width="3"/><path d="M12 62h96" stroke="currentColor" stroke-width="2"/></symbol>
+ <symbol id="s-consistent" viewBox="0 0 120 70"><path d="M12 62h96" stroke="currentColor" stroke-width="2"/><g fill="currentColor"><rect x="18" y="28" width="8" height="34" rx="2"/><rect x="32" y="16" width="8" height="46" rx="2"/><rect x="46" y="34" width="8" height="28" rx="2"/><rect x="60" y="10" width="8" height="52" rx="2"/><rect x="74" y="30" width="8" height="32" rx="2"/><rect x="88" y="22" width="8" height="40" rx="2"/></g></symbol>
+ <symbol id="s-unknown" viewBox="0 0 120 70"><circle cx="60" cy="35" r="24" fill="none" stroke="currentColor" stroke-width="3"/><path d="M52 29a8 8 0 1 1 10 8v6" fill="none" stroke="currentColor" stroke-width="3"/><circle cx="62" cy="50" r="2.5" fill="currentColor"/></symbol>
+</svg>
+<div class="wrap">
+ <div class="eyebrow">SlotForge Telemetry · rework preview 5</div>
+ <h1>Driver Feedback, remade</h1>
+ <p class="lead">Driver Feedback starts from what you feel in the car, which is right. But it opens as a five-step wizard: a drop-down "What would you like help with?", a second drop-down for the behaviour, three folded sections, a box that says "Start with an observation, not a specification sheet", and only then a button for your first checks. The checks themselves and what to try sit two steps further.</p>
+ <ul class="why">
+  <li><b>Replaces:</b> the five steps and their side list (Your experience, First checks, Your setup, Look deeper, Try &amp; learn).</li>
+  <li><b>Kept:</b> every symptom and every follow-up question, the six checks (guide, tyres, axles, body, pickup, the corner itself) with "looks OK / problem found", the optional measurements, the research behind each suggestion, and saving all of it with the setup.</li>
+  <li><b>New, each one for you to approve:</b> pictures instead of drop-downs, answers as buttons, and a suggestion handed to Track day to test ("Try it on Track day").</li>
+ </ul>
+ <div class="bar">
+  <b>Option</b><div class="sg" id="opt"><button class="on" data-o="a">A · Symptom Cards</button><button data-o="b">B · Case File</button></div>
+  <b>Look</b><div class="sg" id="tone"><button class="on" data-t="dark">Dark</button><button data-t="light">Light</button></div>
+  <span style="color:var(--muted);font-size:12.5px">Example: the Club GT's rear steps out under power at the hairpin.</span>
+ </div>
+ <div class="opt-note">
+  <div id="noteA" class="on"><h3>A · Symptom Cards</h3><p>One page that grows as you answer, like a conversation.</p>
+   <ul><li>Start: <b>ten picture cards</b>, one per behaviour (tipping, rear sliding, guide escape, hopping…), plus "not sure".</li><li>Each follow-up question is a row of <b>answer buttons</b> under it, never a drop-down.</li><li>Then the <b>checks as a to-do list</b>: looks OK / problem found.</li><li>Then <b>three things to try</b>, best first, each with why and a button to test it on Track day.</li></ul></div>
+  <div id="noteB"><h3>B · Case File</h3><p>Like a notebook per problem: where it happens, and everything you tried.</p>
+   <ul><li>A <b>corner map</b>: tap where it happens (entry, apex, exit, straight, a joint), then what the car does.</li><li>Each problem becomes a <b>case</b> with its own file: the facts on the right, then a <b>log</b> of checks and changes, with "it helped / no change".</li><li>Several cases side by side as tabs: "rear slides at the hairpin", "hops on the back straight".</li></ul></div>
+ </div>
+
+ <div class="app">
+  <div class="top"><div class="logo"><i></i>TELEMETRY</div>
+   <div class="tabs"><span><a>Workbench</a><a>Track day</a></span><span><a>Laps</a><a>Setups</a><a class="on">Driver Feedback</a></span><span><a>Library</a><a>Settings</a></span></div>
+   <div class="lights"><span class="dot"></span>Local workspace</div></div>
+
+  <!-- A -->
+  <div class="page" id="A">
+   <div class="ph"><div class="grow"><div class="eyebrow">Your car, your experience</div><h2>Driver Feedback</h2></div><span style="color:var(--muted);font-size:12.5px;margin-right:8px">For <b style="color:var(--ink)">Club GT · technical</b></span><button class="btn ghost">Start over</button></div>
+   <div class="card stepcard"><h4><span class="num">1</span>What does the car do?</h4><p class="sub">Pick the one that comes closest. No measuring needed.</p>
+    <div class="symgrid">
+     <div class="sym"><svg><use href="#s-tip"/></svg><b>Tipping</b><small>rolls onto its side</small></div>
+     <div class="sym on"><svg><use href="#s-slide"/></svg><b>Rear sliding</b><small>the back steps out</small></div>
+     <div class="sym"><svg><use href="#s-snap"/></svg><b>Sudden catching</b><small>slides, then snaps</small></div>
+     <div class="sym"><svg><use href="#s-guide"/></svg><b>Guide escape</b><small>the nose leaves the slot</small></div>
+     <div class="sym"><svg><use href="#s-hop"/></svg><b>Hopping</b><small>or vibration</small></div>
+     <div class="sym"><svg><use href="#s-slow"/></svg><b>Lack of power</b><small>feels slow</small></div>
+     <div class="sym"><svg><use href="#s-brake"/></svg><b>Braking</b><small>too much or too little</small></div>
+     <div class="sym"><svg><use href="#s-fade"/></svg><b>Gets worse</b><small>during a run</small></div>
+     <div class="sym"><svg><use href="#s-consistent"/></svg><b>Inconsistent</b><small>lap times vary</small></div>
+     <div class="sym"><svg><use href="#s-unknown"/></svg><b>Not sure</b><small>help me find out</small></div>
+    </div></div>
+   <div class="thread">
+    <div class="card stepcard"><h4><span class="num">2</span>Rear sliding: tell us a bit more</h4>
+     <div class="q">When does the rear step out?</div><div class="answers"><span class="ans on">When applying power</span><span class="ans">While coasting</span><span class="ans">While braking</span><span class="ans">In most conditions</span><span class="ans skip">Not sure · skip</span></div>
+     <div class="q">Has it always behaved this way?</div><div class="answers"><span class="ans">New car · first runs</span><span class="ans">Always</span><span class="ans on">Started recently</span><span class="ans skip">Not sure · skip</span></div>
+     <div class="q">Were the tyres recently trued or reshaped?</div><div class="answers"><span class="ans on">Yes</span><span class="ans">No</span><span class="ans skip">Not sure · skip</span></div>
+     <p class="sub" style="margin-top:12px">▸ More questions, all optional: tyre shoulders, the track and its surface, your controller</p></div>
+    <div class="card stepcard"><h4><span class="num">3</span>Check these first</h4><p class="sub">Quick checks with the power off. Mark each one; a problem found goes to the top of what to try.</p>
+     <div class="todo">
+      <div class="trow ok"><span class="tk">✓</span><div><b>Tyre condition &amp; seating</b><small>Both rear tyres seated, clean and round, wheels secure, no body rubbing.</small></div><span class="seg2"><span class="ok">Looks OK</span><span>Problem found</span></span></div>
+      <div class="trow bad"><span class="tk">!</span><div><b>Axles &amp; drivetrain</b><small>Wheel security, axle play, alignment and gear mesh.</small><small style="color:var(--accent-text)">Your note: right rear wheel slightly loose on the axle.</small></div><span class="seg2"><span>Looks OK</span><span class="bad">Problem found</span></span></div>
+      <div class="trow"><span class="tk"></span><div><b>The troublesome corner</b><small>Slot, rails, bumps and clearances at the hairpin. Compare another corner first.</small></div><span class="seg2"><span>Looks OK</span><span>Problem found</span></span></div>
+      <div class="trow"><span class="tk"></span><div><b>Body &amp; pod movement</b><small>Free movement without tyre, gear or cockpit contact.</small></div><span class="seg2"><span>Looks OK</span><span>Problem found</span></span></div>
+     </div></div>
+    <div class="card stepcard"><h4><span class="num">4</span>Try one thing, then drive</h4><p class="sub">Best first. One change at a time, so you know what did it.</p>
+     <div class="tries">
+      <div class="try first"><b>Secure the right rear wheel</b><p>Your check found it loose. A loose wheel lets the rear step out under power.</p><span class="why">From your check · always first</span><button class="btn small">Done · test on Track day</button></div>
+      <div class="try"><b>Freshly trued tyres: let them bed in</b><p>Newly trued tyres often have less grip for the first runs. Run 10 laps before you judge.</p><span class="why">From your answer: trued recently · 2 research notes</span><button class="btn small">Test on Track day</button></div>
+      <div class="try"><b>A smaller pinion</b><p>Less wheel torque out of the hairpin: <span class="chg">pinion 9 → 8</span>. Top speed drops about 11%.</p><span class="why">Under power, at the exit · your gearing</span><button class="btn small">Try on Track day</button></div>
+     </div></div>
+   </div>
+  </div>
+
+  <!-- B -->
+  <div class="page hidden" id="B">
+   <div class="ph"><div class="grow"><div class="eyebrow">Your car, your experience</div><h2>Driver Feedback</h2></div><button class="btn primary">+ New case</button></div>
+   <div class="cases"><span class="chip on">Club GT · rear slides at the hairpin · open</span><span class="chip">Club GT · hops on the back straight · solved</span><span class="chip">Le Mans · guide escapes at the bridge · open</span></div>
+   <div class="b-grid">
+    <div>
+     <div class="card corner"><div class="h5">Where does it happen?</div><p class="sub">Tap the part of the corner, or the straight or joint.</p>
+      <svg viewBox="0 0 640 262"><path d="M40 200H300a110 110 0 0 0 0-160H140" fill="none" stroke="var(--line)" stroke-width="36" stroke-linecap="round"/><path d="M40 200H300a110 110 0 0 0 0-160H140" fill="none" stroke="var(--muted)" stroke-width="2" stroke-dasharray="6 8"/><path d="M460 200H620" stroke="var(--line)" stroke-width="36"/><path d="M540 182v36" stroke="var(--muted)" stroke-width="3"/>
+       <g class="zone"><circle cx="230" cy="200" r="22"/><text x="230" y="244" text-anchor="middle">Entry</text></g>
+       <g class="zone"><circle cx="380" cy="120" r="22"/><text x="414" y="125">Apex</text></g>
+       <g class="zone on"><circle cx="250" cy="40" r="22"/><text x="250" y="16" text-anchor="middle">Exit</text></g>
+       <g class="zone"><circle cx="500" cy="200" r="22"/><text x="500" y="244" text-anchor="middle">Straight</text></g>
+       <g class="zone"><circle cx="580" cy="200" r="22"/><text x="580" y="244" text-anchor="middle">A joint</text></g>
+      </svg>
+      <div class="h5" style="margin-top:10px">What does the car do there?</div>
+      <div class="does">
+       <div class="sym"><svg><use href="#s-tip"/></svg><b>Tips</b></div><div class="sym on"><svg><use href="#s-slide"/></svg><b>Rear slides</b></div><div class="sym"><svg><use href="#s-guide"/></svg><b>De-slots</b></div><div class="sym"><svg><use href="#s-hop"/></svg><b>Hops</b></div><div class="sym"><svg><use href="#s-slow"/></svg><b>No power</b></div>
+      </div>
+      <div class="q">And then?</div><div class="answers"><span class="ans on">Under power</span><span class="ans">Coasting</span><span class="ans">Braking</span><span class="ans skip">Not sure</span><span class="ans">Started recently</span><span class="ans">Tyres trued</span></div>
+     </div>
+    </div>
+    <div class="card casefile"><div class="case-h"><b>Rear slides at the hairpin</b><span class="chip">open</span></div>
+     <div class="fact"><span>Car · setup</span><b>Club GT · technical</b></div><div class="fact"><span>Where</span><b>Hairpin, at the exit</b></div><div class="fact"><span>When</span><b>Under power · started recently</b></div><div class="fact"><span>Since</span><b>18 Nov · 3 entries</b></div>
+     <div class="h5" style="margin-top:14px">Log</div>
+     <div class="log">
+      <div class="entry ok"><i></i><div><b>Checked tyres &amp; seating · looks OK</b><small>18 Nov</small></div></div>
+      <div class="entry bad"><i></i><div><b>Checked axles · problem found</b><small>Right rear wheel loose. 18 Nov</small></div></div>
+      <div class="entry ok"><i></i><div><b>Secured the wheel · it helped</b><small>Track day run 2: typical −0.08 s, no slides at the exit. 20 Nov</small></div></div>
+      <div class="entry now"><i></i><div><b>Next: let the trued tyres bed in</b><small>Suggested · run 10 laps, then judge</small><div style="display:flex;gap:6px;margin-top:6px"><button class="btn small">It helped</button><button class="btn small">No change</button><button class="btn small ghost">Skip</button></div></div></div>
+     </div>
+     <div style="display:flex;gap:6px;margin-top:12px"><button class="btn small">Mark solved</button><button class="btn small ghost">Other suggestions (3)</button></div>
+    </div>
+   </div>
+  </div>
+ </div>
+ <p class="lead" style="margin-top:16px">Both options keep the advice engine as it is: the same questions, checks and research notes decide what is suggested. Only the way you answer and the way it is shown change.</p>
+</div>
+<script>
+for(const b of document.querySelectorAll('#opt button'))b.onclick=()=>{for(const x of document.querySelectorAll('#opt button'))x.classList.toggle('on',x===b);const a=b.dataset.o==='a';document.getElementById('A').classList.toggle('hidden',!a);document.getElementById('B').classList.toggle('hidden',a);document.getElementById('noteA').classList.toggle('on',a);document.getElementById('noteB').classList.toggle('on',!a);};
+for(const b of document.querySelectorAll('#tone button'))b.onclick=()=>{for(const x of document.querySelectorAll('#tone button'))x.classList.toggle('on',x===b);document.documentElement.dataset.tone=b.dataset.t;};
+const q=new URLSearchParams(location.search);if(q.get('o')==='b')document.querySelector('#opt [data-o=b]').click();if(q.get('t')==='light')document.querySelector('#tone [data-t=light]').click();
+</script>
+</body>
+</html>
