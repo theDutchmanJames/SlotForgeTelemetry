@@ -2,6 +2,18 @@
 
 ## Unreleased
 
+### Track day: the Pit Board (remake)
+
+- **One session:** car, track, lane and driver in one bar, picked from your garage (or typed). A garage track shows its lanes as buttons with their lengths.
+- **Every run of the day is a column:** what changed, the typical lap in big figures, best lap, spread, its laps as small bars, and the verdict against the run before ("▲ 0.114 s quicker than run 1"). The quickest run is marked. Before the first run of the day, your last run on this car, track and lane shows as "Last time".
+- **The next run is the last column:**
+  - **Steppers** for pinion, gear, weight and rear tyre change the workbench setup directly.
+  - **The change is read from the setup** ("pinion 9 → 10"), with an optional note for anything else. No more typing what you changed.
+  - **Lap boxes:** type one lap per box, Enter for the next; paste a list into any box, or use "Paste a list instead".
+  - The verdict against the last run appears while you type.
+- **Keep this change:** when the quickest run of the day had a different setup than the workbench now, one button puts its pinion, gear, weight or tyre back on the workbench.
+- Runs are still saved as Track day runs and appear on the Laps wall with their change marked.
+
 ### Library: every setup in one binder (remake)
 
 - **One list of all your setups, in a section per car.** Each row shows gearing, tyre, weight, top speed and the **best lap driven with that gearing** (from your runs of that car with the same pinion and gear). Cars without setups show with a *New setup* button; setups without a car have their own section.

@@ -67,10 +67,14 @@ app.whenReady().then(async()=>{
   await route('trackday');await type('#trackday-car','Club GT');await type('#trackday-track','Club circuit');await type('#trackday-lane','1');await type('#trackday-driver','Alex');
   await run("(()=>{const c=document.querySelector('#trackday-sequence');if(!c.checked)c.click();})()");
   await type('#trackday-laps',lapTimes(10.06,10,71).map(ms=>(ms/1000).toFixed(3)).join('\n'));await pause();await click('#trackday-save');
-  await wait("document.querySelectorAll('#trackday-today tbody tr').length===1",'first run');
-  await route('telemetry');await set('pinion','10');await route('trackday');
-  await type('#trackday-change','pinion 9 → 10');await type('#trackday-laps',lapTimes(9.93,10,89).map(ms=>(ms/1000).toFixed(3)).join('\n'));await pause();
-  await shot('trackday');await click('#trackday-save');await wait("document.querySelectorAll('#trackday-today tbody tr').length===2",'second run');
+  await wait("document.querySelectorAll('.td-run[data-run]').length===1",'first run');
+  // Pit Board: the pinion up one with the stepper, a quicker run; then up again, a slower one, and the next run being typed.
+  await click('[data-step=pinion][data-dir="1"]');await type('#trackday-laps',lapTimes(9.93,10,89).map(ms=>(ms/1000).toFixed(3)).join('\n'));await pause();await click('#trackday-save');
+  await wait("document.querySelectorAll('.td-run[data-run]').length===2",'second run');
+  await click('[data-step=pinion][data-dir="1"]');await type('#trackday-laps',lapTimes(10.01,10,97).map(ms=>(ms/1000).toFixed(3)).join('\n'));await pause();await click('#trackday-save');
+  await wait("document.querySelectorAll('.td-run[data-run]').length===3",'third run');
+  await click('[data-step=pinion][data-dir="-1"]');await type('#trackday-laps',lapTimes(9.92,4,101).map(ms=>(ms/1000).toFixed(3)).join('\n'));await pause();
+  await shot('trackday');await type('#trackday-laps','');await click('[data-step=pinion][data-dir="-1"]');
   await route('library/garage');await click('[data-garage-car]');await shot('garage','#garage');
   // Laps: the Pace Wall of the Club GT, then one club night in the full lap analysis.
   await route('laps');await wait("document.querySelectorAll('#lw-wall .lw-row[style]').length>3",'the wall');

@@ -40,7 +40,25 @@
  }
  // "Changed: …" from a saved Track day run, for the run list and comparisons.
  const changeOf=run=>/^Changed: (.*)$/m.exec(run?.notes||'')?.[1]||(run?.notes?.startsWith('No change')?'No change':'');
+ // SlotForge Remake (Pit Board): the change is read from the setup, not typed. Fields Track day records, as people say them.
+ const FIELDS=[['pinion','pinion',''],['gear','gear',''],['rearDiameter','rear tyre',' mm'],['weight','weight',' g'],['ratedRpm','motor',' rpm']];
+ const technicalOf=setup=>session({ctx:{car:'x',track:'x',lane:1},setup,laps:[{number:1,durationMs:1,valid:true,pit:false}],sequenceConfirmed:false}).technical;
+ // What changed between the last run and the setup on the workbench now: ["pinion 9 → 10", …].
+ function autoChange(prior,setup){
+  if(!prior)return [];const before=prior.configuration?.technical||{},after=technicalOf(setup);
+  return FIELDS.filter(([k])=>before[k]&&after[k]&&Number(before[k])!==Number(after[k])).map(([k,label,unit])=>`${label} ${before[k]} → ${after[k]}${unit}`);
+ }
+ // The quickest run by typical lap (median), when at least two runs can be compared.
+ function quickest(runs){
+  const rated=runs.map(r=>({run:r,median:RM.statistics(r).median})).filter(x=>x.median!==null);
+  if(rated.length<2)return null;return rated.reduce((a,b)=>b.median<a.median?b:a).run;
+ }
+ // The setup values of a run that differ from the workbench now, to write back with "Keep this change".
+ function keepable(run,setup){
+  if(!run)return [];const t=run.configuration?.technical||{},now=technicalOf(setup);
+  return FIELDS.filter(([k])=>t[k]&&Number(t[k])!==Number(now[k])).map(([k,label,unit])=>({field:k,label,from:now[k]||'—',to:t[k],unit}));
+ }
  function validContext(ctx){return !!(ctx&&key(ctx.car)&&key(ctx.track)&&Number.isInteger(ctx.lane)&&ctx.lane>=1&&ctx.lane<=64);}
- const api={SOURCE,sameContext,previous,today,preview,compare,verdict,session,changeOf,validContext};
+ const api={SOURCE,sameContext,previous,today,preview,compare,verdict,session,changeOf,validContext,autoChange,quickest,keepable,technicalOf};
  if(node)module.exports=api;else root.TrackdayModel=api;
 })(globalThis);

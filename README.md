@@ -46,7 +46,7 @@ The original motor/gearing engine and vector icons come from Paddock. The colour
 <table>
   <tr><th width="50%">Track day · change one thing, see what it did</th><th width="50%">Your cars and tracks in the garage</th></tr>
   <tr>
-    <td><a href="docs/screenshots/trackday.png"><img src="docs/screenshots/trackday.png" alt="Track day comparing a run after a pinion change with the previous run" width="100%"></a></td>
+    <td><a href="docs/screenshots/trackday.png"><img src="docs/screenshots/trackday.png" alt="Track day Pit Board: each run a column with its change and verdict, the quickest marked, and the next run with setup steppers and lap boxes; compared with the previous run" width="100%"></a></td>
     <td><a href="docs/screenshots/garage.png"><img src="docs/screenshots/garage.png" alt="Garage with cars, a track with lane lengths, and a car's setups and best laps" width="100%"></a></td>
   </tr>
 </table>
@@ -198,9 +198,10 @@ Choose a **Car** for each setup on the workbench: the Library groups your setups
 
 Open **Track day** at the track:
 
-1. Set the car, track and lane once.
-2. Write down what you changed, and type or paste the run's lap times.
-3. Telemetry compares the run with your previous one for the same car, track and lane. You get a plain verdict, a better/worse table and the setup differences.
+1. Pick the car, track and lane from your garage once; a garage track shows its lanes with their lengths.
+2. Every run of the day is a **column** on the Pit Board: what changed, the typical lap in big figures, best lap, spread, its laps, and the verdict against the run before. The quickest run is marked.
+3. The last column is **the next run**. Change the setup with the − / + steppers (pinion, gear, weight, rear tyre): they change the workbench, and the change ("pinion 9 → 10") is read from it, so you no longer type it. Type the laps one box at a time (Enter for the next box) or paste them; the verdict appears as you type.
+4. When the quickest run had a different setup than the workbench now, **Keep this change** puts it back on the workbench.
 
 Saved runs are ordinary manual sessions, so they appear on the **Laps** wall with your other runs of that car, track and lane.
 

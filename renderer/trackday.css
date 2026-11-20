@@ -1,35 +1,64 @@
-/* Track day: large, glanceable figures for use between runs. */
-.trackday-context{margin-bottom:16px}
-.trackday-context-grid{display:grid;grid-template-columns:2fr 2fr 90px 1.5fr;gap:12px}
-.trackday-layout{display:grid;grid-template-columns:minmax(240px,1fr) minmax(280px,1.2fr) minmax(300px,1.4fr);gap:16px;align-items:start}
-.trackday-layout>.panel{min-width:0;margin:0}
-.trackday-setup-name{font-weight:700;margin:0 0 10px;overflow-wrap:anywhere}
-.trackday-figures{display:grid;grid-template-columns:1fr 1fr;gap:10px 14px;margin:0 0 14px}
-.trackday-figures div{min-width:0}
-.trackday-figures dt{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
-.trackday-figures dd{margin:2px 0 0;font-size:20px;font-weight:700;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
-.trackday-figures dd small{display:block;font-size:12px;font-weight:500;color:var(--muted)}
-.trackday-log textarea{width:100%;min-height:180px;font:15px/1.5 ui-monospace,Consolas,monospace;resize:vertical}
-.trackday-check{display:flex;gap:8px;align-items:center;font-size:13px;margin:6px 0 8px}
+/* SlotForge Remake (Pit Board): Track day. Large, glanceable figures for use between runs. */
+[data-page=trackday]{--td-num:'SF Roboto Mono',Consolas,monospace;--td-title:'SF Barlow Condensed','Bahnschrift',sans-serif}
+.td-session{display:flex;flex-wrap:wrap;align-items:center;gap:10px 16px;padding:12px 16px;margin-bottom:14px}
+.td-pick{display:flex;align-items:center;gap:8px;margin:0}
+.td-pick>span{font-size:10.5px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.td-pick input{height:36px;width:auto;min-width:0;max-width:200px;border-radius:8px}
+#trackday-car{font:italic 700 17px/1 var(--td-title);text-transform:uppercase;width:170px}
+#trackday-lane{width:70px}
+.td-lanes{display:inline-flex;gap:2px;padding:2px;border:1px solid var(--line);border-radius:8px;background:var(--bg)}
+.td-lanes:empty{display:none}
+.td-lanes button{border:0;background:transparent;color:var(--muted);border-radius:6px;padding:6px 11px;font-size:12.5px}
+.td-lanes button[aria-pressed=true]{background:color-mix(in srgb,var(--ink) 13%,var(--panel));color:var(--ink);font-weight:600}
+.td-grow{flex:1}
+.td-setup{font-size:12.5px;color:var(--muted)}.td-setup b{color:var(--ink)}
+.td-lane-info{flex-basis:100%;margin:0}
+/* The board: run columns, then the next run */
+.td-board{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(230px,1fr);gap:12px;align-items:stretch;overflow-x:auto;padding-bottom:4px}
+.td-board>.td-empty{grid-column:1/-1;margin:0 0 4px}
+.td-run{position:relative;display:flex;flex-direction:column;gap:10px;padding:14px 16px;margin:0;min-width:0}
+.td-run.quickest{outline:2px solid var(--green);outline-offset:-1px}
+.td-crown{position:absolute;top:12px;right:14px;font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--green)}
+.td-run-head{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
+.td-run-head b{font:italic 700 24px/1 var(--td-title);text-transform:uppercase}
+.td-run-head small{color:var(--muted);font-size:12px}
+.td-chg{align-self:flex-start;font:12px var(--td-num);background:color-mix(in srgb,var(--amber) 16%,transparent);padding:1px 7px;border-radius:5px}
+.td-chg.none{background:transparent;padding:0;color:var(--muted)}
+.td-label{display:block;font-size:10.5px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.td-big{display:block;font:700 42px/1 var(--td-title);letter-spacing:.01em;font-variant-numeric:tabular-nums}
+.td-big.good{color:var(--green)}.td-big.bad{color:var(--accent-text,var(--accent))}
+.td-pair{display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:12px;color:var(--muted)}
+.td-pair b{display:block;color:var(--ink);font:600 14px var(--td-num)}
+.td-bars{display:flex;align-items:flex-end;gap:2px;height:44px}
+.td-bars i{flex:1;min-width:2px;border-radius:2px 2px 0 0;background:#5aa9e6;opacity:.8}
+.td-bars i.best{background:var(--green);opacity:1}.td-bars i.slow{background:color-mix(in srgb,var(--muted) 45%,transparent)}.td-bars i.out{background:repeating-linear-gradient(135deg,color-mix(in srgb,var(--muted) 45%,transparent) 0 3px,transparent 3px 6px);height:100%!important}
+.td-verdict{padding:8px 10px;border-radius:8px;font-size:13px;font-weight:600}
+.td-verdict.good{background:color-mix(in srgb,var(--green) 15%,transparent);color:var(--green)}
+.td-verdict.bad{background:color-mix(in srgb,var(--accent) 15%,transparent);color:var(--accent-text,var(--accent))}
+.td-verdict.base{background:color-mix(in srgb,var(--ink) 7%,transparent);color:var(--muted);font-weight:500}
+.td-run>.btn.small{align-self:flex-start;margin-top:auto}
+.td-next{border:1.5px dashed var(--muted);background:color-mix(in srgb,var(--ink) 3%,var(--panel));grid-column:auto/span 1;min-width:300px}
+.td-steps{display:grid;gap:6px}
+.td-step{display:grid;grid-template-columns:80px auto;gap:10px;align-items:center;font-size:13px}
+.td-ctl{display:inline-flex;align-items:center;border:1px solid var(--line);border-radius:7px;overflow:hidden;justify-self:start}
+.td-ctl button{border:0;background:var(--raised);color:var(--ink);width:30px;height:30px;font-size:16px;padding:0}
+.td-ctl output{min-width:70px;text-align:center;font:600 13px var(--td-num);padding:0 8px}
+.td-step.changed .td-ctl{border-color:var(--amber);box-shadow:0 0 0 1px var(--amber)}
+.td-auto{margin:0;font-size:12.5px;color:var(--muted);display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.td-note{display:grid;gap:4px;font-size:12px;color:var(--muted)}.td-note input{height:34px}
+.td-laps{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:5px}
+.td-laps input{height:34px;padding:4px 6px;text-align:center;font:500 13px var(--td-num)}
+.td-laps input:focus{border-color:var(--accent);outline:none;box-shadow:0 0 0 1px var(--accent)}
+#trackday-paste-toggle{justify-self:start;align-self:flex-start}
+#trackday-laps{width:100%;font:13px/1.5 var(--td-num);resize:vertical;background:var(--bg);color:var(--ink);border:1px solid var(--line);border-radius:7px;padding:8px}
+.trackday-check{display:flex;gap:8px;align-items:center;font-size:13px;margin:0}
 .trackday-check input{width:18px;height:18px;min-height:0;flex:none;margin:0;padding:0}
-.trackday-log .btn.primary{width:100%;justify-content:center;padding:12px;font-size:15px}
-.trackday-verdict{font-size:17px;font-weight:700;margin:6px 0 12px;line-height:1.4}
-.trackday-compare td,.trackday-today td{font-variant-numeric:tabular-nums}
-.trackday-compare td.good{color:var(--green);font-weight:700}
-.trackday-compare td.bad{color:var(--accent);font-weight:700}
-.trackday-today{margin-top:16px}
-@media(max-width:1100px){.trackday-layout{grid-template-columns:1fr 1fr}.trackday-compare{grid-column:1/-1}}
-@media(max-width:760px){.trackday-layout{grid-template-columns:1fr}.trackday-context-grid{grid-template-columns:1fr 1fr;gap:10px}}
-
-/* SlotForge Restyle: the setup as detail rows (name left, value right in Roboto Mono), a calmer Save run,
-   the compare and Today's runs tables as Race Sheets (see restyle.css). */
-.trackday-setup-name{font:italic 700 20px/1.15 var(--sf-title);text-transform:uppercase;letter-spacing:.02em}
-.trackday-figures{grid-template-columns:1fr;gap:0}
-.trackday-figures div{display:flex;align-items:baseline;justify-content:space-between;gap:12px;padding:8px 0;border-bottom:1px solid color-mix(in srgb,var(--line) 65%,transparent)}
-.trackday-figures div:last-child{border-bottom:0}
-.trackday-figures dt{font-size:12.5px;letter-spacing:0;text-transform:none}
-.trackday-figures dd{margin:0;font:500 15px var(--sf-mono);white-space:nowrap;text-align:right}
-.trackday-figures dd small{display:inline;margin-left:6px;font:400 12px 'Segoe UI',system-ui,sans-serif}
-.trackday-log .btn.primary{min-height:40px;padding:0 14px;font-size:14px}
-.trackday-log textarea{font-family:var(--sf-mono);font-size:14px}
-.trackday-compare td:is(.good,.bad){font-weight:400}
+.td-live{margin:0;padding:8px 10px;border-radius:8px;font-size:13px;background:color-mix(in srgb,var(--ink) 6%,transparent)}
+.td-live.good{background:color-mix(in srgb,var(--green) 13%,transparent);color:var(--green)}
+.td-live.bad{background:color-mix(in srgb,var(--accent) 13%,transparent);color:var(--accent-text,var(--accent))}
+.td-next .btn.primary{justify-content:center;padding:11px;font-size:14px}
+/* Keep this change */
+.td-keep{margin-top:14px;display:flex;flex-wrap:wrap;align-items:center;gap:12px;padding:12px 16px;border-radius:10px;border:1px solid color-mix(in srgb,var(--green) 45%,var(--line));background:color-mix(in srgb,var(--green) 8%,var(--panel))}
+.td-keep b{display:block;font-size:14px}.td-keep small{color:var(--muted);font-size:12.5px}
+.td-keep-tick{font-size:20px;color:var(--green)}
+@media(max-width:760px){.td-board{grid-auto-flow:row;grid-auto-columns:auto}.td-next{min-width:0}.td-pick input{max-width:none;flex:1}.td-pick{flex:1 1 100%}#trackday-car{width:auto}}

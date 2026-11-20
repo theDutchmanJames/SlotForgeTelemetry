@@ -41,7 +41,7 @@ app.whenReady().then(async()=>{
   await click('#garage-trackday');await pause();assert.equal(await run("location.hash"),'#trackday');assert.equal(await run("document.querySelector('#trackday-car').value"),'Renamed example');
   await type('#trackday-track','Home track');await type('#trackday-lane','2');await pause();assert.match(await text('#trackday-lane-info'),/lane 2: 20\.4 m per lap/);
   assert.ok(await run("[...document.querySelectorAll('#trackday-track-list option')].some(o=>o.value==='Home track')"));
-  await type('#trackday-laps','10.2\n10.1');await click('#trackday-save');await wait("document.querySelectorAll('#trackday-today tbody tr').length===1");
+  await type('#trackday-laps','10.2\n10.1');await click('#trackday-save');await wait("document.querySelectorAll('.td-run[data-run]').length===1");
   assert.equal(await run("RaceUI.runs().find(r=>r.entryKind==='manual').laneLengthM"),20.4);
   // The linked car survives a restart.
   await win.loadFile(path.join(__dirname,'../renderer/index.html'));await pause();await wait("document.querySelector('[name=carRef]').value==='paddock:paddock-demo:car-a'",'linked car after reload');

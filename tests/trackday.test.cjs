@@ -35,3 +35,13 @@ test('change notes are read back from saved runs; contexts need car, track and a
  assert.equal(T.changeOf(run),'new rear tyres');assert.equal(T.changeOf(ML.runs(library([T.session({ctx,laps:laps('10'),sequenceConfirmed:true})]))[0]),'No change');assert.equal(T.changeOf({notes:'other'}),'');
  assert.equal(T.validContext(ctx),true);for(const bad of [{...ctx,car:' '},{...ctx,track:''},{...ctx,lane:0},{...ctx,lane:1.5},null])assert.equal(T.validContext(bad),false);
 });
+test('Pit Board: the change is read from the setup, the quickest run, and what Keep this change writes back',()=>{
+ const C=require('../renderer/calculator-model.js'),prior={configuration:{technical:{pinion:'9',gear:'27',rearDiameter:'20',weight:'80',ratedRpm:'21500'}}};
+ assert.deepEqual(T.autoChange(prior,{...C.EXAMPLE,pinion:'10',totalWeight:'72'}),['pinion 9 → 10','weight 80 → 72 g']);
+ assert.deepEqual(T.autoChange(prior,{...C.EXAMPLE,totalWeight:'80'}),[],'same setup: no change');assert.deepEqual(T.autoChange(null,C.EXAMPLE),[]);
+ assert.deepEqual(T.autoChange({configuration:{technical:{pinion:'9'}}},{...C.EXAMPLE,pinion:'10',totalWeight:'72'}),['pinion 9 → 10'],'a value the run did not record is not a change');
+ const run=(id,times)=>({id,laps:times.map((t,i)=>({number:i+1,durationMs:t,valid:true,pit:false,recordEligible:true,stintId:'s',heatId:'h'}))});
+ assert.equal(T.quickest([run('a',[10000,10100]),run('b',[9900,9950]),run('c',[10050])]).id,'b');assert.equal(T.quickest([run('a',[10000])]),null);
+ assert.deepEqual(T.keepable(prior,{...C.EXAMPLE,pinion:'11',totalWeight:'80'}).map(c=>[c.field,c.from,c.to]),[['pinion','11','9']]);
+ assert.deepEqual(T.keepable(prior,{...C.EXAMPLE,totalWeight:'80'}),[]);
+});

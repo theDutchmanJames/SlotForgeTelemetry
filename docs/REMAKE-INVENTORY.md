@@ -58,7 +58,8 @@ One list of setups by car with gearing, tyre, weight, top speed and best lap wit
 - **Ideas:** the car is the way in: a garage of cars, each with its setups (versions over time), its runs and its best lap;
   a setup's history (what changed between versions); track pages with lane lengths and records. Car photos from Paddock.
 
-### 4. Track day · Remake
+### 4. Track day · Remake · **Done ("Pit Board")**
+A session from the garage, every run a column with its verdict and the quickest marked, the next run with setup steppers, lap boxes and a live verdict, and Keep this change. Still open from this item: ending a session explicitly, and a tap timer (option B of the preview).
 - Car, track, lane and driver are four free text fields. The setup card on the left copies the workbench. "Log a run" is a
   big empty text box, "Compare with last run" is the best part, but sits on the right.
 - No timer: you type or paste lap times. No session idea: "Today's runs" is whatever was saved today.
