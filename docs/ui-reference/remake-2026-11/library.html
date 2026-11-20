@@ -1,0 +1,253 @@
+<!doctype html>
+<html lang="en" data-tone="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Library remake</title>
+<style>
+@font-face{font-family:'SF Mono';src:url('../../../renderer/fonts/robotomono/RobotoMono[wght].ttf') format('truetype');font-weight:100 700}
+@font-face{font-family:'SF Cond';src:url('../../../renderer/fonts/barlowcondensed/BarlowCondensed-Bold.ttf') format('truetype');font-weight:700}
+@font-face{font-family:'SF Cond';src:url('../../../renderer/fonts/barlowcondensed/BarlowCondensed-BoldItalic.ttf') format('truetype');font-weight:700;font-style:italic}
+:root{--bg:#171b21;--panel:#222831;--panel2:#1c2129;--raised:#2a313b;--ink:#e8e6e1;--ink2:#c4c8ce;--muted:#98a0ab;--faint:#6b7380;--line:#343b47;--line2:#2b313b;
+ --accent:#e5484d;--accent-text:#f06b6f;--good:#3ecf8e;--warn:#f2b705;--rec:#a855f7;--blue:#5aa9e6;--page:#0f1216;
+ --ui:'Segoe UI',system-ui,sans-serif;--cond:'SF Cond','Bahnschrift',sans-serif;--mono:'SF Mono',Consolas,monospace}
+[data-tone=light]{--bg:#f1efea;--panel:#ffffff;--panel2:#f7f5f1;--raised:#ecebe6;--ink:#1d2229;--ink2:#3a414b;--muted:#656c76;--faint:#8b929b;--line:#d9d6cf;--line2:#e6e3dd;
+ --accent:#d62828;--accent-text:#c21f1f;--good:#187a50;--warn:#956000;--rec:#7c3aed;--blue:#1f6fb2;--page:#e4e1da}
+*{box-sizing:border-box}
+body{margin:0;background:var(--page);color:var(--ink);font:13.5px/1.45 var(--ui)}
+.wrap{max-width:1460px;margin:0 auto;padding:26px 20px 90px}
+h1{font:italic 700 42px/1 var(--cond);text-transform:uppercase;margin:0 0 6px}
+.lead{color:var(--muted);margin:0 0 12px;max-width:110ch;font-size:14px}
+ul.why{margin:0 0 6px;padding-left:18px;color:var(--ink2);max-width:120ch;font-size:14px}ul.why li{margin:3px 0}
+.bar{position:sticky;top:0;z-index:20;display:flex;flex-wrap:wrap;align-items:center;gap:10px 18px;margin:14px -20px 18px;padding:12px 20px;background:color-mix(in srgb,var(--page) 88%,transparent);backdrop-filter:blur(6px);border-bottom:1px solid var(--line2)}
+.bar b{font:600 10.5px var(--ui);letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.sg{display:inline-flex;gap:2px;padding:2px;border:1px solid var(--line);border-radius:8px;background:var(--bg)}
+.sg button{height:30px;padding:0 14px;border:0;border-radius:6px;background:transparent;color:var(--muted);font:500 13px var(--ui);cursor:pointer}
+.sg button.on{background:color-mix(in srgb,var(--ink) 13%,var(--panel));color:var(--ink);font-weight:650}
+.opt-note{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:0 0 18px}
+.opt-note>div{border:1px solid var(--line);border-radius:10px;padding:14px 16px;background:var(--panel2)}
+.opt-note>div.on{border-color:var(--ink2)}
+.opt-note h3{margin:0 0 4px;font:italic 700 22px/1 var(--cond);text-transform:uppercase}
+.opt-note p{margin:0 0 6px;color:var(--muted)}.opt-note ul{margin:0;padding-left:18px;color:var(--ink2)}
+.mono{font-family:var(--mono)}
+/* the app frame */
+.app{border:1px solid var(--line);border-radius:12px;overflow:hidden;background:var(--bg)}
+.top{display:flex;align-items:center;gap:14px;height:56px;padding:0 16px;background:var(--panel2);border-bottom:1px solid var(--line)}
+.logo{display:flex;align-items:center;gap:9px;font:italic 700 21px/1 var(--cond);letter-spacing:.02em}
+.logo i{width:30px;height:30px;border-radius:8px;background:var(--accent)}
+.tabs{display:flex;gap:6px;margin-left:10px}
+.tabs span{display:inline-flex;gap:2px;padding:3px;border-radius:9px;background:rgba(0,0,0,.22)}
+[data-tone=light] .tabs span{background:rgba(0,0,0,.06)}
+.tabs a{padding:6px 11px;border-radius:7px;color:var(--muted);font-size:13px;text-decoration:none}
+.tabs a.on{background:color-mix(in srgb,var(--ink) 12%,transparent);color:var(--ink);font-weight:600}
+.lights{margin-left:auto;font-size:12px;color:var(--muted);display:flex;gap:6px;align-items:center}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--good);display:inline-block}
+.page{padding:22px 24px 28px}
+.eyebrow{font:600 11px var(--ui);letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.ph{display:flex;align-items:flex-end;gap:14px;margin-bottom:16px}
+.ph h2{font:italic 700 34px/1 var(--cond);text-transform:uppercase;margin:4px 0 0}
+.ph .grow{flex:1}
+.btn{display:inline-flex;align-items:center;gap:6px;height:34px;padding:0 13px;border:1px solid var(--line);border-radius:7px;background:var(--raised);color:var(--ink);font:500 13px var(--ui);cursor:pointer;white-space:nowrap}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:600}
+.btn.ghost{background:transparent}.btn.small{height:28px;padding:0 10px;font-size:12.5px}
+.chip{display:inline-flex;align-items:center;gap:5px;height:24px;padding:0 9px;border-radius:999px;border:1px solid var(--line);color:var(--ink2);font-size:12px;background:var(--panel2);white-space:nowrap}
+.chip.on{background:color-mix(in srgb,var(--ink) 12%,var(--panel));color:var(--ink);border-color:var(--ink2)}
+.tag{font:600 10.5px var(--ui);letter-spacing:.08em;text-transform:uppercase;padding:2px 7px;border-radius:5px;border:1px solid var(--line);color:var(--muted)}
+.tag.club{color:var(--blue);border-color:color-mix(in srgb,var(--blue) 45%,var(--line))}
+.tag.test{color:var(--warn);border-color:color-mix(in srgb,var(--warn) 45%,var(--line))}
+.tag.rec{color:var(--rec);border-color:color-mix(in srgb,var(--rec) 55%,var(--line))}
+.change{display:inline-flex;align-items:center;gap:5px;font-size:12px;color:var(--ink);background:color-mix(in srgb,var(--warn) 14%,transparent);border-radius:5px;padding:1px 7px}
+.change.none{background:transparent;color:var(--faint);padding:0}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:10px}
+.k{font:600 10.5px var(--ui);letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.big{font:600 26px/1.1 var(--mono)}
+.better{color:var(--good)}.worse{color:var(--accent-text)}
+.note-new{display:inline-block;font:700 9.5px var(--ui);letter-spacing:.1em;text-transform:uppercase;color:#fff;background:var(--rec);padding:1px 6px;border-radius:4px;vertical-align:2px;margin-left:6px}
+
+.hidden{display:none!important}
+.h5{margin:0 0 6px;font:italic 700 19px/1.1 var(--cond);text-transform:uppercase}
+.sub{color:var(--muted);font-size:12.5px;margin:0 0 12px}
+.car-art{display:grid;place-items:center;background:linear-gradient(160deg,color-mix(in srgb,var(--ink) 9%,var(--panel)),var(--panel2));color:var(--muted)}
+.car-art svg{width:62%;height:auto}
+.car-art.photo{background:linear-gradient(150deg,#3b5a7a,#1d2a38 60%,#11161c)}
+.car-art.photo svg{color:#d9e2ec}
+.pd{font:700 9.5px var(--ui);letter-spacing:.1em;text-transform:uppercase;padding:2px 6px;border-radius:4px;background:color-mix(in srgb,var(--blue) 20%,transparent);color:var(--blue)}
+.chg{display:inline-block;font:12px var(--mono);background:color-mix(in srgb,var(--warn) 16%,transparent);padding:1px 7px;border-radius:5px}
+/* ---------- A: Car Garage ---------- */
+.a-tabs{display:flex;gap:6px;margin-bottom:14px}
+.cars{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}
+.ccard{overflow:hidden;cursor:pointer}
+.ccard.on{outline:2px solid var(--ink2);outline-offset:-1px}
+.ccard .car-art{height:120px}
+.ccard .body{padding:12px 14px}
+.ccard b.t{display:block;font:italic 700 21px/1 var(--cond);text-transform:uppercase}
+.ccard small{color:var(--muted)}
+.ccard .facts{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:10px;padding-top:10px;border-top:1px solid var(--line2)}
+.ccard .facts span{font-size:11px;color:var(--muted)}.ccard .facts b{display:block;font:600 14px var(--mono);color:var(--ink)}
+.ccard.add{display:grid;place-items:center;border-style:dashed;background:transparent;color:var(--muted);min-height:250px}
+.carpage{margin-top:18px;display:grid;grid-template-columns:300px minmax(0,1fr);gap:16px;align-items:start}
+.carside .car-art{height:170px;border-radius:10px 10px 0 0}
+.carside .in{padding:14px 16px}
+.carside h3{margin:0;font:italic 700 28px/1 var(--cond);text-transform:uppercase}
+.kv{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--line2);font-size:13px}.kv span{color:var(--muted)}.kv b{font:500 13px var(--mono)}
+.timeline{padding:16px 18px}
+.ver{display:grid;grid-template-columns:22px minmax(0,1fr) auto;gap:12px;padding:12px 0;border-top:1px solid var(--line2)}
+.ver:first-of-type{border-top:0}
+.ver .dotl{position:relative}
+.ver .dotl::before{content:'';position:absolute;left:8px;top:6px;width:10px;height:10px;border-radius:50%;background:var(--ink2)}
+.ver .dotl::after{content:'';position:absolute;left:12px;top:20px;bottom:-14px;width:2px;background:var(--line)}
+.ver:last-child .dotl::after{display:none}
+.ver.cur .dotl::before{background:var(--accent);box-shadow:0 0 0 4px color-mix(in srgb,var(--accent) 25%,transparent)}
+.ver b.n{font-size:14.5px}.ver small{color:var(--muted)}
+.ver .what{margin-top:6px;display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:12.5px;color:var(--muted)}
+.ver .acts{display:flex;gap:6px;align-items:start}
+.tracks{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:14px}
+.tcard{padding:14px 16px}
+.lane{display:grid;grid-template-columns:70px 1fr auto;gap:10px;padding:7px 0;border-top:1px solid var(--line2);font-size:13px;align-items:center}
+.lane .rec{font:600 13px var(--mono);color:var(--rec)}
+.loose{margin-top:14px;padding:12px 16px;border:1px dashed var(--line);border-radius:10px;color:var(--muted);font-size:13px;display:flex;gap:12px;align-items:center}
+/* ---------- B: Setup Binder ---------- */
+.b-grid{display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:16px;align-items:start}
+.bar2{display:flex;gap:8px;align-items:center;margin-bottom:12px}
+.bar2 input{height:34px;border:1px solid var(--line);border-radius:7px;background:var(--bg);color:var(--ink);padding:0 10px;width:260px;font:13px var(--ui)}
+.binder{overflow:hidden}
+.grp{display:flex;align-items:center;gap:10px;padding:10px 14px;background:color-mix(in srgb,var(--ink) 5%,var(--panel));border-top:1px solid var(--line)}
+.grp:first-child{border-top:0}
+.grp b{font:italic 700 17px/1 var(--cond);text-transform:uppercase}
+.grp small{color:var(--muted)}
+.mini{width:42px;height:26px;border-radius:5px;overflow:hidden}.mini.car-art svg{width:80%}
+.srow{display:grid;grid-template-columns:28px minmax(0,1.6fr) 70px 70px 70px 90px 90px 26px;gap:10px;align-items:center;padding:9px 14px;border-top:1px solid var(--line2);font-size:13px;cursor:pointer}
+.srow:hover{background:color-mix(in srgb,var(--ink) 4%,transparent)}
+.srow.sel{background:color-mix(in srgb,var(--ink) 8%,var(--panel))}
+.srow.hd{cursor:default;font:600 10px var(--ui);letter-spacing:.12em;text-transform:uppercase;color:var(--muted);background:transparent}
+.srow .nm b{display:block;font-weight:600}.srow .nm small{color:var(--muted);font-size:11.5px}
+.srow .m{font-family:var(--mono)}
+.star{color:var(--warn)}.star.off{color:var(--faint)}
+.cb{width:16px;height:16px;border:1.5px solid var(--muted);border-radius:4px;display:inline-block}
+.cb.on{background:var(--ink);border-color:var(--ink);box-shadow:inset 0 0 0 3px var(--panel)}
+.tagp{font-size:10.5px;padding:1px 6px;border-radius:4px;border:1px solid var(--line);color:var(--muted);margin-left:6px}
+.actbar{position:sticky;bottom:10px;margin-top:12px;display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:10px;background:var(--ink);color:var(--bg)}
+.actbar .btn{background:var(--bg);color:var(--ink);border-color:var(--bg)}
+.sheet{padding:0;overflow:hidden}
+.sheet .car-art{height:110px}
+.sheet .in{padding:14px 16px}
+.sheet h3{margin:0 0 2px;font:italic 700 24px/1.05 var(--cond);text-transform:uppercase}
+.specgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:12px 0}
+.specgrid div{border:1px solid var(--line2);border-radius:8px;padding:8px 10px}
+.specgrid span{font-size:11px;color:var(--muted)}.specgrid b{display:block;font:600 16px var(--mono)}
+.usage{font-size:12.5px;color:var(--muted);border-top:1px solid var(--line2);padding-top:10px;margin-top:4px}
+.usage b{color:var(--ink)}
+.garmgr{margin-top:16px;display:grid;grid-template-columns:260px minmax(0,1fr);overflow:hidden}
+.garmgr .list{border-right:1px solid var(--line);padding:8px}
+.gi{display:grid;grid-template-columns:42px 1fr;gap:10px;align-items:center;padding:8px;border-radius:8px}
+.gi.on{background:color-mix(in srgb,var(--ink) 9%,var(--panel))}
+.gi b{font-size:13px}.gi small{display:block;color:var(--muted);font-size:11.5px}
+.form{padding:16px 18px;display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.form label{display:grid;gap:5px;font-size:12px;color:var(--muted)}
+.form .f{height:34px;border:1px solid var(--line);border-radius:7px;background:var(--bg);padding:7px 10px;color:var(--ink);font-size:13px}
+@media(max-width:1100px){.cars{grid-template-columns:1fr 1fr}.carpage,.b-grid,.garmgr{grid-template-columns:1fr}.tracks{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute"><symbol id="car" viewBox="0 0 120 50"><path d="M8 36c0-6 4-9 10-10l14-3 14-11c3-2 6-3 10-3h20c5 0 9 2 12 6l8 9 14 2c4 1 6 4 6 8v4c0 2-1 3-3 3h-8M24 42H44M78 42h14" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><circle cx="34" cy="40" r="8" fill="none" stroke="currentColor" stroke-width="3"/><circle cx="86" cy="40" r="8" fill="none" stroke="currentColor" stroke-width="3"/></symbol></svg>
+<div class="wrap">
+ <div class="eyebrow">SlotForge Telemetry · remake preview 3 of 4</div>
+ <h1>Library, remade</h1>
+ <p class="lead">The Library has two rooms that do not talk to each other. <b>Saved setups</b> is a table of name, gearing, tyres and weight, with a detail card whose picture is the same chassis for every setup and eight buttons. The <b>Garage</b> has car tiles with an empty grey box, "2 setup(s) · 7 run(s)", a TELEMETRY tag on every card, and tracks as a separate table. Every setup has a car, yet nothing is grouped by it.</p>
+ <ul class="why">
+  <li><b>Replaces:</b> Library › Saved setups and Library › Garage (cars and tracks).</li>
+  <li><b>Kept:</b> everything you can do today: open on the workbench, rename, duplicate, delete, setup sheet, import and export the library, Paddock cars with their photos, your own cars, tracks with lane lengths, "New setup for this car", "Track day with this car", search and sort.</li>
+  <li><b>New, each one for you to approve:</b> setups grouped by car, what changed between one setup and the next of the same car, the best lap and record per lane on each track, a <b>favourite</b> star, and setups without a car gathered in one place.</li>
+ </ul>
+ <div class="bar">
+  <b>Option</b><div class="sg" id="opt"><button class="on" data-o="a">A · Car Garage</button><button data-o="b">B · Setup Binder</button></div>
+  <b>Look</b><div class="sg" id="tone"><button class="on" data-t="dark">Dark</button><button data-t="light">Light</button></div>
+  <span style="color:var(--muted);font-size:12.5px">Example: three cars (one from Paddock with a photo), five setups, one track.</span>
+ </div>
+ <div class="opt-note">
+  <div id="noteA" class="on"><h3>A · Car Garage</h3><p>Visual, the car is the way in, like walking into your garage.</p>
+   <ul><li>The Library opens on <b>your cars</b> as big cards: photo, setups, runs, best lap.</li><li>A car opens its own page: facts on the left, its <b>setups as a timeline</b>, each with what changed against the one before.</li><li><b>Tracks</b> are cards with every lane's length and record.</li><li>Setups without a car wait in one line at the bottom.</li></ul></div>
+  <div id="noteB"><h3>B · Setup Binder</h3><p>Dense and quick, like a well-kept binder: everything in one list.</p>
+   <ul><li>One list of <b>all setups</b>, in a section per car, with gearing, tyre, weight, top speed and best lap as columns.</li><li>Tick several for one action bar: compare, export, delete.</li><li>The selected setup as a <b>spec card</b> on the right, with where it was driven.</li><li>Cars and tracks below in a <b>manager</b>: a list on the left, the form on the right.</li></ul></div>
+ </div>
+
+ <div class="app">
+  <div class="top"><div class="logo"><i></i>TELEMETRY</div>
+   <div class="tabs"><span><a>Workbench</a><a>Track day</a></span><span><a>Laps</a><a>Setups</a><a>Driver Feedback</a></span><span><a class="on">Library</a><a>Settings</a></span></div>
+   <div class="lights"><span class="dot"></span>Paddock · Home collection</div></div>
+
+  <!-- A -->
+  <div class="page" id="A">
+   <div class="ph"><div class="grow"><div class="eyebrow">Your garage</div><h2>Library</h2></div><button class="btn ghost">Import library</button><button class="btn ghost">Export library</button><button class="btn">+ Add track</button><button class="btn primary">+ Add car</button></div>
+   <div class="a-tabs"><span class="chip on">Cars · 3</span><span class="chip">Tracks · 1</span><span class="chip">Setups without a car · 1</span></div>
+   <div class="cars">
+    <div class="card ccard on"><div class="car-art"><svg><use href="#car"/></svg></div><div class="body"><b class="t">Club GT</b><small>Home build · GT</small><div class="facts"><span>Setups<b>3</b></span><span>Runs<b>7</b></span><span>Best lap<b style="color:var(--rec)">9.810</b></span></div></div></div>
+    <div class="card ccard"><div class="car-art photo"><svg><use href="#car"/></svg></div><div class="body"><b class="t">Vintage Le Mans</b><small>Kit · <span class="pd">Paddock</span></small><div class="facts"><span>Setups<b>1</b></span><span>Runs<b>3</b></span><span>Best lap<b>11.402</b></span></div></div></div>
+    <div class="card ccard"><div class="car-art"><svg><use href="#car"/></svg></div><div class="body"><b class="t">Rally special</b><small>Home build</small><div class="facts"><span>Setups<b>0</b></span><span>Runs<b>0</b></span><span>Best lap<b style="color:var(--faint)">—</b></span></div></div></div>
+    <div class="card ccard add">+ Add a car<br><small>or bring them in from Paddock</small></div>
+   </div>
+   <div class="carpage">
+    <div class="card carside"><div class="car-art"><svg><use href="#car"/></svg></div><div class="in"><h3>Club GT</h3><small style="color:var(--muted)">Home build · GT · added 1 Sep</small>
+     <div style="margin-top:10px"><div class="kv"><span>Setups</span><b>3</b></div><div class="kv"><span>Runs</span><b>7 · last 20 Nov</b></div><div class="kv"><span>Best lap</span><b style="color:var(--rec)">9.810 · lane 1</b></div><div class="kv"><span>On the workbench</span><b>technical</b></div></div>
+     <div style="display:grid;gap:6px;margin-top:12px"><button class="btn primary">New setup for this car</button><button class="btn">Track day with this car</button><button class="btn ghost">Open its laps</button><button class="btn ghost">Edit car · photo</button></div></div></div>
+    <div class="card timeline"><div style="display:flex;align-items:baseline;gap:10px"><div class="h5">Setups · newest on top</div><span class="sub" style="margin:0">Each with what changed against the one before it.</span><span style="flex:1"></span><button class="btn small">Compare all three</button></div>
+     <div class="ver cur"><span class="dotl"></span><div><b class="n">Club GT · light</b> <span class="star">★</span><br><small>21 Nov · 10/27 · 72 g · 30.02 km/h · not driven yet</small><div class="what">changed: <span class="chg">weight 80 → 72 g</span><span class="chg">ballast 20 → 12 g</span></div></div><div class="acts"><button class="btn small">Open</button><button class="btn small ghost">⋯</button></div></div>
+     <div class="ver"><span class="dotl"></span><div><b class="n">Club GT · fast circuit</b><br><small>20 Nov · 10/27 · 80 g · 30.02 km/h · driven: <b style="color:var(--ink)">best 9.810</b> on Club circuit</small><div class="what">changed: <span class="chg">pinion 9 → 10</span> · typical lap −0.114 s on Track day</div></div><div class="acts"><button class="btn small">Open</button><button class="btn small ghost">⋯</button></div></div>
+     <div class="ver"><span class="dotl"></span><div><b class="n">Club GT · technical</b><br><small>20 Nov · 9/27 · 80 g · 27.02 km/h · driven: best 9.940</small><div class="what">the first setup of this car</div></div><div class="acts"><button class="btn small">Open</button><button class="btn small ghost">⋯</button></div></div>
+     <p class="sub" style="margin-top:10px">⋯ holds Rename, Duplicate, Setup sheet, Export file and Delete.</p>
+    </div>
+   </div>
+   <div class="tracks">
+    <div class="card tcard"><div style="display:flex;align-items:baseline;gap:10px"><div class="h5">Club circuit</div><small style="color:var(--muted)">2 lanes · 2 cars driven</small><span style="flex:1"></span><button class="btn small ghost">Edit</button></div>
+     <div class="lane"><b>Lane 1</b><span>20.0 m · Club GT</span><span class="rec">9.810</span></div><div class="lane"><b>Lane 2</b><span>20.3 m · Club GT</span><span class="rec">10.214</span></div></div>
+    <div class="card tcard" style="display:grid;place-items:center;border-style:dashed;background:transparent;color:var(--muted)">+ Add a track with its lane lengths</div>
+   </div>
+   <div class="loose"><span>📎</span><span><b style="color:var(--ink)">1 setup without a car</b> · Test bench motor (saved 3 Oct)</span><span style="flex:1"></span><button class="btn small">Give it a car</button></div>
+  </div>
+
+  <!-- B -->
+  <div class="page hidden" id="B">
+   <div class="ph"><div class="grow"><div class="eyebrow">Every setup, every car</div><h2>Library</h2></div><button class="btn ghost">Import library</button><button class="btn ghost">Export library</button><button class="btn primary">Open workbench</button></div>
+   <div class="b-grid">
+    <div>
+     <div class="bar2"><input placeholder="Find a setup, car or note"><span class="chip on">All</span><span class="chip">★ Favourites</span><span class="chip">Driven</span><span class="chip">Not driven yet</span><span style="flex:1"></span><span class="chip">Sort: newest ▾</span></div>
+     <div class="card binder">
+      <div class="srow hd"><span></span><span>Setup</span><span>Gearing</span><span>Tyre</span><span>Weight</span><span>Top speed</span><span>Best lap</span><span></span></div>
+      <div class="grp"><span class="mini car-art"><svg><use href="#car"/></svg></span><b>Club GT</b><small>Home build · 3 setups</small><span style="flex:1"></span><button class="btn small ghost">New setup</button></div>
+      <div class="srow sel"><span class="cb on"></span><span class="nm"><b>Club GT · light<span class="tagp">workbench</span></b><small>21 Nov · weight 80 → 72 g</small></span><span class="m">10/27</span><span class="m">20 mm</span><span class="m">72 g</span><span class="m">30.02</span><span class="m" style="color:var(--faint)">—</span><span class="star">★</span></div>
+      <div class="srow"><span class="cb on"></span><span class="nm"><b>Club GT · fast circuit</b><small>20 Nov · pinion 9 → 10</small></span><span class="m">10/27</span><span class="m">20 mm</span><span class="m">80 g</span><span class="m">30.02</span><span class="m" style="color:var(--rec)">9.810</span><span class="star off">☆</span></div>
+      <div class="srow"><span class="cb"></span><span class="nm"><b>Club GT · technical</b><small>20 Nov · the first</small></span><span class="m">9/27</span><span class="m">20 mm</span><span class="m">80 g</span><span class="m">27.02</span><span class="m">9.940</span><span class="star off">☆</span></div>
+      <div class="grp"><span class="mini car-art photo"><svg><use href="#car"/></svg></span><b>Vintage Le Mans</b><small>Kit · <span class="pd">Paddock</span> · 1 setup</small><span style="flex:1"></span><button class="btn small ghost">New setup</button></div>
+      <div class="srow"><span class="cb"></span><span class="nm"><b>Le Mans · baseline</b><small>12 Oct</small></span><span class="m">11/32</span><span class="m">21 mm</span><span class="m">96 g</span><span class="m">24.81</span><span class="m">11.402</span><span class="star">★</span></div>
+      <div class="grp"><span class="mini car-art"><svg><use href="#car"/></svg></span><b>Rally special</b><small>Home build · no setups yet</small><span style="flex:1"></span><button class="btn small ghost">New setup</button></div>
+      <div class="grp"><span class="mini" style="display:grid;place-items:center;border:1px dashed var(--line)">?</span><b>Without a car</b><small>1 setup</small></div>
+      <div class="srow"><span class="cb"></span><span class="nm"><b>Test bench motor</b><small>3 Oct</small></span><span class="m">8/30</span><span class="m">—</span><span class="m">—</span><span class="m">21.40</span><span class="m" style="color:var(--faint)">—</span><span class="star off">☆</span></div>
+     </div>
+     <div class="actbar"><b>2 ticked</b><span>Club GT · light, fast circuit</span><span style="flex:1"></span><button class="btn small">Compare</button><button class="btn small">Export files</button><button class="btn small">Delete</button></div>
+    </div>
+    <div class="card sheet"><div class="car-art"><svg><use href="#car"/></svg></div><div class="in"><h3>Club GT · light</h3><small style="color:var(--muted)">Club GT · saved 21 Nov · on the workbench now</small>
+     <div class="specgrid"><div><span>Gearing</span><b>10 / 27</b></div><div><span>Ratio</span><b>2.7:1</b></div><div><span>Top speed</span><b>30.02 km/h</b></div><div><span>Weight</span><b>72 g</b></div><div><span>Power / weight</span><b>218.5 W/kg</b></div><div><span>Rear tyre</span><b>20 mm</b></div></div>
+     <div class="usage">Driven: <b>not yet</b>. The setup before it, <b>fast circuit</b>, set the record 9.810 on Club circuit lane 1.</div>
+     <p style="font-size:12.5px;color:var(--muted);margin:10px 0">Notes: Ballast moved forward, 12 g left. Try at the next club night.</p>
+     <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px"><button class="btn primary" style="grid-column:1/-1">Open on the workbench</button><button class="btn">Compare with…</button><button class="btn">Setup sheet</button><button class="btn ghost">Rename</button><button class="btn ghost">Duplicate</button><button class="btn ghost">Export file</button><button class="btn ghost" style="color:var(--accent-text)">Delete</button></div></div></div>
+   </div>
+   <div class="card garmgr"><div class="list"><div class="k" style="margin:6px 8px">Cars &amp; tracks</div>
+     <div class="gi on"><span class="mini car-art"><svg><use href="#car"/></svg></span><span><b>Club GT</b><small>Home build · 3 setups · 7 runs</small></span></div>
+     <div class="gi"><span class="mini car-art photo"><svg><use href="#car"/></svg></span><span><b>Vintage Le Mans</b><small><span class="pd">Paddock</span> · read-only</small></span></div>
+     <div class="gi"><span class="mini car-art"><svg><use href="#car"/></svg></span><span><b>Rally special</b><small>Home build</small></span></div>
+     <div class="gi"><span class="mini" style="display:grid;place-items:center;border:1px solid var(--line);border-radius:5px;font-size:11px">⛳</span><span><b>Club circuit</b><small>2 lanes · 20.0 / 20.3 m</small></span></div>
+     <div style="display:flex;gap:6px;padding:8px"><button class="btn small">+ Car</button><button class="btn small">+ Track</button></div></div>
+    <div class="form"><label>Name<span class="f">Club GT</span></label><label>Maker<span class="f">Home build</span></label><label>Class<span class="f">GT</span></label><label>Photo<span class="f" style="color:var(--muted)">Choose a picture…</span></label>
+     <div style="grid-column:1/-1;display:flex;gap:8px"><button class="btn primary">Save car</button><button class="btn">New setup for this car</button><button class="btn">Track day with this car</button><span style="flex:1"></span><button class="btn ghost" style="color:var(--accent-text)">Remove car</button></div></div>
+   </div>
+  </div>
+ </div>
+ <p class="lead" style="margin-top:16px">Both options keep Paddock cars read-only (edit them in Paddock) and your own cars editable. Best laps come from the Laps page, so a setup shows its best lap only when a run was driven with that setup's gearing on record.</p>
+</div>
+<script>
+for(const b of document.querySelectorAll('#opt button'))b.onclick=()=>{for(const x of document.querySelectorAll('#opt button'))x.classList.toggle('on',x===b);const a=b.dataset.o==='a';document.getElementById('A').classList.toggle('hidden',!a);document.getElementById('B').classList.toggle('hidden',a);document.getElementById('noteA').classList.toggle('on',a);document.getElementById('noteB').classList.toggle('on',!a);};
+for(const b of document.querySelectorAll('#tone button'))b.onclick=()=>{for(const x of document.querySelectorAll('#tone button'))x.classList.toggle('on',x===b);document.documentElement.dataset.tone=b.dataset.t;};
+const q=new URLSearchParams(location.search);if(q.get('o')==='b')document.querySelector('#opt [data-o=b]').click();if(q.get('t')==='light')document.querySelector('#tone [data-t=light]').click();
+</script>
+</body>
+</html>
