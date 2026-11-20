@@ -14,7 +14,11 @@ const calculationHelp={
 };
 function renderHelp(topic){
   const key=Object.hasOwn(calculationHelp,topic)?topic:'gearing',help=calculationHelp[key];
-  $('#help-topics').innerHTML=Object.entries(calculationHelp).map(([id,h])=>`<a data-category="${topicStyle[id][0]}" href="#settings/calculations/${id}" ${id===key?'aria-current="page"':''}>${sfIcon(topicStyle[id][1])}${h.title}</a>`).join('');
+  // SlotForge Rework: every explanation grouped by area (the topic's own category), searchable above.
+  const AREAS=[['Gearing & speed',/gearing|speed|gear finder|lap & scale|compound gears/i],['Motor & power',/torque|motor|electrical|braking/i],['Weight, tyres & magnets',/weight|ballast|chassis|rotating|tyre|rims|clearance|magnetic/i],['Testing & advice',/./]];
+  const area=id=>AREAS.findIndex(([,re])=>re.test(calculationHelp[id].title));
+  $('#help-topics').innerHTML=AREAS.map(([title],i)=>`<div class="cm-group"><b>${title}</b>${Object.entries(calculationHelp).filter(([id])=>area(id)===i).map(([id,h])=>`<a data-category="${topicStyle[id][0]}" href="#settings/calculations/${id}" ${id===key?'aria-current="page"':''}>${sfIcon(topicStyle[id][1])}${h.title}</a>`).join('')}</div>`).join('');
+  if(typeof CalcMapUI!=='undefined'){CalcMapUI.render();const s=document.getElementById('help-search');if(s&&s.value)s.dispatchEvent(new Event('input'));}
   $('#help-content').dataset.category=topicStyle[key][0];
   $('#help-content').innerHTML=`<section class="panel help-topic-panel"><p class="eyebrow">THE NUMBERS EXPLAINED</p><h2 class="help-title">${sfIcon(topicStyle[key][1])}${help.title}</h2><div class="help-formula">${help.formula}</div><p class="hint">${help.meaning}</p></section><div class="help-grid"><section class="panel help-example"><h3>A worked example</h3><p>${help.example}</p></section><section class="panel"><h3>Assumptions & limits</h3><p>${help.limits}</p></section></div><button class="btn primary" id="help-try">Try it in Telemetry →</button>`;
   if(key==='predicted')$('#help-try').textContent='Open Driver Feedback →';

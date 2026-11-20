@@ -291,7 +291,7 @@ Keep backup files somewhere separate from the computer running the app. Recovery
 
 Choose from eight family presets or create a custom palette in **Settings**. The **Light / Dark** switch remembers your preferred theme for each mode.
 
-**Settings → Calculations explained** provides formulas, worked examples and assumptions. **Try it in Telemetry** takes you directly to the relevant input.
+**Settings → Calculations explained** opens on a map of how your numbers are made, with your workbench values on every box: click a result to light up the inputs behind it and see its formula worked through with your numbers. The **?** next to a number on the workbench opens the map at that number. Below the map, every explanation is grouped by area and searchable, with its formula, worked example and assumptions; **Try it in Telemetry** takes you directly to the relevant input.
 
 Use the calculations to plan tests and understand tradeoffs:
 

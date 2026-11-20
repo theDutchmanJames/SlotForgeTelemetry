@@ -34,6 +34,7 @@
     "test:laps-ui": "electron tests/laps-ui.cjs",
     "test:setups-ui": "electron tests/setups-ui.cjs",
     "test:binder-ui": "electron tests/binder-ui.cjs",
+    "test:calc-map-ui": "electron tests/calc-map-ui.cjs",
     "test:manual-laps-ui": "electron tests/manual-laps-ui.cjs",
     "test:chassis-ui": "electron tests/chassis-ui.cjs",
     "test:prediction-ui": "electron tests/prediction-ui.cjs",

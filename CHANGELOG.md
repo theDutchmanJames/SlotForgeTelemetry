@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+### Calculations explained: the Calculation Map (rework)
+
+- **How your numbers are made, as a map:** your inputs (pinion, driven gear, motor RPM, stall torque, rear tyre, weight) on the left, what they make in between (gear ratio, axle RPM, circumference, peak power), and the results on the right (no-load speed, rollout, pull at the wheels, power-to-weight), each with the value from your workbench.
+- **Click a box** (or use the keyboard): the path to it lights up, and below the map its formula shows **with your numbers** ("circumference 62.83 mm, gear ratio 2.7:1 → 23.27 mm/rev"), what uses it, and where theory ends. *Full explanation* opens its topic; *Change it on the workbench* jumps to the input.
+- **A ? next to the numbers** on the workbench and in Setups opens the map at that number.
+- **Every explanation, grouped:** the cloud of 29 topic chips becomes four groups (Gearing & speed, Motor & power, Weight, tyres & magnets, Testing & advice) with a search that also looks inside the formulas. Each topic's formula, worked example and limits are unchanged.
+
 ### Connect to Paddock: the Status Card (rework)
 
 - **One card says where you stand:** a light, "Connected to Home collection" (or Not connected, or Paddock needs attention) in big type, and the one action you need now: *Connect*, *Refresh now* and *Disconnect*, or *Fix it*.
