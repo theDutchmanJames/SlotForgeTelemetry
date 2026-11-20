@@ -42,3 +42,65 @@
 .sn.df-note{max-width:1200px;margin:0 auto 22px}
 @media(min-width:761px){.df-layout{grid-template-columns:236px minmax(0,1fr)}}
 .df-next{border-left:1px solid var(--line);box-shadow:inset 2px 0 0 var(--accent)}
+/* SlotForge Rework (Symptom Cards): one page that grows as you answer. */
+#driver-feedback{--df-title:'SF Barlow Condensed','Bahnschrift',sans-serif}
+#driver-feedback .df-layout{display:block}
+.df-for{font-size:12.5px;color:var(--muted);margin-right:8px}.df-for b{color:var(--ink)}
+.df-tabs{display:flex;flex-wrap:wrap;align-items:center;gap:4px;margin:0 0 16px;padding:3px;border:1px solid var(--line);border-radius:10px;background:var(--panel)}
+.df-tabs button{display:grid;text-align:left;border:0;background:transparent;border-radius:8px;padding:7px 14px;color:var(--muted)}
+.df-tabs button strong{font-size:13px;color:var(--ink);font-weight:600}.df-tabs button small{font-size:11px}
+.df-tabs button[aria-current=step]{background:color-mix(in srgb,var(--ink) 11%,var(--panel))}
+.df-tabs .help-link{margin-left:auto;padding:0 10px;font-size:12px}
+.df-conversation{display:grid;gap:14px;background:transparent!important;border:0!important;padding:0!important}
+.df-card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px 18px;min-width:0}
+.df-card-title{display:flex;align-items:center;gap:10px;margin:0 0 4px;font:italic 700 20px/1.1 var(--df-title);text-transform:uppercase}
+.df-num{display:inline-grid;place-items:center;width:24px;height:24px;border-radius:50%;background:var(--ink);color:var(--bg);font:700 12px 'SF Roboto Mono',Consolas,monospace;font-style:normal;flex:none}
+.df-card>.hint:first-of-type{margin:0 0 12px}
+.df-symptoms{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px}
+.df-symptom{display:grid;justify-items:center;gap:2px;padding:12px 8px;border-radius:12px;border:1px solid var(--line);background:var(--panel);color:var(--ink);text-align:center}
+.df-symptom svg{width:100%;max-width:150px;height:64px;color:var(--muted)}
+.df-symptom b{font-size:13.5px}.df-symptom small{font-size:11.5px;color:var(--muted)}
+.df-symptom:hover{background:color-mix(in srgb,var(--ink) 5%,var(--panel))}
+.df-symptom[aria-pressed=true]{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent);background:color-mix(in srgb,var(--accent) 6%,var(--panel))}
+.df-symptom[aria-pressed=true] svg{color:var(--accent-text,var(--accent))}
+.df-answered{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0 4px}.df-answered:empty{display:none}
+.df-chip{border:1px solid var(--line);background:var(--panel2,var(--bg));border-radius:999px;padding:4px 11px;font-size:12px;color:var(--muted)}
+.df-chip b{color:var(--ink);font-weight:600}
+.df-next{margin:10px 0 6px}
+.df-next>small{display:block;font-size:10.5px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.df-question{display:block;font-size:15.5px;margin:4px 0 2px}
+.df-next>.hint{margin:0 0 10px}
+.df-answers{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:8px}
+.df-answer-btn{padding:9px 14px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--ink);font-size:13.5px;text-align:left}
+.df-answer-btn:hover{border-color:var(--muted)}
+.df-answer-btn[aria-pressed=true]{border-color:var(--ink);background:color-mix(in srgb,var(--ink) 12%,var(--panel));font-weight:600}
+.df-next [data-feedback-skip]{border-style:dashed;color:var(--muted)}
+.df-card details{margin-top:8px}
+/* Checks: a to-do list */
+.df-todo{display:grid;gap:6px}
+.df-todo .df-check-row{display:grid;grid-template-columns:26px minmax(0,1fr);gap:12px;align-items:start;padding:10px 12px;border:1px solid var(--line);border-radius:10px;margin:0}
+.df-todo .df-check-row>div{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:2px 12px;align-items:center}
+.df-todo .df-check-row strong{font-size:13.5px}.df-todo .df-check-row p{grid-column:1;margin:0;font-size:12px;color:var(--muted)}
+.df-todo .df-check-row small{grid-column:1;font-size:11.5px;color:var(--muted)}
+.df-todo .df-check-actions{grid-column:2;grid-row:1/4;display:inline-flex;gap:2px;padding:2px;border:1px solid var(--line);border-radius:8px;background:var(--bg)}
+.df-todo .df-check-actions .btn{border:0;background:transparent;padding:5px 10px;font-size:12px;color:var(--muted)}
+.df-todo .df-check-actions .btn[aria-pressed=true]{background:color-mix(in srgb,var(--ink) 12%,var(--panel));color:var(--ink);font-weight:600}
+.df-todo .df-check-actions .btn[data-check-status=clear][aria-pressed=true]{background:color-mix(in srgb,var(--green) 20%,transparent);color:var(--green)}
+.df-todo .df-check-actions .btn[data-check-status=issue][aria-pressed=true]{background:color-mix(in srgb,var(--accent) 20%,transparent);color:var(--accent-text,var(--accent))}
+.df-tick{width:22px;height:22px;border-radius:6px;border:1.5px solid var(--muted);display:grid;place-items:center;font-size:12px;font-weight:700;margin-top:1px}
+[data-check-state=clear] .df-tick{background:var(--green);border-color:var(--green);color:#06150e}
+[data-check-state=issue] .df-tick{background:var(--accent);border-color:var(--accent);color:#fff}
+[data-check-state=stale] .df-tick{border-color:var(--amber);border-style:dashed}
+/* What to try: cards */
+.df-tries{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.df-tries>details{grid-column:1/-1}
+.df-tries .df-advice{display:flex;flex-direction:column;gap:6px;padding:14px;border:1px solid var(--line);border-radius:12px;background:var(--bg);margin:0}
+.df-tries .df-advice:first-child{border-color:var(--ink)}
+.df-tries .df-advice-icon{display:none}
+.df-tries .df-advice h3{margin:0;font-size:14.5px}
+.df-tries .df-advice p{margin:0;font-size:12.5px}
+.df-tries .df-basis{font-size:11px;color:var(--muted)}
+.df-try-actions{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px}
+@media(max-width:1100px){.df-symptoms{grid-template-columns:repeat(3,minmax(0,1fr))}.df-tries{grid-template-columns:1fr}}
+@media(max-width:560px){.df-symptoms{grid-template-columns:repeat(2,minmax(0,1fr))}.df-todo .df-check-row>div{grid-template-columns:1fr}.df-todo .df-check-actions{grid-column:1;grid-row:auto;justify-self:start}.df-tabs .help-link{margin-left:0}}
+.df-conversation .df-next{border:0;padding:0;background:none;box-shadow:none}

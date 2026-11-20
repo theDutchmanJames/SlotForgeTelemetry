@@ -2,6 +2,16 @@
 
 ## Unreleased
 
+### Driver Feedback: Symptom Cards (rework)
+
+- **Your car is one page that grows as you answer**, instead of a five-step wizard with a side list:
+  1. **What does the car do?** Ten picture cards: tipping, rear sliding, sudden catching, guide escape, hopping, lack of power, braking, gets worse, inconsistent, and not sure.
+  2. **Tell us a bit more:** each follow-up question is a row of answer buttons, with *Skip this question*. Your answers show as chips you can click to change.
+  3. **Check these first:** the six checks as a to-do list with *Looks OK*, *Problem found* or *Not checked*.
+  4. **Try one thing, then drive:** the best three suggestions as cards, each with why, *Use for my test* and the new **Try on Track day**, which makes it this investigation's test and the note of your next Track day run.
+- *Your setup*, *Look deeper* and *Try & learn* are tabs above the page, unchanged inside. The advice engine, its questions, checks and research are unchanged.
+- The explaining boxes at the top are gone; the setup the advice is for is named next to *Start over*.
+
 ### Track day: the Pit Board (remake)
 
 - **One session:** car, track, lane and driver in one bar, picked from your garage (or typed). A garage track shows its lanes as buttons with their lengths.

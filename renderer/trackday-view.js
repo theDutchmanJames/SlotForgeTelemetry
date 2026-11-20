@@ -169,5 +169,7 @@ const TrackdayUI=(()=>{
     }catch(e){busy=false;q('#trackday-error').textContent=e.message;q('#trackday-error').hidden=false;q('#trackday-save').disabled=false;return;}
     render();focusLap(0);
   }
-  return {init,render,suggest,useCar};
+  // From Driver Feedback: the suggestion to test becomes the note of the next run.
+  function note(text){extra=String(text||'').slice(0,120);render();}
+  return {init,render,suggest,useCar,note};
 })();

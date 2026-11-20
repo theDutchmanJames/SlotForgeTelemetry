@@ -30,10 +30,10 @@ app.whenReady().then(async()=>{
   await win.reload();await new Promise(r=>setTimeout(r,500));await route('feedback');assert.equal(await run('state.setup.adviceTestChange'),'Move existing ballast lower');assert.equal(await run('state.setup.adviceComponents'),'unfinished row');await set('[name=adviceComponents]','');
   for(const value of await run("PredictionModel.fields.adviceMeasurement.options.map(x=>x.split('|')[0])")){await set('[name=adviceMeasurement]',value);assert.equal(await run("[...document.querySelectorAll('[data-feedback-tool]')].every(b=>document.querySelector('[name='+b.dataset.feedbackTool+']'))"),true,'Valid tool destinations');}
   // Guided questions, persistent individual checks, full evidence and explicit test links.
-  await run("state.setup={...CalculatorModel.blank(),name:'Guided review',adviceSymptom:'slide'};fillInputs();persist();");await click('[data-feedback-step=checks]');
-  assert.match(await run("document.querySelector('[data-feedback-panel=checks] .feedback-next-question').textContent"),/rear step out/);
-  await set('[data-feedback-panel=checks] [data-feedback-question=adviceSlideWhen]','power');assert.equal(await run('state.setup.adviceSlideWhen'),'power');
-  assert.equal(await run("document.querySelector('[data-feedback-panel=checks] [data-feedback-question]').dataset.feedbackQuestion"),'adviceWheelspin');
+  await run("state.setup={...CalculatorModel.blank(),name:'Guided review',adviceSymptom:'slide'};fillInputs();persist();");await click('[data-feedback-step=experience]');
+  assert.match(await run("document.querySelector('[data-feedback-panel=experience] .feedback-next-question').textContent"),/rear step out/);
+  await set('[data-feedback-panel=experience] [data-feedback-question=adviceSlideWhen]','power');assert.equal(await run('state.setup.adviceSlideWhen'),'power');
+  assert.equal(await run("document.querySelector('[data-feedback-panel=experience] [data-feedback-question]').dataset.feedbackQuestion"),'adviceWheelspin');
   await click('[data-feedback-check=tyres][data-check-status=clear]');assert.equal(await run('DriverFeedbackModel.analyze(calculationInput()).checks.statuses.tyres'),'clear');
   await click('[data-feedback-check=body][data-check-status=issue]');assert.equal(await run('DriverFeedbackModel.analyze(calculationInput()).suggestions[0].id'),'check-body');
   await run("state.setup.tyreLeft='19';fillInputs();persist();");assert.match(await run("document.querySelector('#feedback-check-list').textContent"),/Some checks need another look/);
@@ -64,7 +64,7 @@ app.whenReady().then(async()=>{
   assert.match(await run("document.querySelector('#feedback-checks').textContent"),/tyre-to-rim attachment/);
   await run("focusSetupInput('adviceDriveSlip')");assert.equal(await run('document.activeElement.dataset.feedbackQuestion'),'adviceDriveSlip');assert.equal(await run('document.activeElement.checkVisibility()'),true);
   await set('[data-feedback-panel=experience] [data-feedback-question=adviceDriveSlip]','none');
-  await click('[data-feedback-step=checks]');assert(await run("document.querySelector('#feedback-checks a[href=\"https://slotracer.online/manual/tuning.php\"]')!==null"));
+  await click('[data-feedback-step=experience]');assert(await run("document.querySelector('#feedback-checks a[href=\"https://slotracer.online/manual/tuning.php\"]')!==null"));
   await click('#feedback-checks [data-feedback-unable=route-drive-slip]');assert.equal(await run("document.querySelector('#feedback-checks [data-feedback-rule=route-drive-slip]')"),null);
   assert.match(await run("document.querySelector('#feedback-checks').textContent"),/easier observation/);
   await click('[data-feedback-action=restore-actions]');await click('#feedback-checks [data-feedback-test=route-drive-slip]');assert.equal(await run('state.setup.adviceTestKind'),'inspection');
@@ -87,11 +87,17 @@ app.whenReady().then(async()=>{
   assert.equal(await run("library.find(e=>e.setup.name==='Route retention').setup.adviceOutcome"),'different');assert.equal(await run('document.activeElement.name'),'adviceSymptom');
   await win.reload();await new Promise(r=>setTimeout(r,250));await route('feedback');assert.equal(await run('state.setup.adviceSymptom'),'unknown');assert.equal(await run('state.setup.adviceHeight'),'14');
   // All unresolved numerical findings must be visible, even beyond the compact first three.
-  await run("state.setup={...CalculatorModel.blank(),adviceUseSetup:'yes',adviceSymptom:'tip',rearDiameter:'19',gearDiameter:'20',tyreMinimum:'20',tyreLeft:'19',tyreRight:'18.8',rulesRows:'Mass | 85 | - | 80 | g'};fillInputs();");await click('[data-feedback-step=checks]');
+  await run("state.setup={...CalculatorModel.blank(),adviceUseSetup:'yes',adviceSymptom:'tip',rearDiameter:'19',gearDiameter:'20',tyreMinimum:'20',tyreLeft:'19',tyreRight:'18.8',rulesRows:'Mass | 85 | - | 80 | g'};fillInputs();");await click('[data-feedback-step=experience]');
   for(const id of ['gear-clearance','tyre-mismatch','tyre-minimum','class-limits'])assert.equal(await run("document.querySelector('#feedback-checks [data-feedback-rule='+"+JSON.stringify(id)+"+']').checkVisibility()"),true,id);
   await run("focusSetupInput('adviceOldZ')");assert.equal(await run('document.activeElement.checkVisibility()'),true);
-  for(const width of [1440,760,390]){win.setContentSize(width,1100);for(const tone of ['light','dark']){await click('[data-tone-choice='+tone+']');for(const step of ['experience','checks','setup','measure','test']){await click('[data-feedback-step='+step+']');assert.equal(await run('document.documentElement.scrollWidth<=innerWidth'),true,width+'/'+tone+'/'+step);}await click('[data-feedback-step=experience]');fs.writeFileSync(path.join(output,'feedback-'+width+'-'+tone+'.png'),(await win.webContents.capturePage()).toPNG());}}
+  for(const width of [1440,760,390]){win.setContentSize(width,1100);for(const tone of ['light','dark']){await click('[data-tone-choice='+tone+']');for(const step of ['experience','setup','measure','test']){await click('[data-feedback-step='+step+']');assert.equal(await run('document.documentElement.scrollWidth<=innerWidth'),true,width+'/'+tone+'/'+step);}await click('[data-feedback-step=experience]');fs.writeFileSync(path.join(output,'feedback-'+width+'-'+tone+'.png'),(await win.webContents.capturePage()).toPNG());}}
   await route('analyze');assert.equal(await run("document.querySelector('#driver-feedback').hidden"),true);await route('settings/calculations/predicted');await click('#help-try');await new Promise(r=>setTimeout(r,100));assert.equal(await run('location.hash'),'#feedback');assert.equal(await run('document.activeElement.name'),'adviceSymptom');assert.deepEqual(errors,[]);
+  // Symptom Cards: a card picks the symptom; a suggestion goes to Track day as the next run's note.
+  await run("state.setup={...CalculatorModel.blank(),name:'Cards'};fillInputs();persist();");await route('feedback');await click('[data-feedback-step=experience]');await click('[data-feedback-symptom=slide]');assert.equal(await run('state.setup.adviceSymptom'),'slide');
+  assert.equal(await run("document.querySelector('[data-feedback-symptom=slide]').getAttribute('aria-pressed')"),'true');assert.match(await run("document.querySelector('#feedback-question-title').textContent"),/Rear sliding: tell us a bit more/);
+  await click('[data-feedback-panel=experience] [data-feedback-question] [data-feedback-answer]');assert.notEqual(await run('state.setup.adviceSlideWhen'),'unknown');assert.ok(await run("document.querySelectorAll('#feedback-answered .df-chip').length>0"));
+  const title=await run("document.querySelector('#feedback-checks .df-advice h3').textContent");await click('#feedback-checks [data-feedback-trackday]');
+  assert.equal(await run('location.hash'),'#trackday');assert.equal(await run("document.querySelector('#trackday-change').value"),title.slice(0,120));assert.ok(await run('state.setup.adviceTestId'));
   console.log('Driver Feedback UI passed: guidance, shared data, calculations, outcomes, save/reload, legacy routes, help and responsive themes.');win.destroy();app.quit();
  }catch(e){console.error(e);console.error(errors);win.destroy();app.exit(1);}
 });
