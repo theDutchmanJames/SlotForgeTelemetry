@@ -35,6 +35,7 @@ const SetupsUI=(()=>{
  function select(id,compare){analysisId=id;others=others.filter(o=>o!==id&&o!==WB&&library.some(e=>e.id===o));if(compare&&!others.length){const next=library.find(e=>e.id!==id);if(next)others=[next.id];}if(!compare)others=[];}
  function route(compare){
   comparing=compare;
+  if(!compare)others=[];
   if(compare){others=others.filter(o=>o===WB||(o!==analysisId&&library.some(e=>e.id===o)));if(!others.length){const next=library.find(e=>e.id!==analysisId);others=[next?next.id:WB];}}
   render();
  }
@@ -65,6 +66,7 @@ const SetupsUI=(()=>{
   return `<span class="cs-move"><span class="cs-val ${c.tone}">${value(c.b,r)} <small>${pct}</small></span><span class="cs-bar"><i class="${c.delta>0?'up':'down'} ${c.tone}" data-w="${w}"></i></span></span>`;
  }
  function sentence(v,name,letter){
+  if(v.quiet&&v.moved.length)return `<p><b>${letter}</b> · ${esc(name)} changes ${v.moved.map(esc).join(', ').toLowerCase()}; speed, pull and weight stay the same.</p>`;
   if(v.quiet)return `<p><b>${letter}</b> changes ${v.inputs?v.inputs===1?'one input':v.inputs+' inputs':'nothing'}, but no calculated result moves${v.inputs?': the change is in measurements, notes or details the calculations do not use':''}.</p>`;
   const bits=v.parts.map(p=>p.key==='massG'?`<b>${unitText(p.grams,'g',1)} ${p.text}</b>`:`<b class="${p.tone}">${p.text}</b>${p.detail?` (${p.detail})`:''}`);
   const list=bits.length>1?bits.slice(0,-1).join(', ')+' and '+bits.at(-1):bits[0];

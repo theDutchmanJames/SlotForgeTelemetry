@@ -30,3 +30,7 @@ test('the verdict in plain words',()=>{
  const w=S.verdict(S.sheet(base,[light]).pairs[0]);assert.ok(w.parts.some(p=>p.text==='lighter'&&p.grams===8));
  const q=S.verdict(S.sheet(base,[{...base,magneticReadings:'10'}]).pairs[0]);assert.equal(q.quiet,true);assert.equal(q.inputs,1);
 });
+test('a change that moves only ratio and rollout says so, instead of "no result moves"',()=>{
+ const v=S.verdict(S.sheet({...base,ratedRpm:'',motorTorque:''},[{...base,ratedRpm:'',motorTorque:'',gear:'28'}]).pairs[0]);
+ assert.equal(v.quiet,true);assert.ok(v.moved.includes('Gear ratio'));assert.ok(v.moved.includes('Rollout'));
+});

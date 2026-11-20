@@ -45,7 +45,7 @@
   if(mass?.moved)parts.push({text:mass.delta<0?'lighter':'heavier',tone:'neutral',key:'massG',grams:Math.abs(mass.delta)});
   if(pull?.moved&&mass?.moved)parts.push({text:pull.delta>0?'accelerates its weight harder':'accelerates its weight less',tone:pull.tone,key:'pullPerKg',detail:pct(pull)!==null?`${pull.delta>0?'+':'−'}${pct(pull)}% pull per kg`:''});
   else if(pw?.moved)parts.push({text:pw.delta>0?'more power for its weight':'less power for its weight',tone:pw.tone,key:'powerToWeight',detail:pct(pw)!==null?`${pw.delta>0?'+':'−'}${pct(pw)}%`:''});
-  return {parts,inputs:pair.changes.length,quiet:!parts.length};
+  return {parts,inputs:pair.changes.length,quiet:!parts.length,moved:pair.rows.filter(x=>x.moved).map(x=>x.label.replace(/ \(.*\)$/,''))};
  }
  const api={sheet,rows,inputChanges,verdict,BETTER};
  if(node)module.exports=api;else root.ChangeSheetModel=api;

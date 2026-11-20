@@ -14,22 +14,23 @@
   return [...withSetups,...empty,...loose];
  }
  // The best lap of runs driven with this car and this setup's pinion and gear (as the run recorded them).
- function driven(setup,carName,runs){
-  if(!carName||!setup.pinion||!setup.gear)return null;
-  let best=null,count=0;
-  for(const r of runs){
-   const t=r.configuration?.technical||{};
-   if(norm(r.car)!==norm(carName)||String(t.pinion??'').trim()!==String(setup.pinion).trim()||String(t.gear??'').trim()!==String(setup.gear).trim())continue;
-   count++;for(const lap of r.laps)if(eligible(lap)&&(!best||lap.durationMs<best.ms))best={ms:lap.durationMs,run:r};
-  }
-  return count?{...best,count}:null;
+ // One pass over the runs: the best lap and the number of runs per car, pinion and gear. A list of hundreds of setups
+ // then looks each one up instead of scanning every run again.
+ const keyOf=(car,pinion,gear)=>JSON.stringify([norm(car),String(pinion??'').trim(),String(gear??'').trim()]);
+ function index(runs){
+  const map=new Map();
+  for(const r of runs){const t=r.configuration?.technical||{};if(!t.pinion||!t.gear)continue;const k=keyOf(r.car,t.pinion,t.gear);let e=map.get(k);if(!e)map.set(k,e={best:null,count:0});e.count++;
+   for(const lap of r.laps)if(eligible(lap)&&(!e.best||lap.durationMs<e.best.ms))e.best={ms:lap.durationMs,run:r};}
+  return map;
  }
+ function lookup(map,setup,carName){if(!carName||!setup.pinion||!setup.gear)return null;const e=map.get(keyOf(carName,setup.pinion,setup.gear));return e&&e.best?{...e.best,count:e.count}:null;}
+ const driven=(setup,carName,runs)=>lookup(index(runs),setup,carName);
  function filter(entries,mode,isDriven){
   if(mode==='favourites')return entries.filter(e=>e.favourite);
   if(mode==='driven')return entries.filter(e=>isDriven(e));
   if(mode==='new')return entries.filter(e=>!isDriven(e));
   return entries;
  }
- const api={groups,driven,filter};
+ const api={groups,driven,index,lookup,filter};
  if(typeof module==='object'&&module.exports)module.exports=api;else root.BinderModel=api;
 })(typeof globalThis!=='undefined'?globalThis:this);

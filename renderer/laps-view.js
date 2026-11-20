@@ -14,11 +14,14 @@ const LapsUI=(()=>{
  // Green at the reference, through yellow, to red at the end of the scale.
  const RAMP=[[62,207,142],[201,226,101],[242,183,5],[240,138,75],[229,72,77]];
  function colour(t){const p=t*4,i=Math.min(3,Math.floor(p)),k=p-i;return `rgb(${RAMP[i].map((a,j)=>Math.round(a+(RAMP[i+1][j]-a)*k)).join(',')})`;}
+ // A change in the chosen units (recorded values are metric): "rear tyre 0.79 in → 0.77 in".
+ const unitOf=c=>c.unit==='mm'?['mm',2]:c.unit==='g'?['g',1]:null;
+ const changeLabel=c=>{const u=unitOf(c);return u&&Number.isFinite(+c.before)&&Number.isFinite(+c.after)?`${c.name} ${unitText(+c.before,u[0],u[1])} → ${unitText(+c.after,u[0],u[1])}`:c.label;};
  const tagOf=run=>notes.runs[run.id]?.tag||M.defaultTag(run),noteOf=run=>notes.runs[run.id]?.note||'';
  const tagChip=run=>{const t=tagOf(run);return `<span class="lw-tag" data-tag="${t}">${M.TAGS[t]}</span>`;};
  const sourceOf=run=>run.entryKind==='manual'?(/track day/i.test(run.sourceName||'')?'Track day':'Typed in'):'Paddock · '+run.hostName;
  function readNotes(){try{notes=RunNotesModel.decode(DataStore.getItem(STORE));notesError='';}catch(e){notes=RunNotesModel.empty();notesError='Your notes could not be read: '+e.message+' Restore a backup in Settings → Backups.';}}
- function saveNote(id,changes){if(notesError)return;try{notes=RunNotesModel.set(notes,id,changes);DataStore.setItem(STORE,JSON.stringify(notes));}catch(e){toast('Could not save the note: '+e.message);}}
+ function saveNote(id,changes){if(notesError)return;try{const next=RunNotesModel.set(notes,id,changes);DataStore.setItem(STORE,JSON.stringify(next));notes=next;}catch(e){toast('Could not save the note: '+e.message);}}
  function markup(){
   document.querySelector('[data-route=analyze]').insertAdjacentHTML('beforebegin','<a href="#laps" data-route="laps">Laps</a>');
   document.querySelector('[data-page=analyze]').insertAdjacentHTML('beforebegin',`<section data-page="laps" hidden>
@@ -52,7 +55,8 @@ const LapsUI=(()=>{
  }
  function render(next){
   if(next)runs=next;
-  if(!$('lw-view'))return;
+  // Only while the wall is on screen: opening the page (route) draws it with the latest runs.
+  if(!$('lw-view')||$('lw-view').closest('[data-page]').hidden||$('lw-view').hidden)return;
   $('lw-notes-error').hidden=!notesError;$('lw-notes-error').textContent=notesError;
   $('lw-empty').hidden=runs.length>0;$('lw-content').hidden=!runs.length;if(!runs.length)return;
   const {carList,lineList,current}=pick(runs);
@@ -78,7 +82,7 @@ const LapsUI=(()=>{
   let html=`<div class="lw-row lw-cols${labels?"":" lw-dense"}" data-cols="${columns}" aria-hidden="true"><span></span>${Array.from({length:columns},(_,i)=>`<span>${i+1}</span>`).join('')}<span>typical</span></div>`;
   list.forEach((run,index)=>{
    const st=statsOf(run),before=current.runs[current.runs.indexOf(run)+1],changed=M.changes(before,run);
-   if(changed.length)html+=`<div class="lw-change">▼ changed: ${changed.map(c=>`<span class="lw-diff">${esc(c.label)}</span>`).join(' ')}</div>`;
+   if(changed.length)html+=`<div class="lw-change">▼ changed: ${changed.map(c=>`<span class="lw-diff">${esc(changeLabel(c))}</span>`).join(' ')}</div>`;
    const reference=mode==='median'?st.median:record,bestId=run.laps.find(l=>M.eligible(l)&&l.durationMs===st.best)?.id;
    html+=`<div class="lw-row${labels?"":" lw-dense"}" data-cols="${columns}" data-selected="${run.id===runId}"><button class="lw-who" data-lw-run="${esc(run.id)}" aria-pressed="${run.id===runId}"><b>${esc(day(run.startedAt))} · ${esc(run.sessionName)}</b><small>${M.TAGS[tagOf(run)]} · ${esc(sourceOf(run))}</small></button>`;
    for(let i=0;i<columns;i++){
@@ -97,7 +101,7 @@ const LapsUI=(()=>{
  }
  function ledger(current){
   const rows=M.ledger(current,statsOf),max=Math.max(1,...rows.map(r=>Math.abs(r.delta||0)));
-  $('lw-ledger').innerHTML=`<h2>What moved the pace</h2><p class="hint">Each setup change on this track and lane, with the typical lap before and after. Driver and conditions can still differ, and one run is a small sample.</p>`+(rows.length?`<div class="lw-ledger-rows"><div class="lw-lrow lw-lhead"><span>Date</span><span>Change</span><span>Typical lap</span><span>Effect</span></div>${rows.slice().reverse().map(r=>`<div class="lw-lrow"><span>${esc(day(r.run.startedAt))}</span><span>${r.changes.map(c=>`<span class="lw-diff">${esc(c.label)}</span>`).join(' ')}</span><span class="lw-num">${sec(r.from)} → ${sec(r.to)}</span><span>${r.delta===null?'—':`<i class="lw-bar ${r.delta<0?'lw-good':'lw-bad'}" data-w="${Math.max(4,Math.round(Math.abs(r.delta)/max*100))}"></i><small class="lw-num ${r.delta<0?'lw-good':r.delta>0?'lw-bad':''}">${signed(r.delta)} s</small>`}</span></div>`).join('')}</div>`:'<p class="lw-quiet">No setup changes recorded on this track and lane yet. Track day runs and Paddock races keep the gearing, motor, tyres and weight they were driven with; a change between two runs shows up here.</p>');
+  $('lw-ledger').innerHTML=`<h2>What moved the pace</h2><p class="hint">Each setup change on this track and lane, with the typical lap before and after. Driver and conditions can still differ, and one run is a small sample.</p>`+(rows.length?`<div class="lw-ledger-rows"><div class="lw-lrow lw-lhead"><span>Date</span><span>Change</span><span>Typical lap</span><span>Effect</span></div>${rows.slice().reverse().map(r=>`<div class="lw-lrow"><span>${esc(day(r.run.startedAt))}</span><span>${r.changes.map(c=>`<span class="lw-diff">${esc(changeLabel(c))}</span>`).join(' ')}</span><span class="lw-num">${sec(r.from)} → ${sec(r.to)}</span><span>${r.delta===null?'—':`<i class="lw-bar ${r.delta<0?'lw-good':'lw-bad'}" data-w="${Math.max(4,Math.round(Math.abs(r.delta)/max*100))}"></i><small class="lw-num ${r.delta<0?'lw-good':r.delta>0?'lw-bad':''}">${signed(r.delta)} s</small>`}</span></div>`).join('')}</div>`:'<p class="lw-quiet">No setup changes recorded on this track and lane yet. Track day runs and Paddock races keep the gearing, motor, tyres and weight they were driven with; a change between two runs shows up here.</p>');
  }
  // The page allows no inline styles: sizes and colours are set here instead.
  function paint(box){for(const e of box.querySelectorAll('[data-cols]'))e.style.setProperty('--cols',e.dataset.cols);for(const e of box.querySelectorAll('[data-bg]'))e.style.background=e.dataset.bg;for(const e of box.querySelectorAll('[data-w]'))e.style.width=e.dataset.w+'%';}
@@ -117,14 +121,14 @@ const LapsUI=(()=>{
   // A refresh from Paddock while you type keeps the note you are writing.
   if(box.dataset.run===run.id&&document.activeElement===$('lw-note'))return;box.dataset.run=run.id;
   const st=statsOf(run),before=current.runs[current.runs.indexOf(run)+1],bs=before?statsOf(before):null,changed=M.changes(before,run);
-  const tech=run.configuration?.technical||{},specs=[['Gearing',tech.pinion&&tech.gear?tech.pinion+' / '+tech.gear:null],['Motor',tech.ratedRpm?tech.ratedRpm+' RPM':tech.motor||null],['Rear tyre',tech.rearDiameter||tech.rearTyreDiameter?(tech.rearDiameter||tech.rearTyreDiameter)+' mm':null],['Weight',tech.totalWeight||tech.weight?(tech.totalWeight||tech.weight)+' g':null]];
+  const tech=run.configuration?.technical||{},specs=[['Gearing',tech.pinion&&tech.gear?tech.pinion+' / '+tech.gear:null],['Motor',tech.ratedRpm?tech.ratedRpm+' RPM':tech.motor||null],['Rear tyre',tech.rearDiameter||tech.rearTyreDiameter?unitText(+(tech.rearDiameter||tech.rearTyreDiameter),'mm',2):null],['Weight',tech.totalWeight||tech.weight?unitText(+(tech.totalWeight||tech.weight),'g',1):null]];
   const stints=RaceModel.stintAnalysis(run),out=run.laps.filter(l=>!l.valid||l.pit).length,manual=run.entryKind==='manual';
   const vs=(a,b)=>a===null||b===null?'—':`<b class="lw-num ${b-a<0?'lw-good':b-a>0?'lw-bad':''}">${signed(b-a)} s</b>`;
   box.innerHTML=`<p class="eyebrow">${esc(full(run.startedAt))}</p><h2>${esc(run.sessionName)} ${tagChip(run)}</h2><p class="lw-src">${esc(sourceOf(run))} · ${esc(run.track)} · lane ${run.lane} · ${esc(run.driver)}</p>
    <p class="lw-line"><span>${run.laps.length} laps</span><span>best <b class="lw-num">${sec(st.best)}</b></span><span>typical <b class="lw-num">${sec(st.median)}</b></span><span>spread <b class="lw-num">${sec(st.spread)}</b></span>${st.bestRun?`<span>best 5 in a row <b class="lw-num">${sec(st.bestRun.mean)}</b></span>`:''}</p>
    ${lapChart(run)}
    <div class="lw-chips">${stints.map((s,i)=>`<span class="lw-chip lw-static">${stints.length>1?'Stint '+(i+1)+' · ':''}${s.statistics.count} of ${s.laps.length} laps counted</span>`).join('')}${out?`<span class="lw-chip lw-static">${out} excluded or pit</span>`:''}</div>
-   ${before?`<p class="lw-vs">Against the run before (${esc(day(before.startedAt))}): typical ${vs(bs.median,st.median)}, best ${vs(bs.best,st.best)}${changed.length?' after '+changed.map(c=>`<span class="lw-diff">${esc(c.label)}</span>`).join(' '):''}</p>`:'<p class="lw-vs lw-quiet">The first run on this track and lane.</p>'}
+   ${before?`<p class="lw-vs">Against the run before (${esc(day(before.startedAt))}): typical ${vs(bs.median,st.median)}, best ${vs(bs.best,st.best)}${changed.length?' after '+changed.map(c=>`<span class="lw-diff">${esc(changeLabel(c))}</span>`).join(' '):''}</p>`:'<p class="lw-vs lw-quiet">The first run on this track and lane.</p>'}
    <h3>Raced with</h3><dl class="lw-specs">${specs.map(([k,v])=>`<div><dt>${k}</dt><dd>${v?esc(v):'<span class="lw-quiet">not recorded</span>'}</dd></div>`).join('')}</dl>
    <h3>Your note</h3><div class="lw-tags" role="group" aria-label="Kind of run">${Object.entries(M.TAGS).map(([k,v])=>`<button class="lw-chip" data-lw-tag="${k}" aria-pressed="${tagOf(run)===k}">${v}</button>`).join('')}</div>
    <textarea id="lw-note" rows="3" maxlength="${RunNotesModel.MAX_NOTE}" placeholder="Track conditions, how the car felt…" aria-label="Note on this run"${notesError?' disabled':''}>${esc(noteOf(run))}</textarea>

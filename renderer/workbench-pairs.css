@@ -40,3 +40,4 @@
 .wb-out .result-group,.wb-out .result-folder,.wb-out .result-body,.wb-out .drivetrain{border-left:0!important;box-shadow:none!important}
 .wb-out .result-folder>summary::after,.wb-out .result-folder>summary::before{display:none!important}
 .wb-out .drivetrain{background:transparent!important;border:0!important;padding:0!important;margin:0}
+.wb-out-wide{grid-column:1/-1}

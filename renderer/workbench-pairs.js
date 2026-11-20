@@ -27,7 +27,7 @@ const WorkbenchPairs=(()=>{
     }
     // Anything left in the results column without an input of its own (none today) stays reachable below the rows.
     const rest=[...q('#stats').querySelectorAll(':scope>[data-result-group]')];
-    if(rest.length){const extra=document.createElement('section');extra.className='wb-pair wb-extra';extra.innerHTML='<div class="wb-out" style="grid-column:1/-1"></div>';rest.forEach(r=>extra.firstChild.append(r));box.append(extra);}
+    if(rest.length){const extra=document.createElement('section');extra.className='wb-pair wb-extra';extra.innerHTML='<div class="wb-out wb-out-wide"></div>';rest.forEach(r=>extra.firstChild.append(r));box.append(extra);}
     // What to do next, with your own data, instead of the advert cards.
     box.insertAdjacentHTML('beforeend','<div class="wb-next" id="workbench-next" aria-live="polite"></div>');
     const help=q('.results-column .help-link');if(help)box.append(help);

@@ -4,7 +4,7 @@
 // When a change wins, "Keep this change" writes it to the workbench setup.
 const TrackdayUI=(()=>{
   const KEY='slotforge.telemetry.trackday.v1',q=s=>document.querySelector(s),M=()=>TrackdayModel;
-  let ctx={car:'',track:'',lane:1,driver:'',sequence:false},busy=false,laps=[],dismissed='',extra='';
+  let ctx={car:'',track:'',lane:1,driver:'',sequence:false},busy=false,laps=[],dismissed='',extra='',pasteOpen=false;
   const time=ms=>Number.isFinite(ms)?(ms/1000).toFixed(3):'—';
   const clock=iso=>new Date(iso).toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
   function save(){try{localStorage.setItem(KEY,JSON.stringify(ctx));}catch{/* Works for this session. */}}
@@ -35,14 +35,14 @@ const TrackdayUI=(()=>{
       const step=e.target.closest('[data-step]');if(step){stepField(step.dataset.step,Number(step.dataset.dir));return;}
       const open=e.target.closest('[data-trackday-open]');if(open){RaceUI.openRun(open.dataset.trackdayOpen);return;}
       if(e.target.closest('#trackday-save'))saveRun();
-      if(e.target.closest('#trackday-paste-toggle')){const box=q('#trackday-paste');box.hidden=!box.hidden;if(!box.hidden)q('#trackday-laps').focus();}
+      if(e.target.closest('#trackday-paste-toggle')){pasteOpen=!pasteOpen;const box=q('#trackday-paste');box.hidden=!pasteOpen;if(pasteOpen)q('#trackday-laps').focus();}
     });
     board.addEventListener('input',e=>{
       const box=e.target.closest('[data-lap]');
       if(box){const i=Number(box.dataset.lap),parts=box.value.split(/[\s;]+/).filter(Boolean);
         if(parts.length>1){laps.splice(i,parts.length,...parts);render();focusLap(i+parts.length);return;}
         laps[i]=box.value;while(laps.length&&!String(laps.at(-1)).trim())laps.pop();q('#trackday-laps').value=laps.join('\n');live();return;}
-      if(e.target.id==='trackday-laps'){laps=e.target.value.split(/\r?\n/).map(s=>s.trim()).filter(Boolean);render();return;}
+      if(e.target.id==='trackday-laps'){const area=e.target,caret=area.selectionEnd,text=area.value;laps=text.split(/\r?\n/).map(s=>s.trim()).filter(Boolean);render();const again=q('#trackday-laps');if(again){again.value=text;again.focus();again.setSelectionRange(caret,caret);}return;}
       if(e.target.id==='trackday-change'){extra=e.target.value;live();}
     });
     board.addEventListener('change',e=>{if(e.target.id==='trackday-sequence'){ctx.sequence=e.target.checked;save();live();}});
@@ -67,17 +67,20 @@ const TrackdayUI=(()=>{
   // Typed laps, or null with a message when they cannot be read yet.
   function typed(){const text=laps.map(s=>String(s).trim()).filter(Boolean).join('\n');if(!text)return {laps:null,error:''};try{return {laps:ManualLapsModel.parse(text),error:''};}catch(e){return {laps:null,error:e.message};}}
   // A stepper writes to the workbench setup, exactly as typing in its field would.
+  // A recorded setup value in the chosen units: tyre and weight convert, teeth and RPM do not.
+  const shown=(field,v)=>field==='rearDiameter'?unitText(+v,'mm',2):field==='weight'?unitText(+v,'g',1):String(v)+(field==='ratedRpm'?' rpm':'');
+  const changeText=c=>`${c.label} ${shown(c.field,c.from)} → ${shown(c.field,c.to)}`;
   function stepField(field,dir){
     const rule=STEPS.find(s=>s[0]===field);if(!rule)return;
     if(field==='rearDiameter'&&state.setup.tyreMode==='rim')return;
-    const shown=Number(displayInput(field,state.setup[field]))||0,next=Math.max(rule[0]==='pinion'||rule[0]==='gear'?1:0,Number((shown+dir*rule[2]).toFixed(rule[3])));
-    state.setup[field]=storeInput(field,String(next));fillInputs();schedulePersist();updateLibraryStatus();render();
+    const now=Number(state.setup[field])||0,next=Math.max(rule[0]==='pinion'||rule[0]==='gear'?1:0,Number((now+dir*rule[2]).toFixed(rule[3])));
+    state.setup[field]=String(next);fillInputs();schedulePersist();updateLibraryStatus();render();
   }
   function keepChange(id){
     const run=RaceUI.runs().find(r=>r.id===id),changes=M().keepable(run,state.setup);if(!changes.length)return;
     const map={pinion:'pinion',gear:'gear',weight:'totalWeight',rearDiameter:'rearDiameter',ratedRpm:'ratedRpm'};
     for(const c of changes){state.setup[map[c.field]]=String(c.to);if(c.field==='rearDiameter')state.setup.tyreMode='diameter';}
-    fillInputs();persist();updateLibraryStatus();toast(`Kept on the workbench: ${changes.map(c=>`${c.label} ${c.to}${c.unit}`).join(', ')}. Save the setup to keep it in the library.`);render();
+    fillInputs();persist();updateLibraryStatus();toast(`Kept on the workbench: ${changes.map(c=>`${c.label} ${shown(c.field,c.to)}`).join(', ')}. Save the setup to keep it in the library.`);render();
   }
   function bars(run){
     const st=RaceModel.statistics(run),inc=run.laps.filter(l=>l.valid&&!l.pit).map(l=>l.durationMs);if(!inc.length)return '';
@@ -101,7 +104,7 @@ const TrackdayUI=(()=>{
      ${bars(run)}${verdictChip(run,before)}<button type="button" class="btn small ghost" data-trackday-open="${esc(run.id)}">Analyze</button></section>`;
   }
   function nextColumn(number,prior){
-    const s=state.setup,auto=M().autoChange(prior,s),rim=s.tyreMode==='rim';
+    const s=state.setup,autoParts=M().autoChanges(prior,s),auto=autoParts.map(changeText),rim=s.tyreMode==='rim';
     const steppers=STEPS.filter(([f])=>!(f==='rearDiameter'&&rim)).map(([field,label])=>{const token=UnitSystem.INPUTS[field],unit=token?Units.label(token):'',v=s[field];const changed=auto.some(a=>a.startsWith({pinion:'pinion',gear:'gear',totalWeight:'weight',rearDiameter:'rear tyre'}[field]+' '));
       return `<div class="td-step${changed?' changed':''}"><span>${label}</span><span class="td-ctl"><button type="button" data-step="${field}" data-dir="-1" aria-label="${label} down">−</button><output>${v===''||v==null?'—':esc(displayInput(field,v))+(unit&&field!=='pinion'&&field!=='gear'?' '+esc(unit):'')}</output><button type="button" data-step="${field}" data-dir="1" aria-label="${label} up">+</button></span></div>`;}).join('');
     const count=Math.max(10,laps.length+1);
@@ -112,7 +115,7 @@ const TrackdayUI=(()=>{
      <span class="td-label">Laps · Enter for the next box, or paste</span>
      <div class="td-laps">${Array.from({length:count},(_,i)=>`<input data-lap="${i}" inputmode="decimal" autocomplete="off" aria-label="Lap ${i+1}" value="${esc(laps[i]||'')}">`).join('')}</div>
      <button type="button" class="text-button" id="trackday-paste-toggle">Paste a list instead</button>
-     <div id="trackday-paste" hidden><textarea id="trackday-laps" rows="5" spellcheck="false" aria-label="Lap times, one per line">${esc(laps.join('\n'))}</textarea></div>
+     <div id="trackday-paste"${pasteOpen?'':' hidden'}><textarea id="trackday-laps" rows="5" spellcheck="false" aria-label="Lap times, one per line">${esc(laps.join('\n'))}</textarea></div>
      <label class="trackday-check"><input type="checkbox" id="trackday-sequence"${ctx.sequence?' checked':''}> In the order driven, no laps missing</label>
      <p id="trackday-preview" class="td-live" aria-live="polite"></p><p id="trackday-error" class="note" role="alert" hidden></p>
      <button type="button" class="btn primary" id="trackday-save">Save run ${number}</button></section>`;
@@ -154,7 +157,7 @@ const TrackdayUI=(()=>{
     const keep=q('#trackday-keep'),changes=best?M().keepable(best,s):[];
     keep.hidden=!changes.length||dismissed===best?.id;
     if(!keep.hidden){const st=RaceModel.statistics(best),first=list[0],gain=first&&first!==best?RaceModel.statistics(first).median-st.median:null;
-      keep.innerHTML=`<span class="td-keep-tick">✓</span><div><b>${esc(best.sessionName.split(' · ')[0])} is your quickest today</b><small>Typical ${time(st.median)} s${gain>0?`, ${time(gain)} s quicker than ${esc(first.sessionName.split(' · ')[0].toLowerCase())}`:''}. The workbench has ${changes.map(c=>`${c.label} ${esc(c.from)}`).join(', ')}; that run had ${changes.map(c=>`${c.label} ${esc(c.to)}${c.unit}`).join(', ')}.</small></div><span class="td-grow"></span><button type="button" class="btn" data-keep="no" data-run="${esc(best.id)}">Not now</button><button type="button" class="btn primary" data-keep="yes" data-run="${esc(best.id)}">Keep this change</button>`;}
+      keep.innerHTML=`<span class="td-keep-tick">✓</span><div><b>${esc(best.sessionName.split(' · ')[0])} is your quickest today</b><small>Typical ${time(st.median)} s${gain>0?`, ${time(gain)} s quicker than ${esc(first.sessionName.split(' · ')[0].toLowerCase())}`:''}. The workbench has ${changes.map(c=>`${c.label} ${esc(c.from==='—'?'—':shown(c.field,c.from))}`).join(', ')}; that run had ${changes.map(c=>`${c.label} ${esc(shown(c.field,c.to))}`).join(', ')}.</small></div><span class="td-grow"></span><button type="button" class="btn" data-keep="no" data-run="${esc(best.id)}">Not now</button><button type="button" class="btn primary" data-keep="yes" data-run="${esc(best.id)}">Keep this change</button>`;}
   }
   async function saveRun(){
     const c=context(),entry=typed();if(busy||!M().validContext(c)||!entry.laps)return;
@@ -170,6 +173,6 @@ const TrackdayUI=(()=>{
     render();focusLap(0);
   }
   // From Driver Feedback: the suggestion to test becomes the note of the next run.
-  function note(text){extra=String(text||'').slice(0,120);render();}
+  function note(text){if(!extra.trim())extra=String(text||'').slice(0,120);render();}
   return {init,render,suggest,useCar,note};
 })();

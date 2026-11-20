@@ -43,7 +43,7 @@ class GarageStore{
  saveCar(input){return this.upsert('cars',input,car);}
  saveTrack(input){return this.upsert('tracks',input,track);}
  remove(kind,id){check(!this.error,this.error);check(['cars','tracks'].includes(kind)&&this.data[kind].some(r=>r.id===id),'Entry not found.');this.persist({...this.data,[kind]:this.data[kind].filter(r=>r.id!==id)});return this.view();}
- reset(){const backup=this.file+'.unreadable-'+Date.now();if(fs.existsSync(this.file))fs.renameSync(this.file,backup);this.data={version:1,cars:[],tracks:[]};this.error='';return {...this.view(),backup};}
+ reset(){check(this.error,'The garage can be read; there is nothing to recover.');const backup=this.file+'.unreadable-'+Date.now();if(fs.existsSync(this.file))fs.renameSync(this.file,backup);this.data={version:1,cars:[],tracks:[]};this.error='';return {...this.view(),backup};}
  persist(next){
   validate(structuredClone(next));const text=JSON.stringify(next);check(Buffer.byteLength(text)<=MAX_BYTES,'Garage file too large.');
   fs.mkdirSync(path.dirname(this.file),{recursive:true});const temp=this.file+'.'+crypto.randomUUID()+'.tmp';let fd;

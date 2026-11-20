@@ -51,6 +51,10 @@ app.whenReady().then(async()=>{
   await win.loadFile(path.join(__dirname,'../renderer/index.html'));await pause();await run("location.hash='trackday'");await pause();
   assert.equal(await run("document.querySelector('#trackday-car').value"),'Club GT');assert.equal(await run("document.querySelector('#trackday-lane').value"),'2');assert.equal(await run("document.querySelector('#trackday-sequence').checked"),true);
   await wait("document.querySelectorAll('.td-run[data-run]').length===3",'runs after a restart');
+  // Typing in the pasted list keeps it open, line after line.
+  await click('#trackday-paste-toggle');await type('#trackday-laps','10.1');await type('#trackday-laps','10.1\n10.2');
+  assert.equal(await run("document.querySelector('#trackday-paste').hidden"),false);assert.equal(await run("document.activeElement.id"),'trackday-laps');
+  assert.equal(await run("document.querySelector('[data-lap=\"1\"]').value"),'10.2');await type('#trackday-laps','');
   await click('[data-tone-choice=light]');await shot('light');
   win.setSize(390,1000);await pause();assert.equal(await run('document.documentElement.scrollWidth>innerWidth'),false);await shot('narrow');
   assert.deepEqual(errors,[]);console.log('Track day passed: session, lap boxes and paste, live verdict, invalid laps, baseline, stepper changes the workbench, change read from the setup, run columns with verdicts, quickest, Keep this change, Laps wall, persistence, light/dark and narrow layouts.');

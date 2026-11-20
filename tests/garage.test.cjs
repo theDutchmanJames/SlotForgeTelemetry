@@ -34,3 +34,7 @@ test('Paddock cars arrive with their configuration and a verified photo; changes
  // The cache survives a restart.
  const again=new LocalHistoryClient(path.join(dir,'shared.json'));assert.equal(again.carsView().hosts[0].cars.length,2);
 });
+
+test('a readable garage is never archived and emptied by a reset',t=>{
+ const file=path.join(temp(t),'garage.json'),g=new GarageStore(file);g.saveCar({name:'Keep me'});assert.throws(()=>g.reset(),/nothing to recover/);assert.equal(new GarageStore(file).view().data.cars.length,1);
+});

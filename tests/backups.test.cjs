@@ -33,7 +33,9 @@ test('a backup is checked completely before anything is restored',t=>{
  const tamper=f=>{const x=JSON.parse(text);f(x);return JSON.stringify(x);};
  assert.throws(()=>b.read('{"format":"other"}'),/not a SlotForge Telemetry backup/);
  assert.throws(()=>b.read(tamper(x=>{x.files['garage-v1.json'].text='{"version":1,"cars":[],"tracks":[{}]}';})),/Garage cars and tracks in this backup is damaged/);
- assert.throws(()=>b.read(tamper(x=>{const t='{"version":2}';x.files['garage-v1.json']={text:t,size:t.length,sha256:require('node:crypto').createHash('sha256').update(t).digest('hex')};})),/cannot be read/);
+ // A file that was already unreadable is restored as it was; it does not block restoring the rest.
+ const odd=b.read(tamper(x=>{const t='{"version":2}';x.files['garage-v1.json']={text:t,size:t.length,sha256:require('node:crypto').createHash('sha256').update(t).digest('hex')};}));
+ assert.equal(odd.contents.find(c=>c.name==='garage-v1.json').unreadable,true);assert.match(odd.contents.find(c=>c.name==='garage-v1.json').label,/unreadable, restored as it was/);
  assert.throws(()=>b.read(tamper(x=>{x.files['../../evil.txt']=x.files['garage-v1.json'];})),/unknown file/);
 });
 test('restore replaces all data after a safety backup; files missing from the backup are removed',t=>{
@@ -44,4 +46,31 @@ test('restore replaces all data after a safety backup; files missing from the ba
  assert.equal(files.get('active'),'entry-1');assert.equal(fs.existsSync(path.join(dir,'paddock-local-v1.json')),false);
  const safety=b.readFile(r.safety);assert.ok(safety.contents.some(c=>c.name==='paddock-local-v1.json'),'the safety backup holds what was replaced');
  assert.equal(b.list()[0].kind,'before-restore');
+});
+
+test('a backup made while one file was unreadable can still be restored',t=>{
+ const dir=profile(t);seed(dir);fs.writeFileSync(path.join(dir,'garage-v1.json'),'{broken');
+ const b=new Backups(dir,{now:clock()}),saved=b.write(b.dir,'manual','manual');
+ fs.writeFileSync(path.join(dir,'setups-active-v1.txt'),'changed-later');
+ const r=b.restore(b.readFile(saved.file));assert.ok(fs.existsSync(r.safety));
+ assert.equal(fs.readFileSync(path.join(dir,'setups-active-v1.txt'),'utf8'),'entry-1');assert.equal(fs.readFileSync(path.join(dir,'garage-v1.json'),'utf8'),'{broken','kept as it was');
+});
+test('a restore writes every file first: a failure while writing changes nothing',t=>{
+ const dir=profile(t);seed(dir);const b=new Backups(dir,{now:clock()}),checked=b.readFile(b.write(b.dir,'manual','manual').file);
+ fs.writeFileSync(path.join(dir,'setups-active-v1.txt'),'changed-later');
+ const df=require('../src/data-files.cjs'),original=df.writeTemp;let n=0;
+ // The second file cannot be written (a full disk, say).
+ require.cache[require.resolve('../src/data-files.cjs')].exports.writeTemp=(...a)=>{if(++n===2)throw Error('disk full');return original(...a);};
+ const fresh=(()=>{delete require.cache[require.resolve('../src/backups.cjs')];return require('../src/backups.cjs');})();
+ const b2=new fresh.Backups(dir,{now:clock()});
+ try{assert.throws(()=>b2.restore(checked),/Nothing was restored: disk full/);}finally{df.writeTemp=original;delete require.cache[require.resolve('../src/backups.cjs')];}
+ assert.equal(fs.readFileSync(path.join(dir,'setups-active-v1.txt'),'utf8'),'changed-later','nothing was swapped in');
+ assert.deepEqual(fs.readdirSync(dir).filter(f=>f.endsWith('.tmp')),[],'no temporary files are left behind');
+});
+test('a save retries when Windows briefly holds the file, then gives up',t=>{
+ const dir=profile(t),{atomicWrite}=require('../src/data-files.cjs'),file=path.join(dir,'x.json'),rename=fs.renameSync;let fails=2;
+ fs.renameSync=(a,b)=>{if(fails-->0){const e=Error('busy');e.code='EBUSY';throw e;}return rename(a,b);};
+ try{atomicWrite(file,'one');assert.equal(fs.readFileSync(file,'utf8'),'one');fails=99;assert.throws(()=>atomicWrite(file,'two'),/busy/);assert.equal(fs.readFileSync(file,'utf8'),'one');}
+ finally{fs.renameSync=rename;}
+ assert.deepEqual(fs.readdirSync(dir).filter(f=>f.endsWith('.tmp')),[]);
 });

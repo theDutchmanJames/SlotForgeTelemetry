@@ -2,7 +2,7 @@
 // One backup file holds every Telemetry data file: setups, draft, manual laps, garage, imported races and caches.
 // Automatic backups are taken when something changed; every restore is validated first and preceded by a safety backup.
 const fs=require('node:fs'),path=require('node:path'),crypto=require('node:crypto');
-const {atomicWrite}=require('./data-files.cjs');
+const {atomicWrite,writeTemp,renameRetry}=require('./data-files.cjs');
 const FORMAT='slotforge-telemetry-backup',KEEP=10,MAX_FILE=200*1024*1024,MAX_BUNDLE=600*1024*1024;
 const sha=t=>crypto.createHash('sha256').update(t).digest('hex');
 const json=t=>JSON.parse(t);
@@ -70,17 +70,22 @@ class Backups{
   for(const [name,f] of Object.entries(b.files)){
    if(!this.validators[name])throw Error('The backup contains an unknown file: '+String(name).slice(0,80));
    if(typeof f?.text!=='string'||sha(f.text)!==f.sha256||Buffer.byteLength(f.text)!==f.size)throw Error(`${LABELS[name]} in this backup is damaged.`);
-   try{this.validators[name](f.text);}catch(e){throw Error(`${LABELS[name]} in this backup cannot be read: ${e.message}`);}
-   contents.push({name,label:LABELS[name],size:f.size});
+   // A file that was already unreadable when the backup was made is restored as it was (the app then offers its
+   // recovery), so it never blocks restoring everything else.
+   let unreadable=false;try{this.validators[name](f.text);}catch{unreadable=true;}
+   contents.push({name,label:LABELS[name]+(unreadable?' (unreadable, restored as it was)':''),size:f.size,unreadable});
   }
   return {bundle:b,createdAt:b.createdAt,appVersion:String(b.app?.version||'').slice(0,40),contents};
  }
  readFile(file){return this.read(fs.readFileSync(file,'utf8'));}
  // Replace all data with the backup's. A safety backup of the current data is written first; files the backup lacks are removed.
  restore(checked){
-  const safety=this.write(this.dir,'before-restore','before restore');
-  for(const name of Object.keys(this.validators)){const file=path.join(this.profile,name),f=checked.bundle.files[name];if(f)atomicWrite(file,f.text);else fs.rmSync(file,{force:true});}
-  this.settings.lastHash=null;this.saveSettings();
+  const safety=this.write(this.dir,'before-restore','before restore'),names=Object.keys(this.validators),temps=new Map();
+  try{for(const name of names){const f=checked.bundle.files[name];if(f)temps.set(name,writeTemp(path.join(this.profile,name),f.text));}}
+  catch(e){for(const t of temps.values())try{fs.unlinkSync(t);}catch{}throw Error('Nothing was restored: '+e.message);}
+  try{for(const name of names){const file=path.join(this.profile,name);if(temps.has(name)){renameRetry(temps.get(name),file);temps.delete(name);}else fs.rmSync(file,{force:true});}}
+  catch(e){for(const t of temps.values())try{fs.unlinkSync(t);}catch{}const error=Error(`The restore stopped part-way (${e.message}). Telemetry restarts; your previous data is in the backup ${path.basename(safety.file)}.`);error.partial=true;error.safety=safety.file;throw error;}
+  finally{this.settings.lastHash=null;this.saveSettings();}
   return {safety:safety.file};
  }
 }

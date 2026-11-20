@@ -2,6 +2,34 @@
 
 ## Unreleased
 
+### Fixes and speed (full review)
+
+**Your data**
+- A backup made while one data file was unreadable could never be restored, and after ten automatic backups no backup could be. Such a file is now restored as it was, and everything else comes back.
+- A restore now writes every file first and swaps them in only when all are written: a full disk changes nothing. If the swap stops part-way, the message names the safety backup, and Telemetry restarts so no old data is written back over the restored files.
+- Saves wait briefly and try again when Windows (antivirus, the search indexer) holds a file for a moment, instead of failing.
+- The portable Windows build restarts itself after a restore.
+- The garage is only archived and emptied when it really could not be read.
+- The one-time move of setups from browser storage into files no longer runs on every start, which could bring an old active setup or library back after it was removed.
+- A note on a run that cannot be saved is no longer shown as if it were.
+
+**Pages**
+- Library: a setup whose gearing was driven, but without a record-eligible lap, no longer breaks the whole Library page.
+- Setups: going back to one setup forgets the earlier comparison, so ticking a setup starts a new one.
+- Setups: when only the ratio and rollout move, the verdict names them instead of saying nothing moved.
+- Track day: typing in "Paste a list instead" keeps the list open and the cursor in it.
+- Track day: the steppers move the weight by 1 g and the tyre by 0.1 mm in any units (in imperial they jumped by an ounce or a tenth of an inch).
+- Track day: a suggestion from Driver Feedback fills the run note only when nothing is typed there yet, and starts its test without the previous outcome.
+- Laps and Track day: changes and the "Raced with" values show in your units.
+- Calculation Map: values stay in metric, like the formulas, instead of mixing units in one sum. Keyboard focus stays on the box you chose.
+- Laps: searching by date finds runs by the date shown (local), not the UTC date.
+
+**Speed**
+- Typing in the run search no longer redraws the Laps wall on every key, and the wall only redraws while it is on screen.
+- The Library works out each setup's figures once and looks up the best lap per gearing from one index, instead of scanning every run for every setup.
+- Run dates are formatted once and reused.
+- With hundreds of setups and races, run search went from about 30 ms to about 20 ms per keystroke.
+
 ### Calculations explained: the Calculation Map (rework)
 
 - **How your numbers are made, as a map:** your inputs (pinion, driven gear, motor RPM, stall torque, rear tyre, weight) on the left, what they make in between (gear ratio, axle RPM, circumference, peak power), and the results on the right (no-load speed, rollout, pull at the wheels, power-to-weight), each with the value from your workbench.

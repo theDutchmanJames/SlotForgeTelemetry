@@ -4,15 +4,15 @@
 const CalcMapUI=(()=>{
  const M=CalcMapModel,$=id=>document.getElementById(id),W=900,ROW=58,COLS=[{x:10,w:205},{x:335,w:200},{x:655,w:235}];
  let selected='rollout',ready=false;
- const units={mm:'mm',g:'g','km/h':'km/h'};
- const show=(v,n)=>v===null?'—':units[n.unit]?unitText(v,n.unit,n.unit==='mm'?2:n.unit==='g'?1:2):n.unit===':1'?performanceNumber(v,3)+':1':performanceNumber(v,['RPM','teeth'].includes(n.unit)?0:2)+(n.unit==='teeth'?'':' '+n.unit);
+ // In metric, like the formulas: mixing units inside one formula would read wrong.
+ const show=(v,n)=>v===null?'—':n.unit===':1'?performanceNumber(v,3)+':1':performanceNumber(v,['RPM','teeth'].includes(n.unit)?0:2)+(n.unit==='teeth'?'':' '+n.unit);
  function layout(){
   const pos={};for(const c of [0,1,2]){const list=M.NODES.filter(n=>n.col===c),top=40+((6-list.length)*ROW)/2;list.forEach((n,i)=>pos[n.id]={x:COLS[c].x,y:top+i*ROW,w:COLS[c].w});}
   return pos;
  }
  function init(){
   const section=$('settings-calculations');if(!section||$('calc-map'))return;
-  $('help-topics').insertAdjacentHTML('beforebegin',`<section class="cm-card" id="calc-map"><div class="cm-head"><h3 class="cm-h">How your numbers are made</h3><p class="hint">Your inputs on the left, the results on the right, with the values from your workbench. Click any box: the path to it lights up.</p></div><div class="cm-scroll"><svg id="cm-svg" viewBox="0 0 ${W} 400" role="group" aria-label="How your numbers are made"></svg></div><div class="cm-detail" id="cm-detail" aria-live="polite"></div></section>
+  $('help-topics').insertAdjacentHTML('beforebegin',`<section class="cm-card" id="calc-map"><div class="cm-head"><h3 class="cm-h">How your numbers are made</h3><p class="hint">Your inputs on the left, the results on the right, with the values from your workbench (in metric, like the formulas). Click any box: the path to it lights up.</p></div><div class="cm-scroll"><svg id="cm-svg" viewBox="0 0 ${W} 400" role="group" aria-label="How your numbers are made"></svg></div><div class="cm-detail" id="cm-detail" aria-live="polite"></div></section>
    <section class="cm-card cm-index"><h3 class="cm-h">Every explanation</h3><label class="field cm-search"><span class="sr-only">Search the explanations</span><input id="help-search" type="search" maxlength="60" placeholder="Search: rollout, clearance, magnet…"></label></section>`);
   section.querySelector('.cm-index').append($('help-topics'));
   const svg=$('cm-svg');
@@ -44,7 +44,7 @@ const CalcMapUI=(()=>{
   $('cm-full').onclick=()=>{navigate('settings/calculations/'+n.topic);requestAnimationFrame(()=>$('help-content').scrollIntoView({block:'start'}));};
   if(n.field)$('cm-edit').onclick=()=>{navigate('telemetry');requestAnimationFrame(()=>focusSetupInput(n.field==='rearDiameter'&&state.setup.tyreMode==='rim'?'rimDiameter':n.field));};
  }
- function select(id){if(!M.byId[id])return;selected=id;render();}
+ function select(id){if(!M.byId[id])return;const keep=document.activeElement?.closest?.('#cm-svg');selected=id;render();if(keep)$('cm-svg').querySelector(`[data-node="${id}"]`)?.focus({preventScroll:true});}
  function open(id){if(!M.byId[id])return;selected=id;navigate('settings/calculations/'+M.byId[id].topic);requestAnimationFrame(()=>{render();$('calc-map')?.scrollIntoView({block:'start'});$('cm-svg')?.querySelector(`[data-node="${id}"]`)?.focus({preventScroll:true});});}
  return {init,render,select,open,state:()=>selected};
 })();

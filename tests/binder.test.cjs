@@ -27,3 +27,7 @@ test('filters: favourites, driven and not driven yet',()=>{
  assert.deepEqual(B.filter(list,'favourites',driven).map(e=>e.id),['a']);assert.deepEqual(B.filter(list,'driven',driven).map(e=>e.id),['b']);
  assert.deepEqual(B.filter(list,'new',driven).map(e=>e.id),['a','c']);assert.equal(B.filter(list,'all',driven).length,3);
 });
+test('a run with this gearing but no record-eligible lap is not counted as driven (it broke the Library)',()=>{
+ const runs=[{car:'Club GT',configuration:{technical:{pinion:'9',gear:'27'}},laps:[{durationMs:9900,valid:true,pit:true,recordEligible:false}]}];
+ assert.equal(B.driven({pinion:'9',gear:'27'},'Club GT',runs),null);
+});

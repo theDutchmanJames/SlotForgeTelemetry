@@ -24,7 +24,7 @@
  function changes(before,after){
   if(!before||!after)return [];
   const seen=new Set();
-  return RM.configurationChanges(before,after).technical.filter(c=>c.before&&c.after).map(c=>{const name=LABELS[c.field]||c.field,unit=UNITS[c.field]||'';return {field:c.field,label:`${name} ${c.before}${unit} → ${c.after}${unit}`,name};}).filter(c=>!seen.has(c.name)&&seen.add(c.name));
+  return RM.configurationChanges(before,after).technical.filter(c=>c.before&&c.after).map(c=>{const name=LABELS[c.field]||c.field,unit=UNITS[c.field]||'';return {field:c.field,label:`${name} ${c.before}${unit} → ${c.after}${unit}`,name,before:c.before,after:c.after,unit:unit.trim()};}).filter(c=>!seen.has(c.name)&&seen.add(c.name));
  }
  const medianOf=laps=>RM.quantile(laps.filter(l=>l.valid&&!l.pit).map(l=>l.durationMs),.5);
  // The scoreboard of a line. Runs are newest first.

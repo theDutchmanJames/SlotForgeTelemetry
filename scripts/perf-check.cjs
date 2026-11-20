@@ -89,7 +89,7 @@ app.whenReady().then(async()=>{
 
   // Page changes, as a click on a link does it: change the hash, then wait for two painted frames.
   const frame='new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r)))';
-  const routes=['telemetry','trackday','analyze','analyze/compare','laps/run','laps/compare','laps','laps','feedback','library','laps','library/garage','settings','settings/calculations','settings/paddock','settings/backups','settings/updates','telemetry'];
+  const routes=['telemetry','trackday','analyze','analyze/compare','laps/run','laps/compare','laps','feedback','library','library/garage','settings','settings/calculations','settings/paddock','settings/backups','settings/updates','telemetry'];
   step('start-up measured');
   await profiled('page changes',async()=>{for(const r of routes){const before=ipc.get('data:get')?.calls||0;step('page '+r);
    const v=await run(`(async()=>{const t=performance.now();location.hash=${JSON.stringify(r)};await new Promise(r=>addEventListener('hashchange',r,{once:true}));const s=performance.now()-t;await ${frame};return [s,performance.now()-t];})()`);

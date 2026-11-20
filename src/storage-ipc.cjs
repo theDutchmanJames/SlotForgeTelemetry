@@ -5,7 +5,7 @@ const path=require('node:path'),fs=require('node:fs'),{pathToFileURL}=require('n
 const {DataFiles}=require('./data-files.cjs'),{Backups}=require('./backups.cjs');
 const page=()=>pathToFileURL(path.join(__dirname,'../renderer/index.html')).href;
 const trusted=event=>event.senderFrame&&event.senderFrame===event.sender.mainFrame&&event.senderFrame.url.split('#')[0]===page();
-function registerStorage(profile,{version='0.0.0',relaunch=()=>{app.relaunch();app.exit(0);},schedule=true,confirm=null}={}){
+function registerStorage(profile,{version='0.0.0',relaunch=()=>{const portable=process.env.PORTABLE_EXECUTABLE_FILE;app.relaunch(portable?{execPath:portable,args:[]}:undefined);app.exit(0);},schedule=true,confirm=null}={}){
  const files=new DataFiles(profile),backups=new Backups(profile,{version});
  // Synchronous on purpose: the library keeps its synchronous rules; files are small and local.
  for(const [name,fn] of Object.entries({get:k=>files.get(k),set:p=>files.set(p?.key,p?.text),remove:k=>files.remove(k)}))
@@ -15,7 +15,8 @@ function registerStorage(profile,{version='0.0.0',relaunch=()=>{app.relaunch();a
   const when=new Date(checked.createdAt).toLocaleString();
   const answer=await ask({type:'warning',title:'Restore this backup?',message:`Replace all Telemetry data with the backup from ${when}?`,detail:`It contains: ${checked.contents.map(c=>c.label).join(', ')||'nothing'}.\n\nYour current data is saved as a "before restore" backup first, so this can be undone. Telemetry restarts afterwards.`,buttons:['Cancel','Restore and restart'],defaultId:0,cancelId:0});
   if(answer!==1)return {cancelled:true};
-  const result=backups.restore(checked);setTimeout(relaunch,50);return {restored:true,...result};
+  let result;try{result=backups.restore(checked);}catch(e){if(e.partial)setTimeout(relaunch,1500);throw e;}
+  setTimeout(relaunch,50);return {restored:true,...result};
  };
  const handlers={
   status:()=>backups.status(),

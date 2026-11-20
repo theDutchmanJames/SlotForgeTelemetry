@@ -44,10 +44,12 @@
  const FIELDS=[['pinion','pinion',''],['gear','gear',''],['rearDiameter','rear tyre',' mm'],['weight','weight',' g'],['ratedRpm','motor',' rpm']];
  const technicalOf=setup=>session({ctx:{car:'x',track:'x',lane:1},setup,laps:[{number:1,durationMs:1,valid:true,pit:false}],sequenceConfirmed:false}).technical;
  // What changed between the last run and the setup on the workbench now: ["pinion 9 → 10", …].
- function autoChange(prior,setup){
+ function autoChanges(prior,setup){
   if(!prior)return [];const before=prior.configuration?.technical||{},after=technicalOf(setup);
-  return FIELDS.filter(([k])=>before[k]&&after[k]&&Number(before[k])!==Number(after[k])).map(([k,label,unit])=>`${label} ${before[k]} → ${after[k]}${unit}`);
+  return FIELDS.filter(([k])=>before[k]&&after[k]&&Number(before[k])!==Number(after[k])).map(([k,label,unit])=>({field:k,label,from:before[k],to:after[k],unit}));
  }
+ // As saved with the run (metric, as recorded): "pinion 9 → 10", "weight 80 → 72 g".
+ const autoChange=(prior,setup)=>autoChanges(prior,setup).map(c=>`${c.label} ${c.from} → ${c.to}${c.unit}`);
  // The quickest run by typical lap (median), when at least two runs can be compared.
  function quickest(runs){
   const rated=runs.map(r=>({run:r,median:RM.statistics(r).median})).filter(x=>x.median!==null);
@@ -59,6 +61,6 @@
   return FIELDS.filter(([k])=>t[k]&&Number(t[k])!==Number(now[k])).map(([k,label,unit])=>({field:k,label,from:now[k]||'—',to:t[k],unit}));
  }
  function validContext(ctx){return !!(ctx&&key(ctx.car)&&key(ctx.track)&&Number.isInteger(ctx.lane)&&ctx.lane>=1&&ctx.lane<=64);}
- const api={SOURCE,sameContext,previous,today,preview,compare,verdict,session,changeOf,validContext,autoChange,quickest,keepable,technicalOf};
+ const api={SOURCE,sameContext,previous,today,preview,compare,verdict,session,changeOf,validContext,autoChange,autoChanges,quickest,keepable,technicalOf};
  if(node)module.exports=api;else root.TrackdayModel=api;
 })(globalThis);

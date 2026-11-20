@@ -8,9 +8,13 @@ const DataStore=(()=>{
   function call(name,...args){const r=bridge[name](...args);if(!r?.ok){const e=Error(r?.error||'Could not use the data file.');e.name='DataFileError';throw e;}return r.value;}
   // One-time copy from localStorage. Copied as-is (even unreadable data, so recovery can still offer it);
   // the localStorage copy is left in place as a safety net for older Telemetry versions.
+  const MIGRATED='slotforge.telemetry.files-migrated.v1';
   function migrate(){
     if(migrated||!bridge)return;migrated=true;
-    for(const [key,file] of Object.entries(FILES)){try{if(call('get',file)===null){const old=localStorage.getItem(key);if(old!==null)call('set',file,old);}}catch{/* Reported on first real use. */}}
+    try{if(localStorage.getItem(MIGRATED)==='1')return;}catch{/* Then migrate as before. */}
+    let ok=true;
+    for(const [key,file] of Object.entries(FILES)){try{if(call('get',file)===null){const old=localStorage.getItem(key);if(old!==null)call('set',file,old);}}catch{ok=false;/* Reported on first real use; tried again next time. */}}
+    if(ok)try{localStorage.setItem(MIGRATED,'1');}catch{/* Harmless: the copy only fills missing files. */}
   }
   return {
     fileBacked:!!bridge,

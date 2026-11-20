@@ -45,3 +45,7 @@ test('Pit Board: the change is read from the setup, the quickest run, and what K
  assert.deepEqual(T.keepable(prior,{...C.EXAMPLE,pinion:'11',totalWeight:'80'}).map(c=>[c.field,c.from,c.to]),[['pinion','11','9']]);
  assert.deepEqual(T.keepable(prior,{...C.EXAMPLE,totalWeight:'80'}),[]);
 });
+test('changes keep their recorded values for display in any units',()=>{
+ const C=require('../renderer/calculator-model.js');
+ assert.deepEqual(T.autoChanges({configuration:{technical:{rearDiameter:'20',weight:'80'}}},{...C.EXAMPLE,rearDiameter:'19.5',totalWeight:'72'}).map(c=>[c.field,c.from,c.to]),[['rearDiameter','20','19.5'],['weight','80','72']]);
+});
