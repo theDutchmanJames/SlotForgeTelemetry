@@ -28,6 +28,7 @@ const WorkbenchLevels=(()=>{
     for(const g of document.querySelectorAll('[data-result-group]'))g.hidden=!shows(RESULTS,g.dataset.resultGroup);
     // Never land on an empty-looking level: open its first folder when none is open.
     const visible=folders.filter(f=>!f.hidden);if(visible.length&&!visible.some(f=>f.open))visible[0].open=true;
+    if(typeof WorkbenchPairs!=='undefined')WorkbenchPairs.sync();
   }
   function set(next){
     if(!LEVELS.some(([k])=>k===next))return;level=next;

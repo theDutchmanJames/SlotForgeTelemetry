@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+### The workbench: Paired Rows (rework)
+
+- **One row per topic below the setup bar:** what you enter on the left, what it does on the right. Gearing sits beside its speed, rollout and power figures; Motor beside the drivetrain picture; Rear tyres beside clearance and wear; Weight & ballast (with chassis geometry) beside balance and the ballast planner; and so on for magnets, gear finder, lap speed and testing.
+- **A row opens and closes as one.** Closed, it still shows a summary of both sides. The separate *Live results* list with its Pin buttons is gone.
+- **Since saved:** once the workbench is linked to a saved setup, each row shows what its change did, such as "No-load speed 30.02 km/h +3.00", green when better and red when worse. A row with a change gets a coloured edge.
+- **What next, with your own data**, replaces the two advert cards: compare with what you saved (with a plain verdict and *Open in Setups*, which compares the saved setup with the workbench now), take it to Track day, or open Driver Feedback.
+- The view tabs (Quick setup, Measure the car, Plan & test, Everything) decide which rows show, as before. Nothing is calculated differently.
+
 ### Driver Feedback: Symptom Cards (rework)
 
 - **Your car is one page that grows as you answer**, instead of a five-step wizard with a side list:

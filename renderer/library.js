@@ -20,7 +20,7 @@ function updateLibraryStatus() {
   if(item)try{changed=JSON.stringify(CalculatorModel.cleanSetup(state.setup))!==JSON.stringify(item.setup);}catch{changed=true;}
   $('#library-workspace-status').textContent=libraryError?'Library unavailable':item?`${item.setup.name} · ${changed?'unsaved library changes':'saved in library'}`:'Workbench draft · not linked to a library setup';
   $('#library-workspace-status').dataset.saveStatus=libraryError?'error':item&&!changed?'saved':'draft';
-  $('#library-count').textContent=library.length;
+  $('#library-count').textContent=library.length;if(typeof WorkbenchPairs!=='undefined')WorkbenchPairs.refresh();
   for(const id of ['save-library','save-copy'])$('#'+id).disabled=!!libraryError||!$('#input-error').hidden;
 }
 function commitLibrary(next,{recover=false}={}) {

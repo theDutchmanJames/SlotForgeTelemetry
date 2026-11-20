@@ -55,7 +55,7 @@ function refresh() {
   $('#flow-rpm').textContent = performanceNumber(m.ratedRpm, 0) + ' RPM';
   $('#flow-gearing').textContent = m.ratio === null ? '— : —' : input.pinion + ' : ' + input.gear + ' teeth';
   $('#flow-tyre').textContent = unitText(m.rearDiameter, 'mm', 2);
-  ResultFolders.refresh(input);
+  ResultFolders.refresh(input);if(typeof WorkbenchPairs!=='undefined')WorkbenchPairs.refresh();
   let error = '';
   try { CalculatorModel.cleanSetup(state.setup); } catch (e) { error = e.message; }
   for (const el of document.querySelectorAll('input[type=number][name]')) {
@@ -157,6 +157,6 @@ $('#setup-file').onchange = async event => {
   } catch (error) { toast('Could not open setup: ' + error.message); }
   finally { event.target.value = ''; }
 };
-LapsUI.init(); RaceUI.init(); initializeMagnetic(); WorkshopUI.init(); ChassisUI.init(); ChassisTestUI.init(); PredictionUI.init(); InputHelp.init(); TrackdayUI.init(); GarageUI.init(); LibraryUI.build(); BackupsUI.init(); UpdatesUI.init(); initializeDesign(); AnalyzeNav.init(); WorkbenchUI.init(); ResultFolders.init(); WorkbenchLevels.init(); initializeUnits(); SettingsUI.build(); readWorkspace(); setupAppearance(); fillInputs(); initializeLibrary(); initializePages();
+LapsUI.init(); RaceUI.init(); initializeMagnetic(); WorkshopUI.init(); ChassisUI.init(); ChassisTestUI.init(); PredictionUI.init(); InputHelp.init(); TrackdayUI.init(); GarageUI.init(); LibraryUI.build(); BackupsUI.init(); UpdatesUI.init(); initializeDesign(); AnalyzeNav.init(); WorkbenchUI.init(); ResultFolders.init(); WorkbenchLevels.init(); WorkbenchPairs.init(); initializeUnits(); SettingsUI.build(); readWorkspace(); setupAppearance(); fillInputs(); initializeLibrary(); initializePages();
 $('#save-copy').onclick=()=>{openLibraryTask('save',activeLibraryId);libraryTask.asCopy=true;$('#library-editor-title').textContent='Save a new copy';$('#library-editor-confirm').textContent='Save new copy';$('#library-save-copy').hidden=true;};
 

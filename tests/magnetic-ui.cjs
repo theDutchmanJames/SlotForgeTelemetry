@@ -15,8 +15,8 @@ app.whenReady().then(async()=>{
   await click('[data-input-jump=magneticReadings]');assert.equal(await run('document.activeElement.name'),'magneticReadings');
   for(const [k,v] of Object.entries({totalWeight:'80',magneticReadings:'19,20,21',magneticClearance:'1.1',magneticLimit:'20',magneticCurve:'0.8,30\n1,24\n1.2,20',wornDiameter:'19.6',magneticWearMode:'axle',magneticTester:'<b>Tester</b>',magneticRails:'Steel',magneticOrientation:'Inline',magneticExtra:'none',magneticCondition:'off'}))await set(k,v);
   assert.equal(await run(`document.querySelector('[name=magneticWornClearance]').disabled`),true);
-  assert.match(await run(`document.querySelector('#stats [data-magnetic=worn-estimate]').textContent`),/27 gf/);
-  assert.match(await run(`document.querySelector('#stats [data-magnetic=limit]').textContent`),/exceeds/);
+  assert.match(await run(`document.querySelector('#workbench-pairs [data-magnetic=worn-estimate]').textContent`),/27 gf/);
+  assert.match(await run(`document.querySelector('#workbench-pairs [data-magnetic=limit]').textContent`),/exceeds/);
   assert.equal(await run('document.activeElement.name'),'magneticReadings');
   await click('#save-library');await run(`document.querySelector('#library-entry-name').value='Magnetic test';`);await click('#library-editor-confirm');
   const saved=await run(`localStorage.getItem('slotforge.telemetry.library.v1')`);assert.match(saved,/19,20,21/);
@@ -36,8 +36,8 @@ app.whenReady().then(async()=>{
   assert.equal(await run(`localStorage.getItem('slotforge.telemetry.library.v1')`),saved);
   await win.loadFile(path.join(__dirname,'../renderer/index.html'));await pause();
   assert.equal(await run(`document.querySelector('[name=magneticCurve]').value`),'0.8,30\n1,24\n1.2,20');
-  await set('magneticWearMode','measured');await set('magneticWornClearance','2');assert.match(await run(`document.querySelector('#stats').textContent`),/outside the measured curve/);
-  await set('magneticReadings','0');assert.match(await run(`document.querySelector('#stats .magnetic-result').textContent`),/0 gf/);
+  await set('magneticWearMode','measured');await set('magneticWornClearance','2');assert.match(await run(`document.querySelector('#workbench-pairs').textContent`),/outside the measured curve/);
+  await set('magneticReadings','0');assert.match(await run(`document.querySelector('#workbench-pairs .magnetic-result').textContent`),/0 gf/);
   await set('magneticReadings','19,20,21');await set('magneticWornClearance','.9');
   await capture('magnetic-inputs-light','.magnetic-inputs');
   win.setSize(760,980);await pause();await capture('magnetic-inputs-760','.magnetic-inputs');

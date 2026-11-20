@@ -72,7 +72,7 @@ A session from the garage, every run a column with its verdict and the quickest 
 | Screen | What to rework | Ideas |
 |---|---|---|
 | Driver Feedback · **Done ("Symptom Cards")** | A 5-step wizard whose first step is two drop-downs and three folded sections; lots of explaining ("Start with an observation, not a specification sheet"). | Symptom cards with a picture (where in the corner, what the car does) instead of drop-downs; the checks as a to-do list with "it helped / no change" |
-| Workbench lower part | The input folders and live results folders are two parallel lists with Pin buttons; the "Ready to look deeper?" and "How does your car behave?" cards are adverts for other pages. | Inputs and their result next to each other; remove the adverts once Analysis folds in (#2) |
+| Workbench lower part · **Done ("Paired Rows")** | The input folders and live results folders are two parallel lists with Pin buttons; the "Ready to look deeper?" and "How does your car behave?" cards are adverts for other pages. | Inputs and their result next to each other; remove the adverts once Analysis folds in (#2) |
 | Settings › Connect to Paddock | Two ways in (this computer, network) with a numbered how-to, address and password fields and four buttons. | One status card with one "Connect" action; the network way behind "Another computer" |
 | Settings › Calculations explained | A long text page, reached from Settings only. | A "?" next to each result opening its explanation |
 | Setup sheet | Print view only. | Fine for now, check after #3 |

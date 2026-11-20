@@ -19,7 +19,7 @@ app.whenReady().then(async()=>{
  const download=async(selector,name)=>{const done=new Promise((resolve,reject)=>win.webContents.session.once('will-download',(_e,item)=>{item.setSavePath(path.join(output,name));item.once('done',(_e,status)=>status==='completed'?resolve():reject(Error(status)));}));await click(selector);await done;return fs.readFileSync(path.join(output,name),'utf8');};
  try{
   await reload();await run('localStorage.clear()');await reload();
-  assert.equal(await text('#ratio-inline'),'3.000:1');assert.match(await text('#stats'),/27.02/);
+  assert.equal(await text('#ratio-inline'),'3.000:1');assert.match(await text('#workbench-pairs'),/27.02/);
   assert.equal(await run(`document.querySelectorAll('[data-page=telemetry] .performance-curve').length`),0);
   assert.equal(await run(`document.querySelectorAll('.main-nav a').length`),7);
   // SlotForge Restyle (Pit Wall): three tab groups, status lights in the bar, no grey line under it.
@@ -28,18 +28,18 @@ app.whenReady().then(async()=>{
   assert.equal(await run(`!!document.querySelector('.workspace-bar')`),false,'the old grey line under the menu is gone');
   assert.equal(await run(`document.querySelectorAll('[data-input-jump]').length`),9);
   assert.equal(await run(`document.querySelector('[name=wheelbase]').closest('details').className`),'workbench-folder');
-  assert.equal(await run(`document.querySelector('[name=gearDiameter]').closest('.input-column')!==null`),true);
+  assert.equal(await run(`document.querySelector('[name=gearDiameter]').closest('.wb-in')!==null`),true);
   await click('[data-input-jump=trackLength]');assert.equal(await run('document.activeElement.name'),'trackLength');
   await click('[data-input-jump=totalWeight]');assert.equal(await run('document.activeElement.name'),'totalWeight');
   assert.deepEqual(await run(`Array.from(document.querySelectorAll('.part-illustration svg')).map(i=>i.dataset.paddockIcon)`),['short-can-motor','motor-pinion','spur-gear','wheel-tyre-set']);
-  assert.equal(await run(`getComputedStyle(document.querySelector('[data-category=motor] .icon-tile')).color===getComputedStyle(document.querySelector('.drive-flow [data-category=motor] .part-illustration')).color`),true);
+  assert.equal(await run(`getComputedStyle(document.querySelector('.workbench-folder[data-category=motor] .icon-tile')).color===getComputedStyle(document.querySelector('.drive-flow [data-category=motor] .part-illustration')).color`),true);
   assert.equal(await run(`document.querySelector('.drive-flow [data-category=tyres] svg circle').getAttribute('r')`),'93');
   await route('analyze');assert.equal(await run(`document.querySelector('#analysis-empty').hidden`),false);
   await route('telemetry');await set('totalWeight','80');await set('ballast','20');await set('frontWeight','32');await set('rearWeight','48');await set('wornDiameter','19');await set('trackLength','20');await set('lapTime','5');await set('scaleFactor','32');
   await set('wheelbase','80');await set('ballastPosition','60');await set('gearDiameter','18');
-  assert.match(await text('#stats [data-telemetry=ballast-front]'),/37 g/);assert.match(await text('#stats [data-telemetry=ballast-cg]'),/50.4 mm/);assert.match(await text('#stats [data-telemetry=clearance]'),/1 mm/);
+  assert.match(await text('#workbench-pairs [data-telemetry=ballast-front]'),/37 g/);assert.match(await text('#workbench-pairs [data-telemetry=ballast-cg]'),/50.4 mm/);assert.match(await text('#workbench-pairs [data-telemetry=clearance]'),/1 mm/);
   await set('ballastPosition','81');assert.equal(await run("document.querySelector('#save-library').disabled"),true);assert.match(await text('#input-error'),/between/);await set('ballastPosition','60');
-  await set('gearDiameter','20');assert.match(await text('#stats'),/no clearance/);await set('gearDiameter','21');assert.match(await text('#stats'),/below the tyre contact plane/);await set('gearDiameter','18');
+  await set('gearDiameter','20');assert.match(await text('#workbench-pairs'),/no clearance/);await set('gearDiameter','21');assert.match(await text('#workbench-pairs'),/below the tyre contact plane/);await set('gearDiameter','18');
   await set('name','Club GT · technical');await capture('telemetry-v4');await save('Club GT · technical');
   assert.equal((await data()).length,1);
   for(const [topic,field] of [['weight','totalWeight'],['wear','wornDiameter'],['gears','targetRollout'],['laps','trackLength']]){

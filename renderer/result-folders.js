@@ -12,7 +12,7 @@ const ResultFolders=(()=>{
     ['workshop','Testing & planning','tyres','motor-tester']
   ];
   const links={pinion:'performance',ratedRpm:'performance',tyreMode:'tyres',totalWeight:'weight',chassisGuideSpan:'weight',targetRollout:'gears',trackLength:'laps',magneticReadings:'magnetic',workshop:'workshop'};
-  const groups=new Map();let active='drivetrain',pinned=new Set(),initialized=false,scrollToken=0;
+  const groups=new Map();let followFn=null,followToggle=null,active='drivetrain',pinned=new Set(),initialized=false,scrollToken=0;
   function init(){
     try{const saved=JSON.parse(localStorage.getItem(KEY)||'null');if(saved){if(saved.active===null||definitions.some(([k])=>k===saved.active))active=saved.active;if(Array.isArray(saved.pinned))pinned=new Set(saved.pinned.filter(k=>definitions.some(([id])=>id===k)));}}catch{/* Defaults also work with unavailable storage. */}
     const stats=q('#stats');stats.removeAttribute('aria-live');
@@ -22,7 +22,7 @@ const ResultFolders=(()=>{
       section.innerHTML=`<details class="result-folder"><summary><span class="result-title">${sfIcon(icon)}${title}</span><span class="result-summary"></span></summary><div class="result-body" id="result-body-${key}"></div></details><button type="button" class="btn small result-pin" aria-pressed="false" aria-label="Pin ${title} open">Pin</button>`;
       stats.append(section);const details=section.querySelector('details'),summary=details.querySelector('summary'),pin=section.querySelector('.result-pin');
       groups.set(key,{section,details,summary:summary.querySelector('.result-summary'),body:section.querySelector('.result-body'),pin,title});
-      summary.onclick=e=>{e.preventDefault();if(details.open){if(active===key)active=null;pinned.delete(key);sync();save();}else open(key);};
+      summary.onclick=e=>{e.preventDefault();if(followToggle){followToggle(key);return;}if(details.open){if(active===key)active=null;pinned.delete(key);sync();save();}else open(key);};
       pin.onclick=()=>{if(pinned.has(key))pinned.delete(key);else pinned.add(key);sync();save();if(key==='gears'&&pinned.has(key))refresh(calculationInput());};
     }
     groups.get('drivetrain').body.append(q('.drivetrain'));
@@ -40,12 +40,12 @@ const ResultFolders=(()=>{
     initialized=true;sync();
   }
   function save(){try{localStorage.setItem(KEY,JSON.stringify({active,pinned:[...pinned]}));}catch{/* No effect on car data or calculations. */}}
-  function sync(){for(const [key,g] of groups){g.details.open=active===key||pinned.has(key);g.pin.setAttribute('aria-pressed',String(pinned.has(key)));g.pin.textContent=pinned.has(key)?'Unpin':'Pin';g.pin.setAttribute('aria-label',(pinned.has(key)?'Unpin ':'Pin ')+g.title+(pinned.has(key)?'':' open'));}}
+  function sync(){for(const [key,g] of groups){g.details.open=followFn?followFn(key):active===key||pinned.has(key);g.pin.setAttribute('aria-pressed',String(pinned.has(key)));g.pin.textContent=pinned.has(key)?'Unpin':'Pin';g.pin.setAttribute('aria-label',(pinned.has(key)?'Unpin ':'Pin ')+g.title+(pinned.has(key)?'':' open'));}}
   function open(key,{scroll=false}={}){
-    if(!initialized||!groups.has(key))return;active=key;sync();save();if(key==='workshop'||key==='gears')refresh(calculationInput());const token=++scrollToken;
+    if(!initialized||!groups.has(key))return;if(followFn&&!followFn(key))followToggle(key);active=key;sync();save();if(key==='workshop'||key==='gears')refresh(calculationInput());const token=++scrollToken;
     if(scroll)requestAnimationFrame(()=>{const g=groups.get(key);if(token!==scrollToken||q('[data-page=telemetry]').hidden||!g.details.open)return;const rect=g.section.getBoundingClientRect();if(rect.top<0||rect.top>innerHeight-80)g.section.scrollIntoView({block:'nearest',behavior:'instant'});});
   }
-  function forInput(element,options){const folder=element?.closest('.workbench-folder');if(folder){WorkbenchLevels.ensure(folder.dataset.folder);open(links[folder.dataset.folder],options);}}
+  function forInput(element,options){const folder=element?.closest('.workbench-folder');if(folder){WorkbenchLevels.ensure(folder.dataset.folder);if(followFn)return; /* Paired Rows: the folder itself opens, and its results follow. */open(links[folder.dataset.folder],options);}}
   function refresh(input){
     if(!initialized)return;
     const m=TelemetryModel.calculate(input),c=ChassisModel.calculate(input),mag=MagneticModel.calculate(input,m.massG,m.rideHeightChange);
@@ -73,5 +73,7 @@ const ResultFolders=(()=>{
     for(const [key,text] of Object.entries(summaries))groups.get(key).summary.textContent=text;
     groups.get('workshop').section.dataset.category=WorkshopModel.tools[tool].category;
   }
-  return {init,refresh,open,forInput};
+  // Paired Rows: a result group opens and closes with the input folder of its row.
+  function follow(isOpen,toggle){followFn=isOpen;followToggle=toggle;sync();}
+  return {init,refresh,open,forInput,follow,syncFollow:()=>sync()};
 })();
