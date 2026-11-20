@@ -72,11 +72,11 @@ app.whenReady().then(async()=>{
   await type('#trackday-change','pinion 9 → 10');await type('#trackday-laps',lapTimes(9.93,10,89).map(ms=>(ms/1000).toFixed(3)).join('\n'));await pause();
   await shot('trackday');await click('#trackday-save');await wait("document.querySelectorAll('#trackday-today tbody tr').length===2",'second run');
   await route('library/garage');await click('[data-garage-car]');await shot('garage');
-  // Track laps: one club night in detail, then the history.
-  await route('analyze/races');await wait("document.querySelector('#race-run')?.options.length>0",'runs listed');
-  await run(`(()=>{const s=document.querySelector('#race-run'),o=[...s.options].find(o=>o.textContent.includes('Club night')&&o.textContent.includes('16 Oct'));if(o){s.value=o.value;s.dispatchEvent(new Event('change',{bubbles:true}));}})()`);await pause(400);
-  await shot('lap-analysis');
-  await route('analyze/progress');await wait("!document.querySelector('#race-progress').hidden",'progress shown');await shot('progress','#race-progress');
+  // Laps: the Pace Wall of the Club GT, then one club night in the full lap analysis.
+  await route('laps');await wait("document.querySelectorAll('#lw-wall .lw-row[style]').length>3",'the wall');
+  await run(`[...document.querySelectorAll('[data-lw-run]')].find(b=>b.textContent.includes('Run 2'))?.click()`);await pause(300);await shot('laps');
+  await run(`[...document.querySelectorAll('[data-lw-run]')].find(b=>b.textContent.includes('16 Oct'))?.click()`);await pause(300);
+  await click('#lw-detail');await wait("!document.querySelector('#race-laps').hidden",'full lap analysis');await pause(400);await shot('lap-analysis');
   if(errors.length)throw Error('Console errors:\n'+errors.join('\n'));
   console.log('Screenshots done.');
  }finally{storage.dispose();paddock.disconnect();win.destroy();app.quit();try{fs.rmSync(profile,{recursive:true,force:true});}catch{/* Temporary folder; Windows may still hold it. */}}

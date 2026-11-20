@@ -2,7 +2,7 @@
 // Plain files for the setup library, the active setup and the workbench draft, in Telemetry's profile.
 // The renderer keeps all library rules; this only stores text, atomically, so it can be backed up and copied.
 const fs=require('node:fs'),path=require('node:path'),crypto=require('node:crypto');
-const FILES={library:'setups-library-v1.json',active:'setups-active-v1.txt',workspace:'workbench-draft-v1.json'};
+const FILES={library:'setups-library-v1.json',active:'setups-active-v1.txt',workspace:'workbench-draft-v1.json',runnotes:'run-notes-v1.json'};
 const MAX_BYTES=4*1024*1024;
 function atomicWrite(file,text){
  fs.mkdirSync(path.dirname(file),{recursive:true});const temp=file+'.'+crypto.randomUUID()+'.tmp';let fd;

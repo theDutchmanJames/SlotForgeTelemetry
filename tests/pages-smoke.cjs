@@ -21,9 +21,9 @@ app.whenReady().then(async()=>{
   await reload();await run('localStorage.clear()');await reload();
   assert.equal(await text('#ratio-inline'),'3.000:1');assert.match(await text('#stats'),/27.02/);
   assert.equal(await run(`document.querySelectorAll('[data-page=telemetry] .performance-curve').length`),0);
-  assert.equal(await run(`document.querySelectorAll('.main-nav a').length`),6);
+  assert.equal(await run(`document.querySelectorAll('.main-nav a').length`),7);
   // SlotForge Restyle (Pit Wall): three tab groups, status lights in the bar, no grey line under it.
-  assert.deepEqual(await run(`[...document.querySelectorAll('.main-nav .nav-group')].map(g=>[...g.querySelectorAll('a')].map(a=>a.dataset.route).join(' '))`),['telemetry trackday','analyze feedback','library settings']);
+  assert.deepEqual(await run(`[...document.querySelectorAll('.main-nav .nav-group')].map(g=>[...g.querySelectorAll('a')].map(a=>a.dataset.route).join(' '))`),['telemetry trackday','laps analyze feedback','library settings']);
   assert.equal(await run(`!!document.querySelector('.app-header .status-lights #paddock-global-status')&&!!document.querySelector('.app-header .status-lights #save-state')`),true);
   assert.equal(await run(`!!document.querySelector('.workspace-bar')`),false,'the old grey line under the menu is gone');
   assert.equal(await run(`document.querySelectorAll('[data-input-jump]').length`),9);

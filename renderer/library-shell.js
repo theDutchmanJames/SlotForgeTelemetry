@@ -1,9 +1,9 @@
-// The Library in the SlotForge Restyle look: Saved setups, Race results and Garage in a side list (Paddock Rail) with
+// The Library in the SlotForge Restyle look: Saved setups and Garage in a side list (Paddock Rail) with
 // a status line each, and the setup list's tools as one Control Strip. The links, buttons and fields are moved, not
 // recreated, so routing, handlers and ids stay as they were.
 const LibraryUI=(()=>{
   const q=s=>document.querySelector(s);
-  const ITEMS={'#library':['setup','Your setups'],'#library/races':['history','Imported from Paddock'],'#library/garage':['car','Cars and tracks']};
+  const ITEMS={'#library':['setup','Your setups'],'#library/garage':['car','Cars and tracks']};
   const statuses={};
   function status(key,text){statuses[key]=text;const s=document.querySelector(`.library-rail [data-rail-status="${key}"]`);if(s&&s.textContent!==text)s.textContent=text;}
   const keyOf=hash=>hash==='#library'?'setups':hash.split('/')[1];

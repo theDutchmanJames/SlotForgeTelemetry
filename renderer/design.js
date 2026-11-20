@@ -4,7 +4,7 @@
 function pitWall(){
   const nav=document.querySelector('.main-nav'),header=document.querySelector('.app-header'),bar=document.querySelector('.workspace-bar');
   const link=route=>nav.querySelector(`[data-route="${route}"]`);
-  const groups=[['Build','telemetry','trackday'],['Understand','analyze','feedback'],['Keep','library','settings']].map(([label,...routes])=>{
+  const groups=[['Build','telemetry','trackday'],['Understand','laps','analyze','feedback'],['Keep','library','settings']].map(([label,...routes])=>{
     const group=document.createElement('div');group.className='nav-group';group.setAttribute('role','group');group.setAttribute('aria-label',label);
     for(const route of routes){const a=link(route);if(!a)continue;group.append(a);
       for(const node of [...a.childNodes])if(node.nodeType===3&&node.textContent.trim()){const word=document.createElement('span');word.className='nav-word';word.textContent=node.textContent.trim();node.replaceWith(word);a.title=word.textContent;}}
@@ -44,7 +44,7 @@ function initializeDesign(){
   for(const id of ['new-setup','open-setup','save-setup','setup-sheet'])document.getElementById(id)?.classList.add('ghost');
   const decorate=(selector,name)=>{for(const el of document.querySelectorAll(selector))el.insertAdjacentHTML('afterbegin',sfIcon(name));};
   document.querySelector('.brand-mark').innerHTML='<img src="../assets/icon.svg" alt="" width="42" height="42">';
-  for(const [route,name] of Object.entries({telemetry:'setup',trackday:'history',analyze:'timer',feedback:'list',library:'library',settings:'settings'})){
+  for(const [route,name] of Object.entries({telemetry:'setup',trackday:'history',laps:'timer',analyze:'gear',feedback:'list',library:'library',settings:'settings'})){
     const link=document.querySelector(`[data-route="${route}"]`);link.querySelector('svg')?.remove();link.insertAdjacentHTML('afterbegin',sfIcon(name));
   }
   for(const [field,tone,name] of [['pinion','gearing','spur-gear'],['ratedRpm','motor','short-can-motor'],['tyreMode','tyres','wheel-tyre-set'],['totalWeight','weight','scales']]){

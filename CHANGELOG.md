@@ -2,6 +2,20 @@
 
 ## Unreleased
 
+### Laps: every run on one wall (remake)
+
+Your laps used to be spread over six pages: Track day, Analyze › Laps, Compare runs, Progress, Records and Library › Race results. They now have one page, **Laps**, in the top bar between Track day and Analyze. Every run of a car on the same track and lane lands on one wall, whether it came from Paddock, Track day or was typed in.
+
+- **Pick the car, then the track and lane.** Cars are tiles, newest first; the tracks and lanes it ran on are chips with their number of runs.
+- **A scoreboard:** the record (and the run it was set in), the pace now (typical lap of the last three runs), how much you gained since the first run, and how consistent the last run was.
+- **The wall:** one row per run, newest on top, one square per lap, coloured from green (at the record) to red (6% slower). The record lap is purple, the best lap of each run is outlined, excluded and pit laps are hatched in their place. Switch the colours to compare each lap with its own run's typical lap instead. Twelve runs show at first, the rest one click away; a long run shows its first 40 laps.
+- **What changed** is marked between runs (for example *pinion 9 → 10*), read from the gearing, motor, tyres and weight each run was driven with.
+- **What moved the pace:** every setup change on that track and lane with the typical lap before and after it.
+- **The selected run** opens beside the wall: its laps as a small chart, stints, the comparison with the run before, what it was raced with, and its actions: *Compare with the run before*, *Full lap analysis*, and for runs you typed in or logged on Track day, *Edit laps* and *Delete*.
+- **New: a note and a kind on every run** (Practice, Test, Club night, Qualifying, Race, Endurance), also on races imported from Paddock. They are saved apart from the laps, so imported races stay exactly as imported, and they are part of every backup.
+- The full lap analysis and the comparison of two runs are unchanged, now under Laps with *Back to the wall*. Records, Progress and Library › Race results are replaced by the wall; old links land on the Laps page.
+- *More* holds Connect to Paddock, Export imported races, and the backup and restore of typed-in laps.
+
 ### SlotForge look, first step
 
 Telemetry starts to follow the new shared SlotForge look of Timing and Paddock (`SlotForgeRestyle.md`). This step changes the foundations; the page layouts follow page by page.

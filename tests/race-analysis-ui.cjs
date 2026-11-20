@@ -20,14 +20,14 @@ app.whenReady().then(async()=>{
  const route=async hash=>{await run(`location.hash=${JSON.stringify(hash)};void 0`);await pause();};
  const change=(id,value)=>run(`{const e=document.getElementById(${JSON.stringify(id)});e.value=${JSON.stringify(value)};e.dispatchEvent(new Event('change'));}`);
  try{
-  await win.loadFile(path.join(__dirname,'../renderer/index.html'));await pause();await route('analyze/races');
+  await win.loadFile(path.join(__dirname,'../renderer/index.html'));await pause();await route('laps/run');
   assert.equal(await run("document.querySelectorAll('#race-stints tbody tr').length"),3);assert.equal(await run("document.querySelectorAll('#race-stints b').length"),0);
   assert.match(await run("document.querySelector('#race-stints').textContent"),/Closing pace 0.700 s lower/);
   await change('race-stint','s1');assert.match(await run("document.querySelector('#race-run-findings').textContent"),/15 of 15 recorded laps/);assert.match(await run("document.querySelector('#race-stats').textContent"),/15 valid/);assert.equal(await run("document.querySelectorAll('#race-chart circle').length"),15);
   await change('race-stint','empty');assert.match(await run("document.querySelector('#race-run-findings').textContent"),/0 of 0 recorded laps/);assert.match(await run("document.querySelector('#race-chart').textContent"),/No included laps/);assert.equal(await run("document.querySelectorAll('#race-lap-table tbody tr').length"),0);
   await change('race-stint','s2');assert.match(await run("document.querySelector('#race-stats').textContent"),/14 valid/);assert.equal(await run("document.querySelectorAll('#race-chart circle').length"),14);
   await change('race-stint','');await run("document.querySelector('#race-stints').scrollIntoView({block:'center'})");await pause();fs.writeFileSync(path.join(output,'stint-analysis.png'),(await win.webContents.capturePage()).toPNG());
-  await route('analyze/racecompare');assert.equal(await run("document.querySelector('#race-overlay').hidden"),true);assert.equal(await run("document.querySelectorAll('#race-comparison svg').length"),0);
+  await route('laps/compare');assert.equal(await run("document.querySelector('#race-overlay').hidden"),true);assert.equal(await run("document.querySelectorAll('#race-comparison svg').length"),0);
   await click('#race-compare-detail');assert.equal(await run("document.querySelector('#race-overlay').hidden"),false);
   assert.equal(await run("document.querySelectorAll('#race-overlay-chart .race-overlay-line').length"),2);assert.equal(await run("document.querySelectorAll('#race-overlay-chart .race-series-b circle').length"),0);
   assert.equal(await run("document.querySelectorAll('#race-overlay-chart circle.race-series-a').length"),29);assert.equal(await run("document.querySelectorAll('#race-overlay-chart circle.race-series-b').length"),12);
@@ -37,10 +37,10 @@ app.whenReady().then(async()=>{
   await click('#race-compare-summary');assert.equal(await run("document.querySelector('#race-overlay').hidden"),true);
   win.setSize(390,1000);await pause();await click('#race-compare-detail');assert.equal(await run('document.documentElement.scrollWidth>innerWidth'),false);
   await run("document.querySelector('#race-overlay').scrollIntoView({block:'center'})");await pause();fs.writeFileSync(path.join(output,'run-overlay-mobile.png'),(await win.webContents.capturePage()).toPNG());
-  await route('analyze/races');assert.equal(await run('document.documentElement.scrollWidth>innerWidth'),false);
+  await route('laps/run');assert.equal(await run('document.documentElement.scrollWidth>innerWidth'),false);
   await run("document.querySelector('[data-tone-choice=light]').click()");assert.equal(await run("document.documentElement.dataset.tone"),'light');
   await change('race-stint','s1');await run("document.querySelector('#race-stints').scrollIntoView({block:'center'})");await pause();fs.writeFileSync(path.join(output,'stint-analysis-light.png'),(await win.webContents.capturePage()).toPNG());
-  await run("document.querySelector('#race-search').value='no such result';document.querySelector('#race-search').dispatchEvent(new Event('input'))");assert.equal(await run("document.querySelector('#race-stints').hidden"),true);await route('analyze/racecompare');assert.equal(await run("document.querySelector('#race-overlay').hidden"),true);
+  await run("document.querySelector('#race-search').value='no such result';document.querySelector('#race-search').dispatchEvent(new Event('input'))");assert.equal(await run("document.querySelector('#race-stints').hidden"),true);await route('laps/compare');assert.equal(await run("document.querySelector('#race-overlay').hidden"),true);
   assert.deepEqual(errors,[]);console.log('Stint scope, empty stints, pace windows, optional overlay, unequal runs, inspection, themes and responsive layout passed.');
  }finally{client.disconnect();win.destroy();app.quit();}
 }).catch(e=>{console.error(e);app.exit(1);});

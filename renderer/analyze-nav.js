@@ -3,7 +3,7 @@
 // buttons are moved, not recreated, so routing and handlers stay exactly as they were.
 const AnalyzeNav=(()=>{
   const q=s=>document.querySelector(s);
-  const MODES=[['Setups',[['overview','Analysis'],['compare','Compare']]],['Track laps',[['races','Laps'],['racecompare','Compare'],['progress','Progress'],['records','Records']]]];
+  const MODES=[['Setups',[['overview','Analysis'],['compare','Compare']]]];
   const TOPICS=[['Essentials',['performance','gears']],['Measurements',['weight','wear','chassis','magnetic']],['Planning',['laps','workshop']]];
   // Relabel a link or button whose leading icon must stay.
   const relabel=(el,text)=>{for(const n of [...el.childNodes])if(n.nodeType===3)n.remove();el.append(text);el.title=el.title||text;};
@@ -49,7 +49,7 @@ const AnalyzeNav=(()=>{
   // The topics belong to Analysis: shown only while it is open.
   function route(page,sub){
     const topics=q('.analyze-rail .analyze-topics');if(!topics)return;
-    topics.hidden=!(page==='analyze'&&!['compare','races','racecompare','records','progress'].includes(sub));
+    topics.hidden=!(page==='analyze'&&sub!=='compare');
   }
   // Which topics hold saved values for this setup. Dimmed topics remain clickable.
   function availability(setup){

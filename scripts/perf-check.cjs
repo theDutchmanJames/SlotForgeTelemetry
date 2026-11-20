@@ -89,7 +89,7 @@ app.whenReady().then(async()=>{
 
   // Page changes, as a click on a link does it: change the hash, then wait for two painted frames.
   const frame='new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r)))';
-  const routes=['telemetry','trackday','analyze','analyze/compare','analyze/races','analyze/racecompare','analyze/records','analyze/progress','feedback','library','library/races','library/garage','settings','settings/calculations','settings/paddock','settings/backups','settings/updates','telemetry'];
+  const routes=['telemetry','trackday','analyze','analyze/compare','laps/run','laps/compare','laps','laps','feedback','library','laps','library/garage','settings','settings/calculations','settings/paddock','settings/backups','settings/updates','telemetry'];
   step('start-up measured');
   await profiled('page changes',async()=>{for(const r of routes){const before=ipc.get('data:get')?.calls||0;step('page '+r);
    const v=await run(`(async()=>{const t=performance.now();location.hash=${JSON.stringify(r)};await new Promise(r=>addEventListener('hashchange',r,{once:true}));const s=performance.now()-t;await ${frame};return [s,performance.now()-t];})()`);
@@ -104,7 +104,7 @@ app.whenReady().then(async()=>{
   const keys=n=>Array.from({length:n},(_,i)=>String(8+i%6));
   await profiled('workbench typing',async()=>{await typing('[name=pinion]',keys(20),'workbench pinion');
    await typing('[name=name]',Array.from({length:20},(_,i)=>'Club GT test'.slice(0,1+i%12)),'workbench name');});
-  await run(`location.hash='analyze/races'`);await pause(400);
+  await run(`location.hash='laps/run'`);await pause(400);
   await profiled('race search',async()=>{await typing('#race-search',['C','Cl','Clu','Club','Club ','Club n','Club ni','Club nig','Club nigh','Club night'],'race search');
    await typing('#race-search',[''],'race search clear');});
   await run(`location.hash='trackday'`);await pause(300);

@@ -41,7 +41,7 @@ The original motor/gearing engine and vector icons come from Paddock. The colour
 *Screenshots from the app using example setups and sample lap data, made with `npm run screenshots`. Click any image for a closer look.*
 
 <details>
-  <summary><strong>Explore Track day, the garage, comparisons, lap analysis, Progress and the setup library</strong></summary>
+  <summary><strong>Explore Track day, the garage, comparisons, the Laps wall, lap analysis and the setup library</strong></summary>
 
 <table>
   <tr><th width="50%">Track day · change one thing, see what it did</th><th width="50%">Your cars and tracks in the garage</th></tr>
@@ -63,7 +63,7 @@ The original motor/gearing engine and vector icons come from Paddock. The colour
   <tr><th width="50%">Analyse manually entered laps</th><th width="50%">Follow performance across sessions</th></tr>
   <tr>
     <td><a href="docs/screenshots/lap-analysis.png"><img src="docs/screenshots/lap-analysis.png" alt="Manual lap analysis with pace, consistency and individual lap details" width="100%"></a></td>
-    <td><a href="docs/screenshots/progress.png"><img src="docs/screenshots/progress.png" alt="Progress history comparing median pace across recorded sessions" width="100%"></a></td>
+    <td><a href="docs/screenshots/laps.png"><img src="docs/screenshots/laps.png" alt="Laps page: every lap of every run of one car on one track and lane, coloured by how close it came to the record, with the setup changes that moved the pace" width="100%"></a></td>
   </tr>
 </table>
 
@@ -150,7 +150,7 @@ Motor torque is entered in **gf·cm**—gram-force centimetres. Power curves req
 
 ### Explore motor performance and compare setups
 
-Analyze groups its pages as **Setups** (Analysis, Compare) and **Track laps** (Laps, Compare, Progress, Records). Setup topics are grouped as Essentials, Measurements and Planning. Topics with nothing saved yet are dimmed.
+Analyze holds your saved setups: **Analysis** and **Compare**. Laps you drove have their own page, **Laps**. Setup topics are grouped as Essentials, Measurements and Planning. Topics with nothing saved yet are dimmed.
 
 Save a setup, then open **Analyze → Setups → Analysis**. Torque and power curves show how the ideal motor model changes with speed. Move the motor-speed slider to explore torque, power, axle RPM, vehicle speed and driving force at the same operating point.
 
@@ -202,17 +202,17 @@ Open **Track day** at the track:
 2. Write down what you changed, and type or paste the run's lap times.
 3. Telemetry compares the run with your previous one for the same car, track and lane. You get a plain verdict, a better/worse table and the setup differences.
 
-Saved runs are ordinary manual sessions, so Lap analysis, Progress and Records include them.
+Saved runs are ordinary manual sessions, so they appear on the **Laps** wall with your other runs of that car, track and lane.
 
 ### Bring your own lap times
 
-**You do not need Paddock or Timing to use lap analysis.** Choose **Analyze → Lap analysis → Add lap data** and type or paste times from another timing app, a spreadsheet or a notebook.
+**You do not need Paddock or Timing to use lap analysis.** Choose **Laps → Add laps** and type or paste times from another timing app, a spreadsheet or a notebook.
 
 - Enter one lap time per line, or lap-number/time columns separated by tabs or semicolons.
 - Use seconds, decimal commas, minutes:seconds or whole milliseconds.
 - Add the car, track, lane and session date; optionally record the driver, source, lane length, notes and setup specifications.
 - Review the parsed times and mark invalid or pit laps before saving.
-- Edit sessions later without creating duplicate records, or delete them through **Library → Race results**.
+- Edit sessions later without creating duplicate records, or delete them: select the run on **Laps** and choose **Edit laps** or **Delete**.
 
 Confirm the sequence only when the times form one consecutive stint. Numbered input preserves missing-lap gaps; selected or unordered laps can still be analysed without claiming continuous runs. Generic CSV files with arbitrary columns are not imported automatically. [Manual lap-entry guide](docs/PADDOCK-RESULTS.md#manual-lap-data-without-paddock).
 
@@ -226,9 +226,18 @@ Telemetry imports reviewed sessions that **SlotForge Timing has already delivere
 
 The connection is read-only: Telemetry does not change Paddock's cars or Timing's race results. Passwords stay in memory and are forgotten on disconnect or exit. **Telemetry analyses recorded data; it does not time laps or receive live sensor readings.** [Connection and recovery guide](docs/PADDOCK-RESULTS.md).
 
+### Every run on one wall
+
+**Laps** puts every run of a car on the same track and lane on one wall, whether it came from Paddock, Track day or was typed in. Pick the car, then the track and lane.
+
+- **Scoreboard:** the record, the pace now (typical lap of the last three runs), how much you gained since the first run, and how consistent the last run was.
+- **The wall:** one row per run and one square per lap, coloured from green at the record to red at 6% slower. The record lap is purple, each run's best lap is outlined, excluded and pit laps are hatched. Switch the colours to compare each lap with its own run's typical lap.
+- **What changed** between two runs is marked on the wall (for example *pinion 9 → 10*), and **What moved the pace** lists every change with the typical lap before and after. Driver and conditions can still differ; one run is a small sample.
+- **The selected run** shows its laps, stints, the comparison with the run before and what it was raced with. Give it a **note** and a **kind** (Practice, Test, Club night, Qualifying, Race, Endurance); these are saved apart from the laps, so imported races stay as imported.
+
 ### Understand pace, consistency and stints
 
-**Lap analysis** turns a saved run into a chart, clear statistics and an inspectable lap table:
+**Full lap analysis** (from a run on Laps) turns a saved run into a chart, clear statistics and an inspectable lap table:
 
 - **Best eligible lap:** the quickest lap that qualifies for a record.
 - **Typical pace:** the median of valid, non-pit laps, rather than just the fastest lap.
@@ -239,17 +248,15 @@ The connection is read-only: Telemetry does not change Paddock's cars or Timing'
 
 Pit and invalid laps stay available for inspection but are excluded from pace statistics. Slow valid laps remain included. Missing or excluded laps break consecutive sequences, and insufficient data leaves the relevant metric unavailable. Imported configurations remain tied to the recorded race; manually entered specifications are clearly labelled.
 
-### Compare runs, follow Progress and share reports
+### Compare runs and share reports
 
-**Compare runs** starts with a straightforward numerical comparison. Optional **Lap progression** overlays two runs on the same lap-sequence axis, with solid/dashed traces and gaps for excluded laps. This compares recorded lap sequences; it is not a live race gap or sector analysis.
+**Compare with the run before** (from a run on Laps) starts with a straightforward numerical comparison. Optional **Lap progression** overlays two runs on the same lap-sequence axis, with solid/dashed traces and gaps for excluded laps. This compares recorded lap sequences; it is not a live race gap or sector analysis.
 
 Benefit colours require compatible runs and your confirmation that the driver and conditions are comparable. Track, lane, source and known session/length differences matter. The app's observations explain changes in best lap, median pace, consistency and sample size without claiming that a setup change caused the difference.
 
-**Progress** follows a car across sessions on the same track and lane. Choose median pace, best lap or consistency, set a minimum lap count, and compare a selected run with a reference. Review captured specification and component changes alongside the results. Sources and session types remain separate; runs from different drivers are not pooled.
+The record on the Laps wall is the best eligible lap in the data held by Telemetry for that car, track and lane. It is not a complete copy of Timing's official record database.
 
-**Records** lists the best eligible laps in the data held by Telemetry, with manual and imported evidence kept separate. It is not a complete copy of Timing's official record database.
-
-Use **Export comparison report** in Compare runs or Progress to save a self-contained HTML report. Open it in a browser to read, share or print. It includes statistics, observations, setup differences and source context, with supplied classifications and penalties kept separate from measured lap times. Reports are snapshots and do not update after later corrections.
+Use **Export comparison report** when comparing two runs to save a self-contained HTML report. Open it in a browser to read, share or print. It includes statistics, observations, setup differences and source context, with supplied classifications and penalties kept separate from measured lap times. Reports are snapshots and do not update after later corrections.
 
 ### Keep setups and lap libraries organised
 
@@ -274,8 +281,8 @@ You can still export each kind of data on its own:
 | Data | Backup and recovery |
 | --- | --- |
 | **Saved calculator setups** | **Library → Export library** saves your entries and notes. **Import library** adds copies, keeping existing entries. Save a working draft first to include it; appearance settings are not included. |
-| **Manual lap sessions** | **Library → Race results → Manual lap library → Back up manual laps**. **Restore backup** merges new entries and skips unchanged ones; conflicting revisions stop the restore rather than overwrite edits. |
-| **Imported Paddock results** | **Export results** saves evidence for inspection or a separate copy. That export cannot currently be restored into Telemetry; reconnect to Paddock and import again for recovery. |
+| **Manual lap sessions** | **Laps → More → Back up typed-in laps**. **Restore backup** merges new entries and skips unchanged ones; conflicting revisions stop the restore rather than overwrite edits. |
+| **Imported Paddock results** | **Laps → More → Export imported races** saves evidence for inspection or a separate copy. That export cannot currently be restored into Telemetry; reconnect to Paddock and import again for recovery. |
 
 Keep backup files somewhere separate from the computer running the app. Recovery controls preserve unreadable libraries before restoring or rebuilding them. There is no cloud sync. [Lap-library backup and recovery details](docs/PADDOCK-RESULTS.md#library-and-backup).
 

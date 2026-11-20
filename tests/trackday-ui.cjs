@@ -13,7 +13,7 @@ app.whenReady().then(async()=>{
  const shot=async name=>{await pause();fs.writeFileSync(path.join(output,'trackday-'+name+'.png'),(await win.webContents.capturePage()).toPNG());};
  try{
   await win.loadFile(path.join(__dirname,'../renderer/index.html'));await pause();
-  assert.equal(await run("document.querySelectorAll('.main-nav a').length"),6);
+  assert.equal(await run("document.querySelectorAll('.main-nav a').length"),7);
   await run("location.hash='trackday'");await pause();assert.equal(await run("document.querySelector('[data-page=trackday]').hidden"),false);
   assert.match(await text('#trackday-setup'),/9 : 27/);assert.match(await text('#trackday-compare'),/Enter the car, track and lane/);
   assert.equal(await run("document.querySelector('#trackday-save').disabled"),true);
@@ -35,8 +35,8 @@ app.whenReady().then(async()=>{
   await click('#trackday-save');await wait("document.querySelectorAll('#trackday-today tbody tr').length===2");
   assert.match(await text('#trackday-today'),/Run 2 · pinion 9 → 10/);assert.match(await text('#trackday-compare'),/Run 2 · pinion 9 → 10 compared with Run 1/);
   // Saved runs are ordinary manual sessions: Lap analysis opens them.
-  await click('[data-trackday-open]');await pause();assert.equal(await run("location.hash"),'#analyze/races');assert.equal(await run("document.querySelector('#race-analysis').hidden"),false);
-  assert.match(await run("document.querySelector('#race-run').selectedOptions[0].textContent"),/Run 2/);
+  await click('[data-trackday-open]');await pause();assert.equal(await run("location.hash"),'#laps');assert.equal(await run("document.querySelector('#lw-view').hidden"),false);
+  assert.match(await run("document.querySelector('#lw-drawer h2').textContent"),/Run 2/);assert.match(await run("document.querySelector('#lw-wall').textContent"),/changed: pinion 9 → 10/);
   // The session context is remembered; runs persist.
   await win.loadFile(path.join(__dirname,'../renderer/index.html'));await pause();await run("location.hash='trackday'");await pause();
   assert.equal(await run("document.querySelector('#trackday-car').value"),'Club GT');assert.equal(await run("document.querySelector('#trackday-lane').value"),'2');assert.equal(await run("document.querySelector('#trackday-sequence').checked"),true);

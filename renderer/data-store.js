@@ -2,7 +2,7 @@
 // Desktop app: plain files in Telemetry's profile (backed up with everything else).
 // Browser preview or older test harness without the bridge: the window's localStorage, as before.
 const DataStore=(()=>{
-  const FILES={'slotforge.telemetry.library.v1':'library','slotforge.telemetry.library.active.v1':'active','slotforge.calculator.workspace.v1':'workspace'};
+  const FILES={'slotforge.telemetry.library.v1':'library','slotforge.telemetry.library.active.v1':'active','slotforge.calculator.workspace.v1':'workspace','slotforge.telemetry.runnotes.v1':'runnotes'};
   const bridge=typeof window!=='undefined'&&window.dataFiles?window.dataFiles:null;
   let migrated=false;
   function call(name,...args){const r=bridge[name](...args);if(!r?.ok){const e=Error(r?.error||'Could not use the data file.');e.name='DataFileError';throw e;}return r.value;}

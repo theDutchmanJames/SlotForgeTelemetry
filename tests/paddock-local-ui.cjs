@@ -22,20 +22,20 @@ app.whenReady().then(async()=>{
   assert.match(await run("document.querySelector('#paddock-global-status').textContent"),/Paddock on this computer · Home collection/);
   assert.equal(await run("document.querySelector('#paddock-local-connect').hidden"),true);
   // The Shared-library race is now analysable like any other.
-  await route('analyze/races');
+  await route('laps/run');
   assert.ok(await run(`[...document.querySelectorAll('#race-run option')].some(o=>o.textContent.includes(${JSON.stringify(raceName)}))`),'history-v1 race listed in Lap analysis');
   // "Example prototype" only raced in the history-v1 session; records combine both formats per car/track/lane.
-  await route('analyze/records');assert.match(await run("document.querySelector('#race-record-table').textContent"),/Example prototype/);
-  assert.match(await run("document.querySelector('#race-connection-status').textContent"),/Paddock on this computer/);
-  assert.equal(await run("document.querySelector('#race-analysis [data-race-sync]').disabled"),false,'Refresh works without a network connection');
-  const before=host.s.requests.length;await run("document.querySelector('#race-analysis [data-race-sync]').click()");await wait("document.querySelector('#toast').textContent.includes('Races up to date')");assert.ok(host.s.requests.length>before);
+  await route('laps');assert.match(await run("document.querySelector('#lw-cars').textContent"),/Example prototype/i);assert.match(await run("document.querySelector('#lw-score').textContent"),/Record\s*\d/);
+  assert.match(await run("document.querySelector('#paddock-global-status').textContent"),/Paddock on this computer/);
+  assert.equal(await run("document.querySelector('.lw-head [data-race-sync]').disabled"),false,'Refresh works without a network connection');
+  const before=host.s.requests.length;await run("document.querySelector('.lw-head [data-race-sync]').click()");await wait("document.querySelector('#toast').textContent.includes('Races up to date')");assert.ok(host.s.requests.length>before);
   fs.writeFileSync(path.join(output,'paddock-local-records.png'),(await win.webContents.capturePage()).toPNG());
   // Reopening Telemetry reconnects and refreshes by itself.
   await win.loadFile(path.join(__dirname,'../renderer/index.html'));await pause();
   await wait("document.querySelector('#paddock-global-status').textContent.includes('Paddock on this computer')");
   await route('settings/paddock');await wait("!document.querySelector('#paddock-local-sync').disabled");
   await run("document.querySelector('#paddock-local-disconnect').click()");await wait("document.querySelector('#paddock-local-message').textContent.includes('Disconnected')");
-  await route('analyze/races');assert.ok(await run(`[...document.querySelectorAll('#race-run option')].some(o=>o.textContent.includes(${JSON.stringify(raceName)}))`),'imported races stay available offline');
+  await route('laps/run');assert.ok(await run(`[...document.querySelectorAll('#race-run option')].some(o=>o.textContent.includes(${JSON.stringify(raceName)}))`),'imported races stay available offline');
   // No credential reaches the renderer or the profile.
   assert.equal(await run(`document.documentElement.outerHTML.includes(${JSON.stringify(host.s.token)})`),false);
   for(const f of fs.readdirSync(profile).filter(n=>n.endsWith('.json')))assert.equal(fs.readFileSync(path.join(profile,f),'utf8').includes(host.s.token),false,f);

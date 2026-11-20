@@ -9,7 +9,7 @@ const TrackdayUI=(()=>{
   function init(){
     try{const v=JSON.parse(localStorage.getItem(KEY)||'null');if(v)ctx={car:String(v.car||''),track:String(v.track||''),lane:Number.isInteger(v.lane)&&v.lane>=1&&v.lane<=64?v.lane:1,driver:String(v.driver||''),sequence:v.sequence===true};}catch{/* Defaults. */}
     q('[data-route=telemetry]').insertAdjacentHTML('afterend','<a href="#trackday" data-route="trackday">Track day</a>');
-    q('[data-page=telemetry]').insertAdjacentHTML('afterend',`<section data-page="trackday" hidden><div class="page-head"><div><p class="eyebrow">AT THE TRACK</p><h1>Track day</h1></div></div><div class="sn"><span class="sn-tile">${sfIcon('history')}</span><p class="sn-lead">Change one thing, drive, enter your laps, see what it did.</p><p class="sn-more">Each run is compared with the one before it for the same car, track and lane, even before you save.</p><p class="sn-use">${sfIcon('next')}<span>Saved runs also appear in Analyze: Laps, Progress, Compare and Records.</span></p></div>
+    q('[data-page=telemetry]').insertAdjacentHTML('afterend',`<section data-page="trackday" hidden><div class="page-head"><div><p class="eyebrow">AT THE TRACK</p><h1>Track day</h1></div></div><div class="sn"><span class="sn-tile">${sfIcon('history')}</span><p class="sn-lead">Change one thing, drive, enter your laps, see what it did.</p><p class="sn-more">Each run is compared with the one before it for the same car, track and lane, even before you save.</p><p class="sn-use">${sfIcon('next')}<span>Saved runs also appear on the Laps wall, beside your other runs of this car, track and lane.</span></p></div>
     <section class="panel trackday-context" aria-label="Session"><div class="trackday-context-grid">
      <label class="field">Car<input id="trackday-car" maxlength="200" autocomplete="off" list="trackday-car-list"></label><label class="field">Track<input id="trackday-track" maxlength="200" autocomplete="off" list="trackday-track-list"></label><datalist id="trackday-car-list"></datalist><datalist id="trackday-track-list"></datalist>
      <label class="field">Lane<input id="trackday-lane" type="number" min="1" max="64" step="1" inputmode="numeric"></label><label class="field">Driver · optional<input id="trackday-driver" maxlength="200" autocomplete="off"></label></div>
@@ -101,7 +101,7 @@ const TrackdayUI=(()=>{
       const runNumber=TrackdayModel.today(RaceUI.runs(),c).length+1;
       const values=TrackdayModel.session({ctx:c,setup:state.setup,note:q('#trackday-change').value,laps:entry.laps,sequenceConfirmed:q('#trackday-sequence').checked,runNumber,laneLengthM:laneLength()});
       const response=await window.manualLaps.save({values});if(!response?.ok)throw Error(response?.error||'The run could not be saved.');
-      ManualLapsUI.apply(response.value);q('#trackday-laps').value='';q('#trackday-change').value='';toast(`Run ${runNumber} saved. It is also in Lap analysis.`);
+      ManualLapsUI.apply(response.value);q('#trackday-laps').value='';q('#trackday-change').value='';toast(`Run ${runNumber} saved. It is also on the Laps wall.`);
     }catch(e){busy=false;q('#trackday-error').textContent=e.message;q('#trackday-error').hidden=false;q('#trackday-save').disabled=false;return;}
     busy=false;render();
   }

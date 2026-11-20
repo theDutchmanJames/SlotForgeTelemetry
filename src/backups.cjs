@@ -16,6 +16,7 @@ function knownFiles(){
   'workbench-draft-v1.json':t=>Calculator.decode(t),
   'setups-active-v1.txt':t=>{if(t!==''&&!/^[A-Za-z0-9_-]{1,100}$/.test(t))throw Error('Invalid active setup.');},
   'manual-laps-v1.json':t=>manual.validate(json(t)),
+  'run-notes-v1.json':t=>{require('../renderer/run-notes-model.js').decode(t);},
   'garage-v1.json':t=>garage.validate(json(t)),
   'paddock-results-v1.json':t=>network.checkCache(json(t)),
   'paddock-shared-history-v1.json':t=>local.checkCache(json(t)),
@@ -24,7 +25,7 @@ function knownFiles(){
   'paddock-local-v1.json':version1
  };
 }
-const LABELS={'setups-library-v1.json':'Saved setups','workbench-draft-v1.json':'Workbench draft','setups-active-v1.txt':'Active setup','manual-laps-v1.json':'Manual and Track day laps','garage-v1.json':'Garage cars and tracks','paddock-results-v1.json':'Races imported over the network','paddock-shared-history-v1.json':'Races from Paddock on this computer','paddock-cars-v1.json':'Paddock car catalogue','paddock-connection-v1.json':'Last network Paddock','paddock-local-v1.json':'Selected local Paddock'};
+const LABELS={'setups-library-v1.json':'Saved setups','workbench-draft-v1.json':'Workbench draft','setups-active-v1.txt':'Active setup','manual-laps-v1.json':'Manual and Track day laps','run-notes-v1.json':'Notes and tags on runs','garage-v1.json':'Garage cars and tracks','paddock-results-v1.json':'Races imported over the network','paddock-shared-history-v1.json':'Races from Paddock on this computer','paddock-cars-v1.json':'Paddock car catalogue','paddock-connection-v1.json':'Last network Paddock','paddock-local-v1.json':'Selected local Paddock'};
 const stamp=d=>d.toISOString().replace(/[:.]/g,'-');
 class Backups{
  constructor(profile,{version='0.0.0',now=()=>new Date()}={}){

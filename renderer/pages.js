@@ -13,7 +13,9 @@ function navigate(route){if(location.hash!=='#'+route)location.hash=route;render
 function hashChanged(){if(location.hash===renderedHash){renderedHash=null;return;}renderedHash=null;renderRoute();}
 function renderRoute(){
   if(location.hash==='#analyze/predicted'){history.replaceState(null,'','#feedback');}
-  const [requested,sub,topic]=location.hash.slice(1).split('/'),page=['telemetry','trackday','analyze','feedback','library','settings'].includes(requested)?requested:'telemetry';
+  // Laps used to live in Analyze and Library: old links land on the Laps page.
+  const moved={'#analyze/races':'#laps/run','#analyze/racecompare':'#laps/compare','#analyze/progress':'#laps','#analyze/records':'#laps','#library/races':'#laps'}[location.hash];if(moved)history.replaceState(null,'',moved);
+  const [requested,sub,topic]=location.hash.slice(1).split('/'),page=['telemetry','trackday','laps','analyze','feedback','library','settings'].includes(requested)?requested:'telemetry';
   for(const section of document.querySelectorAll('[data-page]'))section.hidden=section.dataset.page!==page;
   for(const link of document.querySelectorAll('[data-route]')){if(link.dataset.route===page)link.setAttribute('aria-current','page');else link.removeAttribute('aria-current');}
   document.title=`${page==='feedback'?'Driver Feedback':page==='trackday'?'Track day':page[0].toUpperCase()+page.slice(1)} · SlotForge Telemetry`;
@@ -29,7 +31,7 @@ function renderRoute(){
     for(const link of document.querySelectorAll('.settings-nav a')){if(link.hash.split('/')[1]===(sub||'appearance'))link.setAttribute('aria-current','page');else link.removeAttribute('aria-current');}
     if(help)renderHelp(topic);
   }
-  AnalyzeNav.route(page,sub);RaceUI.route(page,sub);GarageUI.route(page,sub);BackupsUI.route(page,sub);UpdatesUI.route(page,sub);
+  AnalyzeNav.route(page,sub);LapsUI.route(page,sub);RaceUI.route(page,sub);GarageUI.route(page,sub);BackupsUI.route(page,sub);UpdatesUI.route(page,sub);
   PredictionUI.route(page,sub);
 }
 function setupOptions(id,selected){

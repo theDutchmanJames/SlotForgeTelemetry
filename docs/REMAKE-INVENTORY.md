@@ -24,7 +24,8 @@ below starts with the places where this hurts most.
 
 ## Tier 1: the biggest wins
 
-### 1. Track laps: Laps, Progress, Records, Race results · Remake
+### 1. Track laps: Laps, Progress, Records, Race results · Remake · **Done ("Pace Wall")**
+One Laps page: cars, track and lane, a scoreboard, every lap of every run as a wall, what moved the pace, the selected run with a note and a kind. Still open from this item: hide or delete a single lap of a typed-in run from the wall, and the full lap analysis page in the new look.
 - One run is spread over **Analyze › Laps** (one run in detail), **Progress** (runs over time), **Records** (best laps) and
   **Library › Race results** (the list of runs, with Edit and Delete). Each page has its own filter bar and its own picker.
 - Laps is a 2000 px page: three stat cards, a chart, two more stat cards, "What this run shows" (three text boxes saying the

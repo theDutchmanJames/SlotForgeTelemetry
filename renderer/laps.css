@@ -1,0 +1,103 @@
+/* SlotForge Remake (Pace Wall): the Laps page. */
+[data-page=laps]{--lw-rec:#a855f7;--lw-good:var(--green);--lw-bad:var(--accent-text,var(--accent));--lw-num:'SF Roboto Mono',Consolas,monospace;--lw-title:'SF Barlow Condensed','Bahnschrift',sans-serif}
+:root[data-tone=light] [data-page=laps]{--lw-rec:#7c3aed}
+.lw-head{align-items:flex-end}
+.lw-crumb{display:flex;gap:14px;align-items:center;margin-top:6px;font-size:13px;color:var(--muted)}
+.lw-crumb a{color:var(--ink)}
+.lw-more{position:relative}
+.lw-more>summary{list-style:none}.lw-more>summary::-webkit-details-marker{display:none}
+.lw-menu{position:absolute;right:0;top:calc(100% + 6px);z-index:30;display:grid;gap:2px;min-width:250px;padding:6px;background:var(--panel);border:1px solid var(--line);border-radius:9px;box-shadow:var(--shadow)}
+.lw-menu .btn,#lw-manual-tools .btn{justify-content:flex-start;gap:8px;border-color:transparent;width:100%}
+#lw-manual-tools{display:grid;gap:2px;border-top:1px solid var(--line);padding-top:4px;margin-top:2px}
+#lw-manual-tools .hint{margin:4px 8px;max-width:240px}
+.lw-label{font-size:10.5px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.lw-num{font-family:var(--lw-num);font-variant-numeric:tabular-nums}
+.lw-good{color:var(--lw-good)}.lw-bad{color:var(--lw-bad)}
+.lw-quiet{color:var(--muted);font-size:12.5px}
+/* Car tiles and the track · lane chips */
+.lw-cars{display:flex;gap:10px;overflow-x:auto;padding-bottom:4px;margin-bottom:14px}
+.lw-car{flex:0 0 220px;display:grid;gap:3px;text-align:left;padding:12px 14px;border-radius:10px;border:1px solid var(--line);background:var(--panel)}
+.lw-car b{font:italic 700 20px/1.05 var(--lw-title);text-transform:uppercase;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.lw-car small{color:var(--muted);font-size:12px}
+.lw-car[aria-pressed=true]{border-color:var(--muted);box-shadow:inset 0 -3px 0 var(--accent)}
+.lw-scope{display:flex;flex-wrap:wrap;align-items:center;gap:8px 10px;margin-bottom:14px}
+.lw-lines,.lw-chips,.lw-tags{display:flex;flex-wrap:wrap;gap:6px}
+.lw-grow{flex:1}
+.lw-chip{display:inline-flex;align-items:center;gap:6px;min-height:28px;padding:3px 11px;border-radius:999px;border:1px solid var(--line);background:var(--panel);color:var(--ink);font-size:12.5px}
+.lw-chip small{color:var(--muted);font-family:var(--lw-num)}
+.lw-chip[aria-pressed=true]{background:color-mix(in srgb,var(--ink) 12%,var(--panel));border-color:var(--muted);font-weight:600}
+.lw-chip.lw-static{cursor:default;color:var(--muted);font-size:12px;min-height:24px}
+.lw-seg{display:inline-flex;gap:2px;padding:2px;border:1px solid var(--line);border-radius:8px;background:var(--bg)}
+.lw-seg button{border:0;background:transparent;color:var(--muted);border-radius:6px;padding:5px 11px;font-size:12.5px}
+.lw-seg button[aria-pressed=true]{background:color-mix(in srgb,var(--ink) 13%,var(--panel));color:var(--ink);font-weight:600}
+/* Scoreboard */
+.lw-score{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));padding:0;margin-bottom:14px;overflow:hidden}
+.lw-score>div{padding:16px 20px;border-right:1px solid var(--line);min-width:0}.lw-score>div:last-child{border-right:0}
+.lw-big{display:block;font:700 44px/1 var(--lw-title);letter-spacing:.01em;margin:8px 0 4px;font-variant-numeric:tabular-nums}
+.lw-big.lw-rec{color:var(--lw-rec)}
+.lw-score small{color:var(--muted);font-size:12px}
+/* The wall */
+.lw-grid{display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:14px;align-items:start}
+.lw-main{display:grid;gap:14px;min-width:0}
+.lw-wall-head{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 12px;margin-bottom:10px}
+.lw-wall-head h2,.lw-ledger h2,.lw-drawer h2{font:italic 700 20px/1.1 var(--lw-title);text-transform:uppercase;margin:0}
+.lw-wall-head .hint{margin:0}
+.lw-wall-scroll{overflow-x:auto}
+.lw-row{display:grid;grid-template-columns:160px repeat(var(--cols),minmax(22px,1fr)) 70px;gap:3px;align-items:center;margin-bottom:3px;min-width:calc(240px + var(--cols) * 25px);border-radius:6px}
+.lw-row[data-selected=true]{background:color-mix(in srgb,var(--ink) 8%,transparent)}
+.lw-cols span{font:500 10.5px var(--lw-num);color:var(--muted);text-align:center}
+.lw-cols span:last-child{text-align:right}
+.lw-who{display:grid;text-align:left;border:0;background:transparent;padding:3px 6px 3px 4px;line-height:1.25;min-width:0;border-radius:6px}
+.lw-who b{font-size:12.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lw-who small{color:var(--muted);font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lw-who:hover b{text-decoration:underline}
+.lw-cell{display:grid;place-items:center;height:28px;border-radius:4px;font:500 10px var(--lw-num);font-style:normal;color:rgba(0,0,0,.74);background:var(--raised)}
+.lw-cell.lw-none{background:transparent;border:1px dashed color-mix(in srgb,var(--line) 70%,transparent)}
+.lw-cell.lw-out{background:repeating-linear-gradient(135deg,color-mix(in srgb,var(--muted) 45%,transparent) 0 3px,transparent 3px 7px);color:var(--muted)}
+.lw-cell.lw-best{box-shadow:inset 0 0 0 2px var(--ink)}
+.lw-cell.lw-record{background:var(--lw-rec)!important;color:#fff;box-shadow:inset 0 0 0 2px color-mix(in srgb,#fff 60%,var(--lw-rec))}
+.lw-cell.lw-more{background:transparent;border:1px solid var(--line);color:var(--muted)}
+.lw-typ{font:600 12.5px var(--lw-num);text-align:right}
+.lw-change{margin:8px 0 4px;font-size:11.5px;color:var(--amber)}
+.lw-diff{display:inline-block;font-size:12px;color:var(--ink);background:color-mix(in srgb,var(--amber) 16%,transparent);border-radius:5px;padding:0 7px;margin:1px 0}
+.lw-legend{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;margin-top:12px;font-size:12px;color:var(--muted)}
+.lw-ramp{width:200px;height:10px;border-radius:3px;background:linear-gradient(90deg,rgb(62,207,142),rgb(201,226,101),rgb(242,183,5),rgb(240,138,75),rgb(229,72,77))}
+.lw-key{display:inline-flex;align-items:center;gap:6px}.lw-key .lw-cell{width:16px;height:12px}
+#lw-older{margin-top:12px}
+/* What moved the pace */
+.lw-ledger .hint{margin:4px 0 10px}
+.lw-lrow{display:grid;grid-template-columns:90px minmax(0,1fr) 170px 150px;gap:12px;align-items:center;padding:9px 0;border-top:1px solid var(--line);font-size:13px}
+.lw-lhead{font-size:10.5px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);border-top:0;padding-top:0}
+.lw-bar{display:block;height:8px;border-radius:4px;background:currentColor;margin-bottom:3px}
+/* The selected run */
+.lw-drawer{position:sticky;top:16px;max-height:calc(100vh - 32px);overflow:auto}
+.lw-drawer .eyebrow{margin-bottom:4px}
+.lw-drawer h2{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+.lw-drawer h3{font:italic 700 16px/1.1 var(--lw-title);text-transform:uppercase;margin:18px 0 8px}
+.lw-tag{font:600 10.5px 'Segoe UI',system-ui,sans-serif;font-style:normal;letter-spacing:.08em;text-transform:uppercase;padding:2px 7px;border-radius:5px;border:1px solid var(--line);color:var(--muted)}
+.lw-tag[data-tag=test]{color:var(--amber);border-color:color-mix(in srgb,var(--amber) 45%,var(--line))}
+.lw-tag[data-tag=club]{color:#5aa9e6;border-color:color-mix(in srgb,#5aa9e6 45%,var(--line))}
+.lw-tag[data-tag=race],.lw-tag[data-tag=endurance]{color:var(--lw-bad);border-color:color-mix(in srgb,var(--accent) 45%,var(--line))}
+.lw-src{color:var(--muted);font-size:12.5px;margin:4px 0 10px}
+.lw-line{display:flex;flex-wrap:wrap;gap:4px 12px;font-size:12px;color:var(--muted);margin:0 0 8px}
+.lw-line b{color:var(--ink);font-weight:600}
+.lw-chart{width:100%;height:auto;display:block;margin:4px 0 8px}
+.lw-bar-lap{fill:#5aa9e6;opacity:.85}.lw-bar-best{fill:var(--green)}.lw-bar-slow{fill:color-mix(in srgb,var(--muted) 55%,transparent)}.lw-bar-out{fill:color-mix(in srgb,var(--muted) 25%,transparent)}
+.lw-chart-typ{stroke:var(--muted);stroke-dasharray:3 4}
+.lw-chart-label{fill:var(--muted);font:10px var(--lw-num)}
+.lw-vs{font-size:13px;margin:10px 0 0;line-height:1.7}
+.lw-specs{margin:0}.lw-specs div{display:flex;justify-content:space-between;gap:10px;padding:6px 0;border-bottom:1px solid var(--line);font-size:13px}
+.lw-specs dt{color:var(--muted)}.lw-specs dd{margin:0;font-family:var(--lw-num)}
+.lw-tags{margin-bottom:8px}
+.lw-drawer textarea{width:100%;min-height:70px;resize:vertical;background:var(--bg);color:var(--ink);border:1px solid var(--line);border-radius:7px;padding:8px 10px;font:13px/1.45 'Segoe UI',system-ui,sans-serif}
+.lw-entered{font-size:12.5px;color:var(--muted);white-space:pre-line;margin:8px 0 0}.lw-entered .lw-label{display:block;margin-bottom:2px}
+.lw-actions{margin-top:14px}
+#lw-sources{margin-top:16px}
+@media(max-width:1180px){.lw-grid{grid-template-columns:1fr}.lw-drawer{position:static;max-height:none}}
+@media(max-width:860px){.lw-score{grid-template-columns:1fr 1fr}.lw-score>div:nth-child(2){border-right:0}.lw-score>div:nth-child(-n+2){border-bottom:1px solid var(--line)}.lw-lrow{grid-template-columns:70px 1fr;}.lw-lrow>span:nth-child(n+3){grid-column:2}.lw-lhead{display:none}}
+@media(max-width:560px){.lw-score{grid-template-columns:1fr}.lw-score>div{border-right:0;border-bottom:1px solid var(--line)}.lw-car{flex-basis:180px}.lw-big{font-size:36px}}
+/* Long runs: smaller squares, so up to 40 laps fit beside the selected run. */
+.lw-row.lw-dense{grid-template-columns:160px repeat(var(--cols),minmax(13px,1fr)) 66px;gap:2px;min-width:calc(236px + var(--cols) * 15px)}
+.lw-row.lw-dense .lw-cell{height:24px;border-radius:3px}
+.lw-cols.lw-dense span{font-size:9px}
+.lw-cols.lw-dense span:nth-child(even):not(:last-child){visibility:hidden}

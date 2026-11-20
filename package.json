@@ -31,7 +31,7 @@
     "test:storage-ui": "electron tests/storage-ui.cjs",
     "test:updates-ui": "electron tests/updates-ui.cjs",
     "test:race-analysis-ui": "electron tests/race-analysis-ui.cjs",
-    "test:race-progress-ui": "electron tests/race-progress-ui.cjs",
+    "test:laps-ui": "electron tests/laps-ui.cjs",
     "test:manual-laps-ui": "electron tests/manual-laps-ui.cjs",
     "test:chassis-ui": "electron tests/chassis-ui.cjs",
     "test:prediction-ui": "electron tests/prediction-ui.cjs",
