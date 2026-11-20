@@ -49,7 +49,8 @@ The tab is Setups: a shelf of setups by car, one setup read by topic, or up to t
   side by side, a "compare with the workbench" choice so you don't need to save first; Analysis folds into the workbench
   (it is the same page for a saved setup).
 
-### 3. Library: Saved setups and Garage · Remake
+### 3. Library: Saved setups and Garage · Remake · **Done ("Setup Binder")**
+One list of setups by car with gearing, tyre, weight, top speed and best lap with this gearing, favourites and filters, tick for compare/export/delete, a spec card, and Cars & tracks below. Still open from this item: editing a car inline instead of in its dialog, and track records per lane in the track list.
 - Saved setups is a table of name, gearing, tyres and weight, with a detail card whose picture is a generic chassis and
   wheels. 8 buttons on the card. Setups are not grouped by car, although every setup has a car.
 - The Garage has car tiles with an empty grey picture and a wheel icon, "2 setup(s) · 7 run(s)", and a "TELEMETRY" tag on

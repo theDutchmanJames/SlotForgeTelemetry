@@ -32,7 +32,7 @@ function initializeDesign(){
   if(carField){
     const row=document.createElement('div');row.className='setup-car-row';carField.replaceWith(row);row.append(carField);
     const hint=carField.querySelector('small');if(hint)hint.remove();
-    row.insertAdjacentHTML('beforeend','<a class="text-button setup-car-link" href="#library/garage" title="Paddock cars and cars added in Library → Garage">Manage cars</a>');
+    row.insertAdjacentHTML('beforeend','<a class="text-button setup-car-link" href="#library/garage" title="Paddock cars and cars added in Library → Cars &amp; tracks">Manage cars</a>');
   }
   if(tools){
     example.className='btn ghost';

@@ -93,5 +93,7 @@ const SetupsUI=(()=>{
  }
  const same=(x,y)=>String(x??'').trim()===String(y??'').trim();
  function render(){markup();if(!$('setup-shelf'))return;shelf();const base=entry(analysisId);$('setup-title').textContent=base?base.setup.name:'';if(comparing)sheet();}
- return {render,route,select,toggle,state:()=>({base:analysisId,others:[...others],comparing})};
+ // From the Library's binder: two or three ticked setups, the first as the base.
+ function compareSet(ids){analysisId=ids[0];others=ids.slice(1,3);navigate('analyze/compare');}
+ return {render,route,select,toggle,compareSet,state:()=>({base:analysisId,others:[...others],comparing})};
 })();

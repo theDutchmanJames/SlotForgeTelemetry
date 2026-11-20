@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+### Library: every setup in one binder (remake)
+
+- **One list of all your setups, in a section per car.** Each row shows gearing, tyre, weight, top speed and the **best lap driven with that gearing** (from your runs of that car with the same pinion and gear). Cars without setups show with a *New setup* button; setups without a car have their own section.
+- **Favourites:** star a setup. Filters: *All*, *Favourites*, *Driven*, *Not driven yet*, next to search and sort.
+- **Tick several setups** for one action bar: *Compare* (two or three, on the Setups page), *Export files* (one setup file each) and *Delete* (one confirmation, with Undo).
+- **The selected setup is a spec card:** gearing, ratio, top speed, weight, power-to-weight and rear tyre, where it was driven, notes, and *Open on the workbench*, *Compare with…*, *Setup sheet*, *Rename*, *Duplicate*, *Export file* and *Delete*.
+- **Cars & tracks** sit below the setups on the same page: cars as a list beside the selected car, tracks under them. The side list is gone; *Library → Garage* links scroll to Cars & tracks.
+- A favourite is stored with the setup in the library file. Older Telemetry versions open the file and ignore the star.
+
 ### Setups: what does this change do? (remake)
 
 Analyze is now **Setups**, built around one question: what does a change do?

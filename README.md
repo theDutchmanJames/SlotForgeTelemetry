@@ -186,13 +186,13 @@ Save the inputs with a setup, then open **Setups → Testing & planning** for ta
 
 ### Garage: cars and tracks
 
-**Library → Garage** brings your cars and tracks together:
+**Library → Cars & tracks** (below your setups) brings your cars and tracks together:
 
 - **Paddock cars** arrive with each import from Paddock on this computer, with their photo and current configuration. They are read-only: edit them in Paddock.
 - **Telemetry cars** can be added for cars that are not in Paddock.
 - **Tracks** store their lanes and lane lengths.
 
-Choose a **Car** for each setup on the workbench. A car's page shows its setups and best laps per track and lane. Track day suggests your garage cars and tracks and fills in the lane length.
+Choose a **Car** for each setup on the workbench: the Library groups your setups by it. Selecting a car shows its setups and best laps per track and lane. Track day suggests your garage cars and tracks and fills in the lane length.
 
 ### Track day
 
@@ -260,7 +260,7 @@ Use **Export comparison report** when comparing two runs to save a self-containe
 
 ### Keep setups and lap libraries organised
 
-In **Library**, save named setups with notes, search and sort them, and load, rename, duplicate or delete entries. Open a setup directly in Setups, or compare it there. Share individual configurations through **Export file / Open file**.
+**Library** is one list of every setup, in a section per car, with gearing, tyre, weight, top speed and the **best lap driven with that gearing** as columns. Star your favourites and filter by *Favourites*, *Driven* or *Not driven yet*. Select a setup for its spec card (open on the workbench, compare, setup sheet, rename, duplicate, export file, delete), or tick several to compare up to three, export them or delete them at once (with Undo). Share individual configurations through **Export file / Open file**.
 
 The working draft is saved automatically on this computer. **Setups reads saved setups** (or *the workbench now* when comparing), so choose **Save setup** after changes you want to analyse. **Save as copy** preserves the original for comparison.
 

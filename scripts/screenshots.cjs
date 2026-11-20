@@ -71,7 +71,7 @@ app.whenReady().then(async()=>{
   await route('telemetry');await set('pinion','10');await route('trackday');
   await type('#trackday-change','pinion 9 → 10');await type('#trackday-laps',lapTimes(9.93,10,89).map(ms=>(ms/1000).toFixed(3)).join('\n'));await pause();
   await shot('trackday');await click('#trackday-save');await wait("document.querySelectorAll('#trackday-today tbody tr').length===2",'second run');
-  await route('library/garage');await click('[data-garage-car]');await shot('garage');
+  await route('library/garage');await click('[data-garage-car]');await shot('garage','#garage');
   // Laps: the Pace Wall of the Club GT, then one club night in the full lap analysis.
   await route('laps');await wait("document.querySelectorAll('#lw-wall .lw-row[style]').length>3",'the wall');
   await run(`[...document.querySelectorAll('[data-lw-run]')].find(b=>b.textContent.includes('Run 2'))?.click()`);await pause(300);await shot('laps');

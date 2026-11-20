@@ -70,7 +70,7 @@ app.whenReady().then(async()=>{
   assert.equal(await run(`!!document.querySelector('[data-sheet-metric=massG]')`),false,'unchanged results fold away');
   await capture('compare-v4');await route('library');await capture('library-v4');
   await click('[data-library-action=duplicate]');assert.equal((await data()).length,3);
-  await click('[data-library-action=rename]');await value('#library-entry-name','<b>Race trim</b>');await click('#library-editor-confirm');assert.match(await text('#library-list'),/<b>Race trim<\/b>/);assert.equal(await run(`document.querySelectorAll('#library-list b').length`),0);
+  await click('[data-library-action=rename]');await value('#library-entry-name','<b>Race trim</b>');await click('#library-editor-confirm');assert.match(await text('#library-list'),/<b>Race trim<\/b>/);assert.equal(await run(`document.querySelectorAll('#library-list .binder-name b b').length`),0);
   await value('#library-search','Race trim');assert.equal(await run(`document.querySelectorAll('.select-setup').length`),1);
   await click('[data-library-action=delete]');await click('#library-editor-cancel');assert.equal((await data()).length,3);
   await click('[data-library-action=delete]');await click('#library-editor-confirm');assert.equal((await data()).length,2);await click('#library-undo');assert.equal((await data()).length,3);

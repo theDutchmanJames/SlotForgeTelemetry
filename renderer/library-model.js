@@ -11,7 +11,8 @@
     for(const key of ['createdAt','updatedAt'])if(typeof value[key]!=='string'||!Number.isFinite(Date.parse(value[key])))throw Error('Invalid library date.');
     if(typeof value.notes!=='string'||value.notes.length>2000)throw Error('Notes must be at most 2,000 characters.');
     const setup=C.cleanSetup(value.setup);setup.name=name(setup.name);
-    return {id:value.id,setup,notes:value.notes,createdAt:value.createdAt,updatedAt:value.updatedAt};
+    if(value.favourite!==undefined&&typeof value.favourite!=='boolean')throw Error('Invalid favourite mark.');
+    return {id:value.id,setup,notes:value.notes,createdAt:value.createdAt,updatedAt:value.updatedAt,...(value.favourite?{favourite:true}:{})};
   }
   function clean(entries) {
     if(!Array.isArray(entries)||entries.length>LIMIT)throw Error('The library can hold up to 500 setups.');
@@ -33,7 +34,7 @@
   function save(entries,{id,setup,notes='',now,newId}) {
     const list=clean(entries),existing=id?list.find(e=>e.id===id):null;
     if(id&&!existing)throw Error('This saved setup no longer exists. Save a new copy instead.');
-    const next=entry({id:existing?.id||newId,setup,notes,createdAt:existing?.createdAt||now,updatedAt:now});
+    const next=entry({id:existing?.id||newId,setup,notes,createdAt:existing?.createdAt||now,updatedAt:now,favourite:existing?.favourite});
     return clean(existing?list.map(e=>e.id===id?next:e):[next,...list]);
   }
   function rename(entries,id,label,now) {
@@ -48,11 +49,13 @@
     const list=clean(entries);if(!list.some(e=>e.id===id))throw Error('This saved setup no longer exists.');
     return list.filter(e=>e.id!==id);
   }
+  // A favourite star: not an edit, so the saved date stays.
+  function star(entries,id,on){const list=clean(entries);if(!list.some(e=>e.id===id))throw Error('This saved setup no longer exists.');return clean(list.map(e=>e.id===id?{...e,favourite:!!on}:e));}
   function merge(entries,incoming,makeId) {return clean([...clean(incoming).map(e=>({...e,id:makeId()})),...clean(entries)]);}
   function search(entries,query='',sort='recent') {
     const q=query.trim().toLocaleLowerCase();
     return entries.filter(e=>(e.setup.name+' '+e.notes).toLocaleLowerCase().includes(q)).sort(sort==='name'?(a,b)=>a.setup.name.localeCompare(b.setup.name):(a,b)=>Date.parse(b.updatedAt)-Date.parse(a.updatedAt)||a.setup.name.localeCompare(b.setup.name));
   }
-  const api={LIMIT,MAX_BYTES,name,entry,clean,decode,encode,save,rename,duplicate,remove,merge,search};
+  const api={LIMIT,MAX_BYTES,name,entry,clean,decode,encode,save,rename,duplicate,remove,star,merge,search};
   if(typeof module==='object'&&module.exports)module.exports=api;else root.LibraryModel=api;
 })(globalThis);
