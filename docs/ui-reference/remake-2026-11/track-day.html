@@ -1,0 +1,229 @@
+<!doctype html>
+<html lang="en" data-tone="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Track day remake</title>
+<style>
+@font-face{font-family:'SF Mono';src:url('../../../renderer/fonts/robotomono/RobotoMono[wght].ttf') format('truetype');font-weight:100 700}
+@font-face{font-family:'SF Cond';src:url('../../../renderer/fonts/barlowcondensed/BarlowCondensed-Bold.ttf') format('truetype');font-weight:700}
+@font-face{font-family:'SF Cond';src:url('../../../renderer/fonts/barlowcondensed/BarlowCondensed-BoldItalic.ttf') format('truetype');font-weight:700;font-style:italic}
+:root{--bg:#171b21;--panel:#222831;--panel2:#1c2129;--raised:#2a313b;--ink:#e8e6e1;--ink2:#c4c8ce;--muted:#98a0ab;--faint:#6b7380;--line:#343b47;--line2:#2b313b;
+ --accent:#e5484d;--accent-text:#f06b6f;--good:#3ecf8e;--warn:#f2b705;--rec:#a855f7;--blue:#5aa9e6;--page:#0f1216;
+ --ui:'Segoe UI',system-ui,sans-serif;--cond:'SF Cond','Bahnschrift',sans-serif;--mono:'SF Mono',Consolas,monospace}
+[data-tone=light]{--bg:#f1efea;--panel:#ffffff;--panel2:#f7f5f1;--raised:#ecebe6;--ink:#1d2229;--ink2:#3a414b;--muted:#656c76;--faint:#8b929b;--line:#d9d6cf;--line2:#e6e3dd;
+ --accent:#d62828;--accent-text:#c21f1f;--good:#187a50;--warn:#956000;--rec:#7c3aed;--blue:#1f6fb2;--page:#e4e1da}
+*{box-sizing:border-box}
+body{margin:0;background:var(--page);color:var(--ink);font:13.5px/1.45 var(--ui)}
+.wrap{max-width:1460px;margin:0 auto;padding:26px 20px 90px}
+h1{font:italic 700 42px/1 var(--cond);text-transform:uppercase;margin:0 0 6px}
+.lead{color:var(--muted);margin:0 0 12px;max-width:110ch;font-size:14px}
+ul.why{margin:0 0 6px;padding-left:18px;color:var(--ink2);max-width:120ch;font-size:14px}ul.why li{margin:3px 0}
+.bar{position:sticky;top:0;z-index:20;display:flex;flex-wrap:wrap;align-items:center;gap:10px 18px;margin:14px -20px 18px;padding:12px 20px;background:color-mix(in srgb,var(--page) 88%,transparent);backdrop-filter:blur(6px);border-bottom:1px solid var(--line2)}
+.bar b{font:600 10.5px var(--ui);letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.sg{display:inline-flex;gap:2px;padding:2px;border:1px solid var(--line);border-radius:8px;background:var(--bg)}
+.sg button{height:30px;padding:0 14px;border:0;border-radius:6px;background:transparent;color:var(--muted);font:500 13px var(--ui);cursor:pointer}
+.sg button.on{background:color-mix(in srgb,var(--ink) 13%,var(--panel));color:var(--ink);font-weight:650}
+.opt-note{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:0 0 18px}
+.opt-note>div{border:1px solid var(--line);border-radius:10px;padding:14px 16px;background:var(--panel2)}
+.opt-note>div.on{border-color:var(--ink2)}
+.opt-note h3{margin:0 0 4px;font:italic 700 22px/1 var(--cond);text-transform:uppercase}
+.opt-note p{margin:0 0 6px;color:var(--muted)}.opt-note ul{margin:0;padding-left:18px;color:var(--ink2)}
+.mono{font-family:var(--mono)}
+/* the app frame */
+.app{border:1px solid var(--line);border-radius:12px;overflow:hidden;background:var(--bg)}
+.top{display:flex;align-items:center;gap:14px;height:56px;padding:0 16px;background:var(--panel2);border-bottom:1px solid var(--line)}
+.logo{display:flex;align-items:center;gap:9px;font:italic 700 21px/1 var(--cond);letter-spacing:.02em}
+.logo i{width:30px;height:30px;border-radius:8px;background:var(--accent)}
+.tabs{display:flex;gap:6px;margin-left:10px}
+.tabs span{display:inline-flex;gap:2px;padding:3px;border-radius:9px;background:rgba(0,0,0,.22)}
+[data-tone=light] .tabs span{background:rgba(0,0,0,.06)}
+.tabs a{padding:6px 11px;border-radius:7px;color:var(--muted);font-size:13px;text-decoration:none}
+.tabs a.on{background:color-mix(in srgb,var(--ink) 12%,transparent);color:var(--ink);font-weight:600}
+.lights{margin-left:auto;font-size:12px;color:var(--muted);display:flex;gap:6px;align-items:center}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--good);display:inline-block}
+.page{padding:22px 24px 28px}
+.eyebrow{font:600 11px var(--ui);letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.ph{display:flex;align-items:flex-end;gap:14px;margin-bottom:16px}
+.ph h2{font:italic 700 34px/1 var(--cond);text-transform:uppercase;margin:4px 0 0}
+.ph .grow{flex:1}
+.btn{display:inline-flex;align-items:center;gap:6px;height:34px;padding:0 13px;border:1px solid var(--line);border-radius:7px;background:var(--raised);color:var(--ink);font:500 13px var(--ui);cursor:pointer;white-space:nowrap}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:600}
+.btn.ghost{background:transparent}.btn.small{height:28px;padding:0 10px;font-size:12.5px}
+.chip{display:inline-flex;align-items:center;gap:5px;height:24px;padding:0 9px;border-radius:999px;border:1px solid var(--line);color:var(--ink2);font-size:12px;background:var(--panel2);white-space:nowrap}
+.chip.on{background:color-mix(in srgb,var(--ink) 12%,var(--panel));color:var(--ink);border-color:var(--ink2)}
+.tag{font:600 10.5px var(--ui);letter-spacing:.08em;text-transform:uppercase;padding:2px 7px;border-radius:5px;border:1px solid var(--line);color:var(--muted)}
+.tag.club{color:var(--blue);border-color:color-mix(in srgb,var(--blue) 45%,var(--line))}
+.tag.test{color:var(--warn);border-color:color-mix(in srgb,var(--warn) 45%,var(--line))}
+.tag.rec{color:var(--rec);border-color:color-mix(in srgb,var(--rec) 55%,var(--line))}
+.change{display:inline-flex;align-items:center;gap:5px;font-size:12px;color:var(--ink);background:color-mix(in srgb,var(--warn) 14%,transparent);border-radius:5px;padding:1px 7px}
+.change.none{background:transparent;color:var(--faint);padding:0}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:10px}
+.k{font:600 10.5px var(--ui);letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.big{font:600 26px/1.1 var(--mono)}
+.better{color:var(--good)}.worse{color:var(--accent-text)}
+.note-new{display:inline-block;font:700 9.5px var(--ui);letter-spacing:.1em;text-transform:uppercase;color:#fff;background:var(--rec);padding:1px 6px;border-radius:4px;vertical-align:2px;margin-left:6px}
+
+.hidden{display:none!important}
+.h5{margin:0 0 6px;font:italic 700 19px/1.1 var(--cond);text-transform:uppercase}
+.sub{color:var(--muted);font-size:12.5px;margin:0 0 12px}
+.chg{display:inline-block;font:12px var(--mono);background:color-mix(in srgb,var(--warn) 16%,transparent);padding:1px 7px;border-radius:5px}
+.sess{display:flex;flex-wrap:wrap;align-items:center;gap:10px 14px;padding:12px 16px;margin-bottom:14px}
+.sess .pick{display:inline-flex;align-items:center;gap:8px;height:36px;padding:0 12px;border:1px solid var(--line);border-radius:8px;background:var(--bg);font-size:13.5px}
+.sess .pick b{font:italic 700 17px/1 var(--cond);text-transform:uppercase}
+.sess .lbl{font:600 10.5px var(--ui);letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.lanes{display:inline-flex;gap:2px;padding:2px;border:1px solid var(--line);border-radius:8px;background:var(--bg)}
+.lanes span{padding:6px 11px;border-radius:6px;font-size:12.5px;color:var(--muted)}.lanes span.on{background:color-mix(in srgb,var(--ink) 13%,var(--panel));color:var(--ink);font-weight:600}
+/* ---------- A: Pit Board ---------- */
+.board{display:grid;grid-template-columns:repeat(3,minmax(0,1fr)) minmax(0,1.25fr);gap:12px;align-items:stretch}
+.runcol{padding:14px 16px;display:flex;flex-direction:column;gap:10px;position:relative}
+.runcol.best{outline:2px solid var(--good);outline-offset:-1px}
+.runcol .rn{display:flex;align-items:baseline;gap:8px}
+.runcol .rn b{font:italic 700 24px/1 var(--cond);text-transform:uppercase}
+.runcol .rn small{color:var(--muted)}
+.big{font:700 40px/1 var(--cond);letter-spacing:.01em}
+.bigl{font:600 10.5px var(--ui);letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.trio{display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:12px;color:var(--muted)}
+.trio b{display:block;color:var(--ink);font:600 14px var(--mono)}
+.bars{display:flex;align-items:flex-end;gap:2px;height:46px}
+.bars i{flex:1;border-radius:2px 2px 0 0;background:var(--blue);opacity:.8}
+.bars i.b{background:var(--good);opacity:1}.bars i.s{background:var(--line)}
+.verd{padding:8px 10px;border-radius:8px;font-size:13px;font-weight:600}
+.verd.good{background:color-mix(in srgb,var(--good) 15%,transparent);color:var(--good)}
+.verd.bad{background:color-mix(in srgb,var(--accent) 15%,transparent);color:var(--accent-text)}
+.verd.base{background:color-mix(in srgb,var(--ink) 7%,transparent);color:var(--muted);font-weight:500}
+.crown{position:absolute;top:10px;right:12px;font:700 10px var(--ui);letter-spacing:.1em;text-transform:uppercase;color:var(--good)}
+.next{border:1.5px dashed var(--ink2);background:color-mix(in srgb,var(--ink) 3%,var(--panel))}
+.steps{display:grid;gap:6px}
+.stepper{display:grid;grid-template-columns:90px auto 1fr;gap:8px;align-items:center;font-size:13px}
+.stepper .ctl{display:inline-flex;align-items:center;border:1px solid var(--line);border-radius:7px;overflow:hidden}
+.stepper .ctl span{padding:4px 10px;font:600 13px var(--mono)}.stepper .ctl button{border:0;background:var(--raised);color:var(--ink);width:28px;height:28px;font-size:15px}
+.stepper.ch .ctl{border-color:var(--warn)}.stepper small{color:var(--muted)}
+.lapgrid{display:grid;grid-template-columns:repeat(5,1fr);gap:5px}
+.lapgrid span{height:32px;border:1px solid var(--line);border-radius:6px;display:grid;place-items:center;font:500 12.5px var(--mono);background:var(--bg)}
+.lapgrid span.f{border-color:var(--ink2)}.lapgrid span.cur{border:2px solid var(--accent)}
+.live{display:flex;justify-content:space-between;align-items:center;padding:8px 10px;border-radius:8px;background:color-mix(in srgb,var(--good) 12%,transparent);font-size:13px}
+.keep{margin-top:14px;display:flex;align-items:center;gap:12px;padding:12px 16px;border-radius:10px;border:1px solid color-mix(in srgb,var(--good) 45%,var(--line));background:color-mix(in srgb,var(--good) 8%,var(--panel))}
+.keep b{font-size:14px}
+/* ---------- B: Test Plan ---------- */
+.b-grid{display:grid;grid-template-columns:280px minmax(0,1fr) 300px;gap:14px;align-items:start}
+.plan{padding:14px}
+.pstep{display:grid;grid-template-columns:28px 1fr;gap:10px;padding:10px 6px;border-radius:8px}
+.pstep.on{background:color-mix(in srgb,var(--ink) 9%,var(--panel))}
+.pstep .n{width:26px;height:26px;border-radius:50%;display:grid;place-items:center;font:700 12px var(--mono);border:1.5px solid var(--muted);color:var(--muted)}
+.pstep.done .n{background:var(--good);border-color:var(--good);color:#06150e}
+.pstep.on .n{border-color:var(--accent);color:var(--accent-text)}
+.pstep b{display:block;font-size:13.5px}.pstep small{color:var(--muted);font-size:12px}
+.timer{padding:20px 22px;text-align:center}
+.mode{display:inline-flex;gap:2px;padding:2px;border:1px solid var(--line);border-radius:8px;background:var(--bg);margin-bottom:16px}
+.mode span{padding:6px 14px;border-radius:6px;font-size:13px;color:var(--muted)}.mode span.on{background:color-mix(in srgb,var(--ink) 13%,var(--panel));color:var(--ink);font-weight:600}
+.clock{font:700 88px/1 var(--mono);letter-spacing:-.02em;margin:6px 0}
+.clock small{font-size:36px;color:var(--muted)}
+.lapno{font:600 13px var(--ui);letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.tap{margin:18px auto 8px;width:min(360px,100%);height:86px;border-radius:14px;border:0;background:var(--accent);color:#fff;font:italic 700 30px/1 var(--cond);text-transform:uppercase;letter-spacing:.04em;box-shadow:0 8px 30px color-mix(in srgb,var(--accent) 35%,transparent)}
+.taphint{color:var(--muted);font-size:12.5px}
+.tlist{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-top:16px}
+.tlist span{font:500 12.5px var(--mono);padding:4px 8px;border-radius:6px;border:1px solid var(--line)}
+.tlist span.b{border-color:var(--good);color:var(--good)}.tlist span.x{text-decoration:line-through;color:var(--faint)}
+.gauge{padding:16px}
+.gauge .scale{position:relative;height:14px;border-radius:7px;background:linear-gradient(90deg,var(--good),color-mix(in srgb,var(--muted) 40%,transparent) 50%,var(--accent));margin:18px 0 6px}
+.gauge .needle{position:absolute;top:-6px;width:4px;height:26px;border-radius:2px;background:var(--ink);left:28%}
+.gauge .ends{display:flex;justify-content:space-between;font-size:11px;color:var(--muted)}
+.agree{display:grid;gap:6px;margin-top:12px}
+.agree div{display:flex;justify-content:space-between;font-size:12.5px;padding:6px 0;border-top:1px solid var(--line2)}
+.agree b{font-family:var(--mono)}
+@media(max-width:1100px){.board,.b-grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="wrap">
+ <div class="eyebrow">SlotForge Telemetry · remake preview 4 of 4</div>
+ <h1>Track day, remade</h1>
+ <p class="lead">Track day is the page you use with the car in your hand. Today it opens with four free text fields (car, track, lane, driver), a copy of the workbench, an empty text box for "what did you change", another for the lap times, and the best part, <b>compare with last run</b>, squeezed into the right column. Nothing knows it is one session, and you type the change by hand while the workbench already knows it.</p>
+ <ul class="why">
+  <li><b>Replaces:</b> the Track day page (context fields, current setup, log a run, compare with last run, today's runs).</li>
+  <li><b>Kept:</b> lap entry by typing or pasting (seconds or minutes:seconds), the "in order, no laps missing" choice, the comparison with the run before (best, typical, spread, laps), runs saved as Track day runs that land on the Laps wall.</li>
+  <li><b>New, each one for you to approve:</b> car, track and lane picked from your garage; the change picked from the setup (pinion 9 → 10) and written to the workbench for you; a <b>session</b> that holds today's runs; and in option B a tap timer and a test plan.</li>
+ </ul>
+ <div class="bar">
+  <b>Option</b><div class="sg" id="opt"><button class="on" data-o="a">A · Pit Board</button><button data-o="b">B · Test Plan</button></div>
+  <b>Look</b><div class="sg" id="tone"><button class="on" data-t="dark">Dark</button><button data-t="light">Light</button></div>
+  <span style="color:var(--muted);font-size:12.5px">Example: Club GT on the Club circuit, lane 1. Run 1 baseline, run 2 pinion 9 → 10, run 3 being entered.</span>
+ </div>
+ <div class="opt-note">
+  <div id="noteA" class="on"><h3>A · Pit Board</h3><p>Every run side by side, like the board at the pit wall.</p>
+   <ul><li>On top: the <b>session</b>: car, track, lane and driver, picked from your garage.</li><li>Each run is a <b>column</b>: its change, typical lap in big figures, best, spread, its laps, and the verdict against the run before. The quickest is marked.</li><li>The last column is <b>the next run</b>: change the setup with steppers (pinion, gear, weight, tyre), type laps one box at a time; the verdict appears as you type.</li><li>When a change wins: <b>Keep this change</b> saves it to the workbench setup.</li></ul></div>
+  <div id="noteB"><h3>B · Test Plan</h3><p>A guided test with a timer, like a test session with an engineer.</p>
+   <ul><li>Left: a <b>test plan</b>: baseline, the change, then the baseline again to make sure the track did not change.</li><li>Centre: a <b>tap timer</b>: press Space (or the big button) when the car crosses the line; the lap times fill in by themselves. Typing or pasting stays possible.</li><li>Right: the <b>verdict gauge</b>: quicker or slower, and whether both baseline runs agree.</li><li>At the end: keep the change, or go back to the baseline.</li></ul></div>
+ </div>
+
+ <div class="app">
+  <div class="top"><div class="logo"><i></i>TELEMETRY</div>
+   <div class="tabs"><span><a>Workbench</a><a class="on">Track day</a></span><span><a>Laps</a><a>Setups</a><a>Driver Feedback</a></span><span><a>Library</a><a>Settings</a></span></div>
+   <div class="lights"><span class="dot"></span>Local workspace</div></div>
+
+  <!-- A -->
+  <div class="page" id="A">
+   <div class="ph"><div class="grow"><div class="eyebrow">At the track · today, 20 Nov</div><h2>Track day</h2></div><button class="btn ghost">End session</button><button class="btn">Open on the Laps wall</button></div>
+   <div class="card sess"><span class="lbl">Car</span><span class="pick"><b>Club GT</b> ▾</span><span class="lbl">Track</span><span class="pick">Club circuit ▾</span><span class="lbl">Lane</span><span class="lanes"><span class="on">1 · 20.0 m</span><span>2 · 20.3 m</span></span><span class="lbl">Driver</span><span class="pick">Alex ▾</span><span style="flex:1"></span><span style="color:var(--muted);font-size:12.5px">Setup: <b style="color:var(--ink)">Club GT · technical</b> · 9/27 · 80 g</span></div>
+   <div class="board">
+    <div class="card runcol"><div class="rn"><b>Run 1</b><small>19:42 · 10 laps</small></div><span class="chg" style="background:transparent;padding:0;color:var(--muted)">baseline · 9/27</span>
+     <div><div class="bigl">Typical lap</div><div class="big">10.024</div></div><div class="trio"><span>Best<b>9.940</b></span><span>Spread<b>0.089</b></span></div>
+     <div class="bars" id="b1"></div><div class="verd base">The baseline</div></div>
+    <div class="card runcol best"><span class="crown">Quickest</span><div class="rn"><b>Run 2</b><small>19:58 · 10 laps</small></div><span><span class="chg">pinion 9 → 10</span></span>
+     <div><div class="bigl">Typical lap</div><div class="big" style="color:var(--good)">9.910</div></div><div class="trio"><span>Best<b>9.810</b></span><span>Spread<b>0.106</b></span></div>
+     <div class="bars" id="b2"></div><div class="verd good">▲ 0.114 s quicker than run 1</div></div>
+    <div class="card runcol"><div class="rn"><b>Run 3</b><small>20:15 · 10 laps</small></div><span><span class="chg">pinion 10 → 11</span></span>
+     <div><div class="bigl">Typical lap</div><div class="big" style="color:var(--accent-text)">9.987</div></div><div class="trio"><span>Best<b>9.902</b></span><span>Spread<b>0.141</b></span></div>
+     <div class="bars" id="b3"></div><div class="verd bad">▼ 0.077 s slower than run 2</div></div>
+    <div class="card runcol next"><div class="rn"><b>Run 4</b><small>next · 4 of ~10 laps</small></div>
+     <div class="bigl">What you change</div>
+     <div class="steps">
+      <div class="stepper ch"><span>Pinion</span><span class="ctl"><button>−</button><span>10</span><button>+</button></span><small>back from 11 to 10</small></div>
+      <div class="stepper"><span>Gear</span><span class="ctl"><button>−</button><span>27</span><button>+</button></span><small></small></div>
+      <div class="stepper"><span>Weight</span><span class="ctl"><button>−</button><span>80 g</span><button>+</button></span><small></small></div>
+      <div class="stepper"><span>Rear tyre</span><span class="ctl"><button>−</button><span>20 mm</span><button>+</button></span><small>+ more fields</small></div>
+     </div>
+     <div class="bigl">Laps · Enter for the next box, or paste</div>
+     <div class="lapgrid"><span class="f">9.92</span><span class="f">9.88</span><span class="f">10.01</span><span class="f">9.86</span><span class="cur">|</span><span></span><span></span><span></span><span></span><span></span></div>
+     <div class="live"><span>So far: typical <b class="mono">9.900</b></span><b style="color:var(--good)">▲ 0.010 s vs run 2</b></div>
+     <button class="btn primary" style="justify-content:center">Save run 4</button></div>
+   </div>
+   <div class="keep"><span style="font-size:20px">✓</span><div><b>Pinion 10 is your quickest today</b><br><small style="color:var(--muted)">Run 2: typical 9.910 s, 0.114 s quicker than the baseline. The workbench still has 9.</small></div><span style="flex:1"></span><button class="btn">Not now</button><button class="btn primary">Keep this change</button></div>
+  </div>
+
+  <!-- B -->
+  <div class="page hidden" id="B">
+   <div class="ph"><div class="grow"><div class="eyebrow">At the track · test session</div><h2>Track day</h2></div><button class="btn ghost">End session</button></div>
+   <div class="card sess"><span class="lbl">Car</span><span class="pick"><b>Club GT</b> ▾</span><span class="lbl">Track</span><span class="pick">Club circuit ▾</span><span class="lbl">Lane</span><span class="lanes"><span class="on">1 · 20.0 m</span><span>2 · 20.3 m</span></span><span class="lbl">Driver</span><span class="pick">Alex ▾</span></div>
+   <div class="b-grid">
+    <div class="card plan"><div class="h5">Test plan</div><p class="sub">Testing <span class="chg">pinion 9 → 10</span>. Three runs of 10 laps.</p>
+     <div class="pstep done"><span class="n">✓</span><div><b>Baseline · 9/27</b><small>typical 10.024 · best 9.940</small></div></div>
+     <div class="pstep done"><span class="n">✓</span><div><b>The change · 10/27</b><small>typical 9.910 · best 9.810</small></div></div>
+     <div class="pstep on"><span class="n">3</span><div><b>Baseline again · 9/27</b><small>change the pinion back to 9, then drive 10 laps. Lap 6 of 10.</small></div></div>
+     <div class="pstep"><span class="n">4</span><div><b>Decide</b><small>keep pinion 10, or stay on 9</small></div></div>
+     <button class="btn small ghost" style="margin-top:6px">+ Add a run to the plan</button>
+    </div>
+    <div class="card timer"><div class="mode"><span class="on">Tap timer</span><span>Type or paste</span></div>
+     <div class="lapno">Run 3 · lap 6 of 10</div><div class="clock">7.<small>418</small></div><div class="taphint">last lap <b class="mono" style="color:var(--ink)">10.012</b> · typical so far <b class="mono" style="color:var(--ink)">10.006</b></div>
+     <button class="tap">Lap · Space</button><div class="taphint">Press Space each time the car crosses the line. Backspace removes the last lap; X marks it as a crash.</div>
+     <div class="tlist"><span>10.044</span><span class="b">9.958</span><span class="x">11.802</span><span>10.012</span><span>9.996</span></div></div>
+    <div class="card gauge"><div class="h5">Verdict so far</div><p class="sub" style="margin:0">Pinion 10 against the two baseline runs.</p>
+     <div class="scale"><span class="needle"></span></div><div class="ends"><span>quicker</span><span>same</span><span>slower</span></div>
+     <p style="font-size:15px;margin:12px 0 0"><b style="color:var(--good)">Pinion 10 is about 0.10 s quicker</b> per lap.</p>
+     <div class="agree"><div><span>Baseline, run 1</span><b>10.024</b></div><div><span>Baseline again, so far</span><b>10.006</b></div><div><span>The track stayed the same</span><b style="color:var(--good)">yes · 0.018 s</b></div><div><span>The change, run 2</span><b>9.910</b></div></div>
+     <p class="sub" style="margin-top:10px">If both baselines differ by more than the change, the verdict says "unclear: the track changed".</p></div>
+   </div>
+  </div>
+ </div>
+ <p class="lead" style="margin-top:16px">Both options save each run as a Track day run, so it appears on the Laps wall with its change marked, and both keep typing or pasting laps. The tap timer in option B is a stopwatch on this computer: good for testing, not as precise as a timing system's lap counter.</p>
+</div>
+<script>
+function bars(id,laps){const lo=Math.min(...laps),hi=Math.max(...laps.filter(x=>x<lo+0.35));document.getElementById(id).innerHTML=laps.map(v=>{const slow=v>lo+0.35;return `<i class="${v===lo?'b':slow?'s':''}" style="height:${slow?100:20+80*(v-lo)/(hi-lo||1)}%"></i>`;}).join('');}
+bars('b1',[9.94,10.02,10.10,10.07,10.14,10.62,10.02,9.99,9.99,10.03]);bars('b2',[9.81,9.98,9.87,10.01,9.91,10.48,9.86,9.91,9.92,9.86]);bars('b3',[9.95,9.90,10.06,9.99,10.12,10.55,9.98,9.92,10.04,9.97]);
+for(const b of document.querySelectorAll('#opt button'))b.onclick=()=>{for(const x of document.querySelectorAll('#opt button'))x.classList.toggle('on',x===b);const a=b.dataset.o==='a';document.getElementById('A').classList.toggle('hidden',!a);document.getElementById('B').classList.toggle('hidden',a);document.getElementById('noteA').classList.toggle('on',a);document.getElementById('noteB').classList.toggle('on',!a);};
+for(const b of document.querySelectorAll('#tone button'))b.onclick=()=>{for(const x of document.querySelectorAll('#tone button'))x.classList.toggle('on',x===b);document.documentElement.dataset.tone=b.dataset.t;};
+const q=new URLSearchParams(location.search);if(q.get('o')==='b')document.querySelector('#opt [data-o=b]').click();if(q.get('t')==='light')document.querySelector('#tone [data-t=light]').click();
+</script>
+</body>
+</html>
