@@ -1,0 +1,201 @@
+<!doctype html>
+<html lang="en" data-tone="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Calculations rework</title>
+<style>
+@font-face{font-family:'SF Mono';src:url('../../../renderer/fonts/robotomono/RobotoMono[wght].ttf') format('truetype');font-weight:100 700}
+@font-face{font-family:'SF Cond';src:url('../../../renderer/fonts/barlowcondensed/BarlowCondensed-Bold.ttf') format('truetype');font-weight:700}
+@font-face{font-family:'SF Cond';src:url('../../../renderer/fonts/barlowcondensed/BarlowCondensed-BoldItalic.ttf') format('truetype');font-weight:700;font-style:italic}
+:root{--bg:#171b21;--panel:#222831;--panel2:#1c2129;--raised:#2a313b;--ink:#e8e6e1;--ink2:#c4c8ce;--muted:#98a0ab;--faint:#6b7380;--line:#343b47;--line2:#2b313b;
+ --accent:#e5484d;--accent-text:#f06b6f;--good:#3ecf8e;--warn:#f2b705;--rec:#a855f7;--blue:#5aa9e6;--page:#0f1216;
+ --ui:'Segoe UI',system-ui,sans-serif;--cond:'SF Cond','Bahnschrift',sans-serif;--mono:'SF Mono',Consolas,monospace}
+[data-tone=light]{--bg:#f1efea;--panel:#ffffff;--panel2:#f7f5f1;--raised:#ecebe6;--ink:#1d2229;--ink2:#3a414b;--muted:#656c76;--faint:#8b929b;--line:#d9d6cf;--line2:#e6e3dd;
+ --accent:#d62828;--accent-text:#c21f1f;--good:#187a50;--warn:#956000;--rec:#7c3aed;--blue:#1f6fb2;--page:#e4e1da}
+*{box-sizing:border-box}
+body{margin:0;background:var(--page);color:var(--ink);font:13.5px/1.45 var(--ui)}
+.wrap{max-width:1460px;margin:0 auto;padding:26px 20px 90px}
+h1{font:italic 700 42px/1 var(--cond);text-transform:uppercase;margin:0 0 6px}
+.lead{color:var(--muted);margin:0 0 12px;max-width:110ch;font-size:14px}
+ul.why{margin:0 0 6px;padding-left:18px;color:var(--ink2);max-width:120ch;font-size:14px}ul.why li{margin:3px 0}
+.bar{position:sticky;top:0;z-index:20;display:flex;flex-wrap:wrap;align-items:center;gap:10px 18px;margin:14px -20px 18px;padding:12px 20px;background:color-mix(in srgb,var(--page) 88%,transparent);backdrop-filter:blur(6px);border-bottom:1px solid var(--line2)}
+.bar b{font:600 10.5px var(--ui);letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.sg{display:inline-flex;gap:2px;padding:2px;border:1px solid var(--line);border-radius:8px;background:var(--bg)}
+.sg button{height:30px;padding:0 14px;border:0;border-radius:6px;background:transparent;color:var(--muted);font:500 13px var(--ui);cursor:pointer}
+.sg button.on{background:color-mix(in srgb,var(--ink) 13%,var(--panel));color:var(--ink);font-weight:650}
+.opt-note{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:0 0 18px}
+.opt-note>div{border:1px solid var(--line);border-radius:10px;padding:14px 16px;background:var(--panel2)}
+.opt-note>div.on{border-color:var(--ink2)}
+.opt-note h3{margin:0 0 4px;font:italic 700 22px/1 var(--cond);text-transform:uppercase}
+.opt-note p{margin:0 0 6px;color:var(--muted)}.opt-note ul{margin:0;padding-left:18px;color:var(--ink2)}
+.mono{font-family:var(--mono)}
+/* the app frame */
+.app{border:1px solid var(--line);border-radius:12px;overflow:hidden;background:var(--bg)}
+.top{display:flex;align-items:center;gap:14px;height:56px;padding:0 16px;background:var(--panel2);border-bottom:1px solid var(--line)}
+.logo{display:flex;align-items:center;gap:9px;font:italic 700 21px/1 var(--cond);letter-spacing:.02em}
+.logo i{width:30px;height:30px;border-radius:8px;background:var(--accent)}
+.tabs{display:flex;gap:6px;margin-left:10px}
+.tabs span{display:inline-flex;gap:2px;padding:3px;border-radius:9px;background:rgba(0,0,0,.22)}
+[data-tone=light] .tabs span{background:rgba(0,0,0,.06)}
+.tabs a{padding:6px 11px;border-radius:7px;color:var(--muted);font-size:13px;text-decoration:none}
+.tabs a.on{background:color-mix(in srgb,var(--ink) 12%,transparent);color:var(--ink);font-weight:600}
+.lights{margin-left:auto;font-size:12px;color:var(--muted);display:flex;gap:6px;align-items:center}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--good);display:inline-block}
+.page{padding:22px 24px 28px}
+.eyebrow{font:600 11px var(--ui);letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.ph{display:flex;align-items:flex-end;gap:14px;margin-bottom:16px}
+.ph h2{font:italic 700 34px/1 var(--cond);text-transform:uppercase;margin:4px 0 0}
+.ph .grow{flex:1}
+.btn{display:inline-flex;align-items:center;gap:6px;height:34px;padding:0 13px;border:1px solid var(--line);border-radius:7px;background:var(--raised);color:var(--ink);font:500 13px var(--ui);cursor:pointer;white-space:nowrap}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:600}
+.btn.ghost{background:transparent}.btn.small{height:28px;padding:0 10px;font-size:12.5px}
+.chip{display:inline-flex;align-items:center;gap:5px;height:24px;padding:0 9px;border-radius:999px;border:1px solid var(--line);color:var(--ink2);font-size:12px;background:var(--panel2);white-space:nowrap}
+.chip.on{background:color-mix(in srgb,var(--ink) 12%,var(--panel));color:var(--ink);border-color:var(--ink2)}
+.tag{font:600 10.5px var(--ui);letter-spacing:.08em;text-transform:uppercase;padding:2px 7px;border-radius:5px;border:1px solid var(--line);color:var(--muted)}
+.tag.club{color:var(--blue);border-color:color-mix(in srgb,var(--blue) 45%,var(--line))}
+.tag.test{color:var(--warn);border-color:color-mix(in srgb,var(--warn) 45%,var(--line))}
+.tag.rec{color:var(--rec);border-color:color-mix(in srgb,var(--rec) 55%,var(--line))}
+.change{display:inline-flex;align-items:center;gap:5px;font-size:12px;color:var(--ink);background:color-mix(in srgb,var(--warn) 14%,transparent);border-radius:5px;padding:1px 7px}
+.change.none{background:transparent;color:var(--faint);padding:0}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:10px}
+.k{font:600 10.5px var(--ui);letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.big{font:600 26px/1.1 var(--mono)}
+.better{color:var(--good)}.worse{color:var(--accent-text)}
+.note-new{display:inline-block;font:700 9.5px var(--ui);letter-spacing:.1em;text-transform:uppercase;color:#fff;background:var(--rec);padding:1px 6px;border-radius:4px;vertical-align:2px;margin-left:6px}
+
+.hidden{display:none!important}
+.h5{margin:0 0 6px;font:italic 700 19px/1.1 var(--cond);text-transform:uppercase}
+.sub{color:var(--muted);font-size:12.5px;margin:0 0 12px}
+.q{display:inline-grid;place-items:center;width:18px;height:18px;border-radius:50%;border:1px solid var(--muted);color:var(--muted);font:700 11px var(--ui);margin-left:6px;vertical-align:1px}
+.q.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.f{font:500 14px/1.9 var(--mono);padding:12px 14px;border-radius:8px;background:var(--bg);border:1px solid var(--line2)}
+.f .v{color:var(--warn)}
+/* ---------- A ---------- */
+.a-grid{display:grid;grid-template-columns:minmax(0,1fr) 400px;gap:16px;align-items:start}
+.figs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;padding:14px 16px}
+.figs div{border:1px solid var(--line2);border-radius:8px;padding:10px 12px}
+.figs span{display:block;font-size:11.5px;color:var(--muted)}.figs b{font:600 22px var(--mono)}
+.figs div.on{border-color:var(--ink2);background:color-mix(in srgb,var(--ink) 5%,var(--panel))}
+.drawer{padding:16px 18px;position:sticky;top:12px}
+.drawer h5{margin:0 0 4px;font:italic 700 22px/1.05 var(--cond);text-transform:uppercase}
+.drawer .ex{margin-top:12px;font-size:13px;line-height:1.6}
+.drawer .ex b{font-family:var(--mono)}
+.lim{margin-top:12px;padding:10px 12px;border-left:3px solid var(--warn);background:color-mix(in srgb,var(--warn) 7%,transparent);font-size:12.5px;color:var(--ink2);border-radius:0 8px 8px 0}
+.idx{margin-top:16px;padding:16px 18px}
+.search{height:36px;border:1px solid var(--line);border-radius:8px;background:var(--bg);display:flex;align-items:center;padding:0 12px;color:var(--muted);font-size:13px;margin-bottom:12px}
+.groups{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}
+.grp b{display:block;font:italic 700 15px/1 var(--cond);text-transform:uppercase;margin-bottom:6px}
+.grp a{display:block;font-size:12.5px;color:var(--ink2);padding:3px 0;text-decoration:none}
+.grp a span{color:var(--faint)}
+/* ---------- B ---------- */
+.mapcard{padding:16px 18px}
+.mapcard svg{width:100%;height:auto;display:block}
+.nd rect{fill:var(--panel2);stroke:var(--line);stroke-width:1.5}
+.nd.in rect{fill:color-mix(in srgb,var(--blue) 12%,var(--panel2))}
+.nd.out rect{fill:color-mix(in srgb,var(--good) 12%,var(--panel2))}
+.nd.on rect{stroke:var(--ink);stroke-width:2.5}
+.nd text{fill:var(--ink);font:600 12.5px var(--ui)}.nd .val{fill:var(--warn);font:600 12px var(--mono)}
+.edge{stroke:var(--line);stroke-width:2;fill:none}.edge.on{stroke:var(--warn);stroke-width:2.5}
+.col{fill:var(--muted);font:600 10.5px var(--ui);letter-spacing:.12em}
+.b-grid{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);gap:14px;margin-top:14px}
+.panel2{padding:16px 18px}
+@media(max-width:1100px){.a-grid,.b-grid{grid-template-columns:1fr}.groups{grid-template-columns:1fr 1fr}}
+</style>
+</head>
+<body>
+<div class="wrap">
+ <div class="eyebrow">SlotForge Telemetry · rework preview 8</div>
+ <h1>Calculations explained, remade</h1>
+ <p class="lead">Every number in Telemetry has an honest explanation: the formula, a worked example and where theory ends. But they live on one Settings page as a cloud of 29 topic chips, and the worked examples use made-up numbers. When you wonder what "rollout" means on the workbench, you have to leave it, find Settings, and pick the right chip.</p>
+ <ul class="why">
+  <li><b>Replaces:</b> Settings › Calculations explained (the chip cloud) and the "How are these numbers calculated?" links.</li>
+  <li><b>Kept:</b> every topic, formula, worked example, assumption and limit, and the research sources behind Driver Feedback.</li>
+  <li><b>New, each one for you to approve:</b> explanations reachable from the number itself, worked through with <b>your</b> setup's values.</li>
+ </ul>
+ <div class="bar">
+  <b>Option</b><div class="sg" id="opt"><button class="on" data-o="a">A · Ask Anywhere</button><button data-o="b">B · Calculation Map</button></div>
+  <b>Look</b><div class="sg" id="tone"><button class="on" data-t="dark">Dark</button><button data-t="light">Light</button></div>
+  <span style="color:var(--muted);font-size:12.5px">Example: the workbench with Club GT · technical, pinion 10 / gear 27, 20 mm tyres, 21,500 RPM.</span>
+ </div>
+ <div class="opt-note">
+  <div id="noteA" class="on"><h3>A · Ask Anywhere</h3><p>A small ? next to every result; the answer opens beside it.</p>
+   <ul><li>Click <b>?</b> next to Rollout on the workbench: a side panel explains it, with <b>your numbers</b> worked through.</li><li>Then the limits in one line, and "related" links to the next question.</li><li>Settings keeps an <b>index</b>: topics grouped by area, with search.</li></ul></div>
+  <div id="noteB"><h3>B · Calculation Map</h3><p>How every number is built, as a map you can click.</p>
+   <ul><li>Your inputs on the left, what they make in the middle, the results on the right, joined by lines.</li><li>Click a result: its path lights up, and the formula shows with your values.</li><li>The ? next to a number opens the map at that number.</li></ul></div>
+ </div>
+
+ <div class="app">
+  <div class="top"><div class="logo"><i></i>TELEMETRY</div>
+   <div class="tabs"><span><a class="on">Workbench</a><a>Track day</a></span><span><a>Laps</a><a>Setups</a><a>Driver Feedback</a></span><span><a>Library</a><a>Settings</a></span></div>
+   <div class="lights"><span class="dot"></span>Local workspace</div></div>
+
+  <!-- A -->
+  <div class="page" id="A">
+   <p class="sub">On the workbench, in the Gearing row:</p>
+   <div class="a-grid">
+    <div class="card"><div class="figs">
+     <div><span>Gear ratio<i class="q">?</i></span><b>2.700<small style="font-size:12px;color:var(--muted)">:1</small></b></div>
+     <div><span>No-load speed<i class="q">?</i></span><b>30.02<small style="font-size:12px;color:var(--muted)"> km/h</small></b></div>
+     <div class="on"><span>Rollout<i class="q on">?</i></span><b>23.27<small style="font-size:12px;color:var(--muted)"> mm/rev</small></b></div>
+     <div><span>Pull at the wheels<i class="q">?</i></span><b>7.55<small style="font-size:12px;color:var(--muted)"> N</small></b></div>
+     <div><span>Peak power<i class="q">?</i></span><b>15.73<small style="font-size:12px;color:var(--muted)"> W</small></b></div>
+     <div><span>Power / weight<i class="q">?</i></span><b>196.6<small style="font-size:12px;color:var(--muted)"> W/kg</small></b></div>
+    </div></div>
+    <div class="card drawer"><div class="eyebrow">What is this number?</div><h5>Rollout</h5><p class="sub" style="margin:0">How far the car moves for one turn of the motor. The bigger the rollout, the faster but the less pull.</p>
+     <div class="f" style="margin-top:12px">rollout = π × tyre ÷ ratio<br>= π × <span class="v">20 mm</span> ÷ <span class="v">2.7</span><br>= <b>23.27 mm</b> per motor turn</div>
+     <p class="ex">With your <b>10 / 27</b> gearing and <b>20 mm</b> tyres the car moves <b>23.27 mm</b> per motor turn. With 9 teeth it was <b>20.94 mm</b>: 11% less distance per turn, so more pull out of corners.</p>
+     <div class="lim">Assumes no tyre slip and a single-stage drivetrain. Worn tyres roll out less: at 19 mm it is 22.11 mm.</div>
+     <p class="sub" style="margin-top:12px">Related: <u>Gear ratio</u> · <u>No-load speed</u> · <u>Gear finder</u> · <u>Tyre wear</u></p></div>
+   </div>
+   <div class="card idx"><div class="h5">Settings › Calculations explained</div><p class="sub">Every explanation, grouped. The ? next to a number opens the same page.</p><div class="search">Search: rollout, clearance, magnet…</div>
+    <div class="groups">
+     <div class="grp"><b>Gearing &amp; speed</b><a>Gearing &amp; rollout</a><a>Theoretical speed</a><a>Gear finder</a><a>Compound gears <span>· advanced</span></a><a>Lap &amp; scale speed</a></div>
+     <div class="grp"><b>Motor &amp; power</b><a>Torque &amp; driving force</a><a>Motor curves &amp; power</a><a>Electrical losses</a><a>Motor test records</a><a>Braking &amp; coast-down</a></div>
+     <div class="grp"><b>Weight &amp; tyres</b><a>Weight &amp; ballast</a><a>Ballast placement &amp; balance</a><a>Chassis geometry</a><a>Rims &amp; tyre wear</a><a>Driven gear clearance</a><a>Magnetic downforce</a></div>
+     <div class="grp"><b>Testing &amp; advice</b><a>Controlled A–B–A tests</a><a>Race strategy</a><a>Comparisons &amp; missing values</a><a>Driver Feedback advice</a><a>Measurement ranges</a></div>
+    </div></div>
+  </div>
+
+  <!-- B -->
+  <div class="page hidden" id="B">
+   <div class="card mapcard"><div class="h5">How your numbers are made</div><p class="sub">Your inputs left, results right. Click any box; the path to it lights up.</p>
+    <svg viewBox="0 0 900 330">
+     <text class="col" x="20" y="18">YOUR INPUTS</text><text class="col" x="350" y="18">IN BETWEEN</text><text class="col" x="690" y="18">RESULTS</text>
+     <path class="edge on" d="M170 50 C260 50 260 95 340 95"/><path class="edge on" d="M170 110 C260 110 260 95 340 95"/><path class="edge" d="M170 170 C260 170 260 155 340 155"/><path class="edge on" d="M170 230 C260 230 260 215 340 215"/><path class="edge" d="M170 290 C430 290 430 290 680 290"/>
+     <path class="edge on" d="M500 95 C590 95 590 215 340 215" style="display:none"/>
+     <path class="edge on" d="M500 95 C580 95 590 215 500 215" style="display:none"/>
+     <path class="edge" d="M500 95 C590 95 590 60 680 60"/><path class="edge on" d="M500 215 C590 215 590 120 680 120"/><path class="edge on" d="M500 95 C560 95 560 215 500 215" style="display:none"/>
+     <path class="edge" d="M500 155 C590 155 590 60 680 60"/><path class="edge" d="M500 155 C590 155 590 180 680 180"/><path class="edge" d="M500 95 C590 95 590 180 680 180"/><path class="edge" d="M500 155 C590 155 590 240 680 240"/>
+     <g class="nd in"><rect x="20" y="32" width="150" height="38" rx="9"/><text x="34" y="56">Pinion</text><text class="val" x="156" y="56" text-anchor="end">10</text></g>
+     <g class="nd in"><rect x="20" y="92" width="150" height="38" rx="9"/><text x="34" y="116">Driven gear</text><text class="val" x="156" y="116" text-anchor="end">27</text></g>
+     <g class="nd in"><rect x="20" y="152" width="150" height="38" rx="9"/><text x="34" y="176">Motor RPM</text><text class="val" x="156" y="176" text-anchor="end">21,500</text></g>
+     <g class="nd in"><rect x="20" y="212" width="150" height="38" rx="9"/><text x="34" y="236">Rear tyre</text><text class="val" x="156" y="236" text-anchor="end">20 mm</text></g>
+     <g class="nd in"><rect x="20" y="272" width="150" height="38" rx="9"/><text x="34" y="296">Weight</text><text class="val" x="156" y="296" text-anchor="end">80 g</text></g>
+     <g class="nd on"><rect x="340" y="76" width="160" height="38" rx="9"/><text x="354" y="100">Gear ratio</text><text class="val" x="486" y="100" text-anchor="end">2.700</text></g>
+     <g class="nd"><rect x="340" y="136" width="160" height="38" rx="9"/><text x="354" y="160">Axle RPM</text><text class="val" x="486" y="160" text-anchor="end">7,963</text></g>
+     <g class="nd on"><rect x="340" y="196" width="160" height="38" rx="9"/><text x="354" y="220">Circumference</text><text class="val" x="486" y="220" text-anchor="end">62.8 mm</text></g>
+     <g class="nd out"><rect x="680" y="41" width="200" height="38" rx="9"/><text x="694" y="65">No-load speed</text><text class="val" x="866" y="65" text-anchor="end">30.02 km/h</text></g>
+     <g class="nd out on"><rect x="680" y="101" width="200" height="38" rx="9"/><text x="694" y="125">Rollout</text><text class="val" x="866" y="125" text-anchor="end">23.27 mm</text></g>
+     <g class="nd out"><rect x="680" y="161" width="200" height="38" rx="9"/><text x="694" y="185">Pull at the wheels</text><text class="val" x="866" y="185" text-anchor="end">7.55 N</text></g>
+     <g class="nd out"><rect x="680" y="221" width="200" height="38" rx="9"/><text x="694" y="245">Peak power</text><text class="val" x="866" y="245" text-anchor="end">15.73 W</text></g>
+     <g class="nd out"><rect x="680" y="271" width="200" height="38" rx="9"/><text x="694" y="295">Power / weight</text><text class="val" x="866" y="295" text-anchor="end">196.6 W/kg</text></g>
+     <path class="edge on" d="M500 95 C560 95 600 120 680 120"/>
+    </svg></div>
+   <div class="b-grid">
+    <div class="card panel2"><div class="h5">Rollout</div><p class="sub" style="margin:0">How far the car moves for one turn of the motor.</p>
+     <div class="f" style="margin-top:12px">rollout = π × tyre ÷ ratio = π × <span class="v">20</span> ÷ <span class="v">2.7</span> = <b>23.27 mm</b></div>
+     <p class="sub" style="margin-top:10px">Made from: pinion, driven gear and rear tyre. Used by: gear finder, lap speed per motor turn.</p></div>
+    <div class="card panel2"><div class="h5">Where theory ends</div><p class="sub">Assumes no tyre slip and a single-stage drivetrain. Worn tyres roll out less. Check gear pitch, axle size, clearance and mesh separately.</p><p class="sub"><u>All explanations, as a list</u></p></div>
+   </div>
+  </div>
+ </div>
+ <p class="lead" style="margin-top:16px">Both options keep every formula, example and limit word for word where they are right; only the way you reach them and the numbers in the examples change.</p>
+</div>
+<script>
+for(const b of document.querySelectorAll('#opt button'))b.onclick=()=>{for(const x of document.querySelectorAll('#opt button'))x.classList.toggle('on',x===b);const a=b.dataset.o==='a';document.getElementById('A').classList.toggle('hidden',!a);document.getElementById('B').classList.toggle('hidden',a);document.getElementById('noteA').classList.toggle('on',a);document.getElementById('noteB').classList.toggle('on',!a);};
+for(const b of document.querySelectorAll('#tone button'))b.onclick=()=>{for(const x of document.querySelectorAll('#tone button'))x.classList.toggle('on',x===b);document.documentElement.dataset.tone=b.dataset.t;};
+const q=new URLSearchParams(location.search);if(q.get('o')==='b')document.querySelector('#opt [data-o=b]').click();if(q.get('t')==='light')document.querySelector('#tone [data-t=light]').click();
+</script>
+</body>
+</html>
