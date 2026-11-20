@@ -62,8 +62,12 @@ app.whenReady().then(async()=>{
   await route('telemetry');await click('#save-copy');await value('#library-entry-name','Club GT · fast circuit');await click('#library-editor-confirm');
   assert.equal((await data()).length,2);await route('analyze/compare');
   assert.equal(await run(`document.querySelectorAll('#analysis-compare svg').length`),0);
-  assert.equal(await run(`document.querySelector('[data-compare-metric=speedKmh] td:last-child').className`),'good');
-  assert.equal(await run(`document.querySelector('[data-compare-metric=forceN] td:last-child').className`),'neutral');
+  // Change Sheet: what you changed first, then only the results that moved, coloured by which way is better.
+  assert.match(await text('#change-sheet .cs-section'),/Pinion\s*Gearing\s*10\s*10 → 9/);
+  assert.equal(await run(`document.querySelector('[data-sheet-metric=speedKmh] .cs-val').classList.contains('bad')`),true,'9 teeth is slower on the straight');
+  assert.equal(await run(`document.querySelector('[data-sheet-metric=forceN] .cs-val').classList.contains('good')`),true,'and pulls harder');
+  assert.equal(await run(`document.querySelector('[data-sheet-metric=ratio] .cs-val').classList.contains('neutral')`),true,'the ratio is neutral');
+  assert.equal(await run(`!!document.querySelector('[data-sheet-metric=massG]')`),false,'unchanged results fold away');
   await capture('compare-v4');await route('library');await capture('library-v4');
   await click('[data-library-action=duplicate]');assert.equal((await data()).length,3);
   await click('[data-library-action=rename]');await value('#library-entry-name','<b>Race trim</b>');await click('#library-editor-confirm');assert.match(await text('#library-list'),/<b>Race trim<\/b>/);assert.equal(await run(`document.querySelectorAll('#library-list b').length`),0);

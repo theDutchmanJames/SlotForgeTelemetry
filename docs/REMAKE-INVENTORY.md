@@ -39,7 +39,8 @@ One Laps page: cars, track and lane, a scoreboard, every lap of every run as a w
   a badge. Missing: notes on a run, a tag (club night, test, race), delete/hide a lap on manual runs, a "best 5 in a row"
   on the chart.
 
-### 2. Analyze for setups: Analysis and Compare · Remake
+### 2. Analyze for setups: Analysis and Compare · Remake · **Done ("Change Sheet")**
+The tab is Setups: a shelf of setups by car, one setup read by topic, or up to three (the workbench now included) on the Change Sheet. Still open from this item: Export comparison, and reading the workbench now on its own.
 - **Analysis** shows a saved setup's numbers again, the same results the workbench shows live, behind a picker and a left
   menu of 8 topics. "Edit these inputs" and "Edit in Telemetry" both leave the page.
 - **Compare** is a 20-row table where 13 rows say "Unavailable". The changes (pinion 9 → 10) are not listed; you read them

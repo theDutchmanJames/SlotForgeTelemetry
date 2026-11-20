@@ -1,0 +1,63 @@
+/* SlotForge Remake (Change Sheet): the Setups page. */
+[data-page=analyze]{--cs-a:#5aa9e6;--cs-b:#e5a43a;--cs-c:#3ecf8e;--cs-num:'SF Roboto Mono',Consolas,monospace;--cs-title:'SF Barlow Condensed','Bahnschrift',sans-serif}
+:root[data-tone=light] [data-page=analyze]{--cs-a:#1f6fb2;--cs-b:#b86e00;--cs-c:#187a50}
+[data-slot=a]{--slot:var(--cs-a)}[data-slot=b]{--slot:var(--cs-b)}[data-slot=c]{--slot:var(--cs-c)}
+/* The old mode links stay for routing only: the shelf replaces them. */
+.analyze-rail .analyze-modes>.nav-group{display:none}
+.analysis-toolbar>label.field{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+.analysis-toolbar{position:relative}
+.setup-shelf{display:grid;gap:2px;margin-bottom:12px}
+.setup-shelf .nav-group-label{margin:2px 6px 6px}
+.shelf-car{display:flex;justify-content:space-between;align-items:baseline;gap:8px;margin:10px 6px 4px}
+.shelf-car b{font:italic 700 16px/1.1 var(--cs-title);text-transform:uppercase;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.shelf-car small{color:var(--muted);font-size:11px;white-space:nowrap}
+.shelf-row{display:grid;grid-template-columns:22px minmax(0,1fr) auto;gap:8px;align-items:center;padding:4px 6px;border-radius:8px;border:1px solid transparent}
+.shelf-row.on{background:color-mix(in srgb,var(--ink) 8%,var(--panel));border-color:var(--line)}
+.shelf-tick{width:18px;height:18px;padding:0;border-radius:5px;border:1.5px solid var(--muted);background:transparent;display:grid;place-items:center}
+.shelf-tick[aria-checked=true]{background:var(--slot,var(--ink));border-color:var(--slot,var(--ink))}
+.shelf-tick[aria-checked=true]::after{content:'✓';color:var(--bg);font-size:11px;font-weight:700;line-height:1}
+.shelf-tick:disabled{opacity:1;cursor:default}
+.shelf-pick{display:grid;text-align:left;border:0;background:transparent;padding:3px 0;min-width:0;color:var(--ink)}
+.shelf-pick b{font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.shelf-pick small{color:var(--muted);font-size:11.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+button.shelf-pick:hover b{text-decoration:underline}
+.shelf-pick[aria-pressed=true] b{color:var(--ink)}
+.shelf-role{font:700 10px 'Segoe UI',system-ui,sans-serif;letter-spacing:.08em;text-transform:uppercase;padding:2px 6px;border-radius:4px;border:1px solid var(--line);color:var(--muted)}
+.shelf-role.base{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.shelf-live{margin-top:10px;border:1px dashed var(--line)}
+/* The sheet */
+.cs-panel{padding:0;overflow:hidden}
+.cs-grid{display:grid;grid-template-columns:200px repeat(var(--cols,2),minmax(0,1fr));gap:12px;align-items:center}
+.cs-head{padding:14px 18px;border-bottom:1px solid var(--line);align-items:end}
+.cs-who{border-top:3px solid var(--slot);padding-top:8px;min-width:0}
+.cs-who b{display:block;font:italic 700 18px/1.05 var(--cs-title);text-transform:uppercase;overflow-wrap:anywhere}
+.cs-who small{color:var(--muted);font-size:11.5px}
+.cs-verdict{padding:14px 18px;border-bottom:1px solid var(--line);align-items:start}
+.cs-verdict p{margin:0;font-size:14px;line-height:1.5}
+.cs-basecell{color:var(--muted);font-size:13px}
+.cs-verdict .good,.cs-val.good{color:var(--green)}.cs-verdict .bad,.cs-val.bad{color:var(--accent-text,var(--accent))}
+.cs-section{padding:6px 18px 12px}
+.cs-section h3{margin:14px 0 4px;font:italic 700 18px/1.1 var(--cs-title);text-transform:uppercase}
+.cs-section>.hint{margin:0 0 6px}
+.cs-row{padding:8px 0;border-top:1px solid color-mix(in srgb,var(--line) 70%,transparent);font-size:13px}
+.cs-lab{min-width:0}.cs-lab small{display:block;color:var(--muted);font-size:11px}
+.cs-num,.cs-val,.cs-chg{font-family:var(--cs-num);font-variant-numeric:tabular-nums}
+.cs-val small{color:var(--muted);font-size:11px}
+.cs-chg{display:inline-block;font-size:12.5px;background:color-mix(in srgb,var(--amber) 16%,transparent);padding:1px 7px;border-radius:5px}
+.cs-same{color:var(--muted);font-size:12px}
+.cs-move{display:grid;grid-template-columns:auto minmax(40px,1fr);gap:8px;align-items:center;min-width:0}
+.cs-bar{position:relative;height:8px;border-radius:4px;background:color-mix(in srgb,var(--line) 60%,transparent)}
+.cs-bar::after{content:'';position:absolute;left:50%;top:-3px;bottom:-3px;width:1px;background:var(--muted)}
+.cs-bar i{position:absolute;top:0;bottom:0;border-radius:4px;background:var(--muted)}
+.cs-bar i.up{left:50%}.cs-bar i.down{right:50%}
+.cs-bar i.good{background:var(--green)}.cs-bar i.bad{background:var(--accent-text,var(--accent))}
+.cs-fold{margin:4px 18px 12px;padding:9px 12px;border:1px solid var(--line);border-radius:8px;color:var(--muted);font-size:12.5px}
+.cs-fold summary b{color:var(--ink);font-weight:600}
+.cs-fold .hint{margin:8px 0 0}
+.cs-fold:last-child{margin-bottom:16px}
+@media(max-width:860px){.cs-grid{grid-template-columns:repeat(var(--cols,2),minmax(0,1fr))}.cs-grid>:first-child{grid-column:1/-1}.cs-move{grid-template-columns:1fr}}
+.shelf-topics{border-top:1px solid var(--line);padding-top:10px}
+.shelf-topics .analyze-topics .nav-group{display:grid}
+.setup-title{flex:1;margin:0;font:italic 700 24px/1.1 var(--cs-title);text-transform:uppercase;overflow-wrap:anywhere}
+.analysis-toolbar{display:flex;align-items:center;gap:12px}
+.shelf-topics:has(.analyze-topics[hidden]){display:none}

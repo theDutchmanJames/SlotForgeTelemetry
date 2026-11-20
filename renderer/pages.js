@@ -1,4 +1,4 @@
-let analysisId=null,compareA=null,compareB=null,analysisTopic='performance',selectedLibraryId=null;
+let analysisId=null,analysisTopic='performance',selectedLibraryId=null;
 function liveStats(input){
   const m=TelemetryModel.calculate(input);
   return `<div class="performance-stats">${[
@@ -18,12 +18,12 @@ function renderRoute(){
   const [requested,sub,topic]=location.hash.slice(1).split('/'),page=['telemetry','trackday','laps','analyze','feedback','library','settings'].includes(requested)?requested:'telemetry';
   for(const section of document.querySelectorAll('[data-page]'))section.hidden=section.dataset.page!==page;
   for(const link of document.querySelectorAll('[data-route]')){if(link.dataset.route===page)link.setAttribute('aria-current','page');else link.removeAttribute('aria-current');}
-  document.title=`${page==='feedback'?'Driver Feedback':page==='trackday'?'Track day':page[0].toUpperCase()+page.slice(1)} · SlotForge Telemetry`;
+  document.title=`${page==='feedback'?'Driver Feedback':page==='trackday'?'Track day':page==='analyze'?'Setups':page[0].toUpperCase()+page.slice(1)} · SlotForge Telemetry`;
   if(page==='trackday')TrackdayUI.render();
   if(page==='library'){readLibrary();renderLibrary();updateLibraryStatus();}
   if(page==='analyze'){
     readLibrary();renderAnalysis();const compare=sub==='compare';
-    $('#analysis-overview').hidden=compare;$('#analysis-compare').hidden=!compare;
+    $('#analysis-overview').hidden=compare;$('#analysis-compare').hidden=!compare;SetupsUI.route(compare);
     for(const link of document.querySelectorAll('[data-analysis-mode]')){if(link.dataset.analysisMode===(sub||'overview'))link.setAttribute('aria-current','page');else link.removeAttribute('aria-current');}
   }
   if(page==='settings'){
@@ -42,27 +42,17 @@ function renderAnalysis(){
   $('#analysis-empty').hidden=available;$('#analysis-content').hidden=!available;
   if(!available)return;
   if(!library.some(e=>e.id===analysisId))analysisId=library[0].id;
-  if(!library.some(e=>e.id===compareA))compareA=analysisId;
-  if(!library.some(e=>e.id===compareB)||(compareA===compareB&&library.length>1))compareB=(library.find(e=>e.id!==compareA)||library[0]).id;
-  setupOptions('analysis-setup',analysisId);setupOptions('compare-a',compareA);setupOptions('compare-b',compareB);
+  setupOptions('analysis-setup',analysisId);
   const item=library.find(e=>e.id===analysisId),input=CalculatorModel.inputOf(item.setup),m=PerformanceModel.calculate(input);
   $('#analysis-stats').innerHTML=performanceStats(input);$('#analysis-stats').className='analysis-summary';
-  AnalyzeNav.refresh(item.setup);renderCurves(input,m);renderTelemetry(input);$('#magnetic-results').innerHTML=magneticResults(input,true);WorkshopUI.renderSaved();ChassisUI.renderSaved();selectAnalysisTopic(analysisTopic);renderComparison();
+  AnalyzeNav.refresh(item.setup);renderCurves(input,m);renderTelemetry(input);$('#magnetic-results').innerHTML=magneticResults(input,true);WorkshopUI.renderSaved();ChassisUI.renderSaved();selectAnalysisTopic(analysisTopic);SetupsUI.render();
 }
 function selectAnalysisTopic(topic){
   analysisTopic=topic;
   for(const button of document.querySelectorAll('[data-analysis-topic]')){const active=button.dataset.analysisTopic===topic;button.classList.toggle('active',active);button.setAttribute('aria-pressed',String(active));}
   for(const panel of document.querySelectorAll('[data-analysis-panel]'))panel.hidden=panel.dataset.analysisPanel!==topic;
 }
-function renderComparison(){
-  const a=library.find(e=>e.id===compareA),b=library.find(e=>e.id===compareB);
-  if(!a||!b)return;
-  const rows=CompareModel.compare(a.setup,b.setup,$('#compare-goal').value);
-  // Values and differences follow the chosen units; percentages are unit-free.
-  const delta=r=>!r.sameBasis?'Different measurement basis':r.delta===null?'Unavailable':`${r.delta>0?'↑ +':r.delta<0?'↓ ':''}${unitValue(r.delta,r.unit,r.digits)} ${r.unit==='%'?r.deltaUnit:Units.label(r.unit)}${r.percent!==null?`<small>${r.percent>0?'+':''}${performanceNumber(r.percent,1)}% from A</small>`:''}`;
-  $('#comparison').innerHTML=`${a.id===b.id?'<p class="note">Choose two different saved setups to compare changes.</p>':''}${rows.some(r=>!r.sameBasis)?'<p class="note">Motor rating bases, magnetic conditions, or chassis weighing references differ or are incomplete. Affected metrics are shown without a direct change or performance verdict.</p>':''}<div class="table-wrap"><table class="comparison-table"><thead><tr><th>Metric</th><th>Setup A</th><th>Setup B</th><th>Change · B − A</th></tr></thead><tbody>${rows.map(r=>`<tr data-compare-metric="${r.key}"><th>${r.label}<small class="muted"> · ${Units.label(r.unit)}</small></th><td>${unitValue(r.a,r.unit,r.digits)}</td><td>${unitValue(r.b,r.unit,r.digits)}</td><td class="${r.tone}">${delta(r)}</td></tr>`).join('')}</tbody></table></div>`;
-}
-function showSavedAnalysis(id,compare=false){analysisId=id;if(compare){compareA=id;compareB=(library.find(e=>e.id!==id)||library[0])?.id;}navigate(compare?'analyze/compare':'analyze');}
+function showSavedAnalysis(id,compare=false){SetupsUI.select(id,compare);navigate(compare?'analyze/compare':'analyze');}
 function focusSetupInput(name){
   if(Object.hasOwn(PredictionModel.fields,name)){PredictionUI.focus(name);return;}
   WorkshopUI.reveal(name);
@@ -80,8 +70,5 @@ function initializePages(){
   $('#analysis-edit').onclick=()=>openLibraryTask('load',analysisId);
   for(const button of document.querySelectorAll('[data-edit-inputs]'))button.onclick=()=>{openLibraryTask('load',analysisId);libraryTask.focus=button.dataset.editInputs;};
   for(const button of document.querySelectorAll('[data-analysis-topic]'))button.onclick=()=>selectAnalysisTopic(button.dataset.analysisTopic);
-  $('#compare-a').onchange=e=>{compareA=e.target.value;renderComparison();};
-  $('#compare-b').onchange=e=>{compareB=e.target.value;renderComparison();};
-  $('#compare-goal').onchange=renderComparison;
   renderRoute();
 }

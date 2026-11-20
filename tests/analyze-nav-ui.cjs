@@ -14,11 +14,12 @@ app.whenReady().then(async()=>{
   await click('#save-library');await pause();await click('#library-editor-confirm');await pause();
   await run("location.hash='analyze'");await pause();
   // Modes: two labelled groups with short names; every original link is still present.
-  assert.deepEqual(await run(`[...document.querySelectorAll('.analyze-modes>.nav-group')].map(g=>g.querySelector('.nav-group-label').textContent+': '+[...g.querySelectorAll('a')].map(a=>a.textContent.trim()).join(' / '))`),['Setups: Analysis / Compare']);
+  // SlotForge Remake (Change Sheet): the side list is a shelf of setups; the old mode links stay hidden for routing.
+  assert.equal(await run(`!!document.querySelector('.analyze-rail #setup-shelf')`),true);assert.equal(await run(`getComputedStyle(document.querySelector('.analyze-modes>.nav-group')).display`),'none');
   assert.equal(await run(`document.querySelectorAll('[data-analysis-mode]').length`),2);
   // SlotForge Restyle: the modes are a side list beside the page, with the topics nested right under Analysis.
   assert.equal(await run(`!!document.querySelector('.analyze-shell>.analyze-rail .analyze-modes')&&!!document.querySelector('.analyze-shell>.analyze-main #analysis-content')`),true);assert.equal(await run(`!!document.querySelector('[data-page=laps] #lw-sub #race-analysis')`),true,'the lap analysis lives on the Laps page');
-  assert.equal(await run(`document.querySelector('[data-analysis-mode=overview]').nextElementSibling.classList.contains('analyze-topics')`),true);
+  assert.equal(await run(`!!document.querySelector('.analyze-rail .shelf-topics .analyze-topics')`),true,'topics sit under the shelf');
   assert.equal(await run(`document.querySelector('.analyze-topics').hidden`),false);
   // Topics: three clusters holding all eight topics.
   assert.deepEqual(await run(`[...document.querySelectorAll('.analyze-topics .nav-group')].map(g=>g.querySelector('.nav-group-label').textContent+':'+g.querySelectorAll('[data-analysis-topic]').length)`),['Essentials:2','Measurements:4','Planning:2']);
@@ -35,8 +36,8 @@ app.whenReady().then(async()=>{
   // Laps moved to their own page: old Analyze links land there.
   await run("location.hash='analyze/races'");await pause();assert.equal(await run('location.hash'),'#laps/run');assert.equal(await run(`document.querySelector('[data-page=laps]').hidden`),false);
   await run("location.hash='analyze'");await pause();
-  await click('[data-analysis-mode=compare]');await pause();assert.equal(await run(`document.querySelector('#analysis-compare').hidden`),false);assert.equal(await run(`document.querySelector('.analyze-topics').hidden`),true);
-  await click('[data-analysis-mode=overview]');await pause();assert.equal(await run(`document.querySelector('.analyze-topics').hidden`),false);
+  await run("location.hash='analyze/compare'");await pause();assert.equal(await run(`document.querySelector('#analysis-compare').hidden`),false);assert.equal(await run(`document.querySelector('.analyze-topics').hidden`),true);
+  await run("location.hash='analyze'");await pause();assert.equal(await run(`document.querySelector('.analyze-topics').hidden`),false);
   await click('[data-tone-choice=light]');await shot('topics-light');
   win.setSize(390,1000);await pause();assert.equal(await run('document.documentElement.scrollWidth>innerWidth'),false);await shot('topics-narrow');
   assert.deepEqual(errors,[]);console.log('Analyze navigation passed: grouped modes and topics, dimmed topics without data, usable dimmed topics, routing, side list with nested topics, light/dark and narrow layouts.');

@@ -43,7 +43,7 @@ app.whenReady().then(async()=>{
   win.setSize(760,980);await pause();await capture('magnetic-inputs-760','.magnetic-inputs');
   assert.equal(await run('document.documentElement.scrollWidth<=innerWidth'),true);
   await route('analyze');await click('[data-analysis-topic=magnetic]');assert.equal(await run('document.documentElement.scrollWidth<=innerWidth'),true);
-  await route('analyze/compare');assert.equal(await run(`document.querySelector('[data-compare-metric=magneticMean] td:last-child').className`),'neutral');
+  await route('analyze/compare');assert.equal(await run(`!!document.querySelector('[data-sheet-metric=magneticMean]')`),false,'magnetic pull is never shown as better or worse here');assert.match(await run("document.querySelector('#change-sheet').textContent"),/Measured magnetic pull/);
   assert.deepEqual(errors,[]);console.log('Magnetic UI passed: live calculations, navigation, saved analysis, themes, escaped text, draft recovery, help, comparison and 760px layout.');
   win.destroy();app.quit();
  }catch(e){console.error(e);win.destroy();app.exit(1);}

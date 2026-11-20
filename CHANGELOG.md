@@ -2,6 +2,20 @@
 
 ## Unreleased
 
+### Setups: what does this change do? (remake)
+
+Analyze is now **Setups**, built around one question: what does a change do?
+
+- **Your setups by car** in a list beside the page. Click one to read its results, with the topics (Performance, Gear finder, Weight & ballast…) right under the list.
+- **Tick one or two more** to compare, up to three at once. **The workbench now** can be one of them, so you can see what a change does before you save it. Click another setup's name to make it the base.
+- **The Change Sheet** replaces the 20-row comparison table:
+  - **In short:** a plain verdict per setup, such as "quicker on the straight (+11.1% no-load speed) and pulls less out of a corner", "8 g lighter" or "more power for its weight".
+  - **What you changed:** the inputs that differ, named as on the workbench, in your units.
+  - **What it does:** only the results that moved, each with a bar: green when better for that result, red when worse, grey for results that depend on the track (ratio, rollout, weight).
+  - **New result: pull per kg**, how hard the car accelerates its own weight.
+  - Results that did not change, need a value in each setup, or were measured on a different basis (another motor test voltage, other magnetic conditions) fold away into one line each, instead of rows of "Unavailable". The same-basis rules are unchanged.
+- With one saved setup, Compare uses the workbench now as the second.
+
 ### Laps: every run on one wall (remake)
 
 Your laps used to be spread over six pages: Track day, Analyze › Laps, Compare runs, Progress, Records and Library › Race results. They now have one page, **Laps**, in the top bar between Track day and Analyze. Every run of a car on the same track and lane lands on one wall, whether it came from Paddock, Track day or was typed in.

@@ -109,7 +109,7 @@ Choose front/rear axle weighing, guide/rear axle weighing, or **guide plus indiv
 
 **Plan ballast before moving it.** Add, remove or relocate parts with longitudinal and lateral positions. Compare measured and planned support loads, CG movement and mass-limit margins. An optional rear-share target suggests additional ballast at a chosen position. Plans remain separate from measured car mass.
 
-Save the setup for **Analyze → Chassis geometry & balance**, with diagrams, load charts and detailed tables. Setup comparison keeps geometry and balance differences neutral. In **Testing & planning → Controlled A–B–A tests**, attach a frozen copy of a saved chassis setup to manually entered or imported lap runs. Later library edits cannot change those captured inputs; edited run rows mark their previous evidence as detached.
+Save the setup for **Setups → Chassis geometry & balance**, with diagrams, load charts and detailed tables. Setup comparison keeps geometry and balance differences neutral. In **Testing & planning → Controlled A–B–A tests**, attach a frozen copy of a saved chassis setup to manually entered or imported lap runs. Later library edits cannot change those captured inputs; edited run rows mark their previous evidence as detached.
 
 These are static geometry and balance tools, not predictions of grip, cornering speed or deslot limits. [Read the measurement guide and worked examples](docs/chassis-geometry.md).
 
@@ -117,7 +117,7 @@ These are static geometry and balance tools, not predictions of grip, cornering 
 
 Record motor magnetic pull in gram-force (gf), including repeated measurements and the tester, rails and motor mounting used. Telemetry calculates mean pull, force in newtons, observed range, pull relative to actual car weight and total static support load. Optional club limits show margins to both the mean and the highest reading.
 
-Build a measured clearance curve in **Analyze → Magnetic downforce**, with a graph, exact values and sensitivity between points. Connect it to tyre wear using measured worn clearance or an explicitly selected rear-axle approximation. Estimates stay within the measured range; actual mass, power-to-weight and acceleration remain unchanged. All measurements travel with saved setups and library backups.
+Build a measured clearance curve in **Setups → Magnetic downforce**, with a graph, exact values and sensitivity between points. Connect it to tyre wear using measured worn clearance or an explicitly selected rear-axle approximation. Estimates stay within the measured range; actual mass, power-to-weight and acceleration remain unchanged. All measurements travel with saved setups and library backups.
 
 [Read the measurement and calculation guide](docs/MAGNETIC-DOWNFORCE.md).
 
@@ -150,11 +150,11 @@ Motor torque is entered in **gf·cm**—gram-force centimetres. Power curves req
 
 ### Explore motor performance and compare setups
 
-Analyze holds your saved setups: **Analysis** and **Compare**. Laps you drove have their own page, **Laps**. Setup topics are grouped as Essentials, Measurements and Planning. Topics with nothing saved yet are dimmed.
+**Setups** holds your saved setups, grouped by car in a list beside the page. Click one to read its results by topic; tick one or two more, or *the workbench now*, to see what a change does. Laps you drove have their own page, **Laps**. Setup topics are grouped as Essentials, Measurements and Planning. Topics with nothing saved yet are dimmed.
 
-Save a setup, then open **Analyze → Setups → Analysis**. Torque and power curves show how the ideal motor model changes with speed. Move the motor-speed slider to explore torque, power, axle RPM, vehicle speed and driving force at the same operating point.
+Save a setup, then open **Setups** and click it. Torque and power curves show how the ideal motor model changes with speed. Move the motor-speed slider to explore torque, power, axle RPM, vehicle speed and driving force at the same operating point.
 
-**Compare setups** puts two saved configurations side by side in a simple table. See absolute and percentage changes, with colour highlights for selected performance metrics. Gearing, rollout, mass and measured lap averages remain neutral tradeoffs: a higher theoretical top speed does not automatically mean a faster car around your track.
+**Compare setups:** tick up to three. The Change Sheet starts with **what you changed** (the inputs that differ), then a plain verdict per setup ("quicker on the straight (+11.1% no-load speed) and pulls less out of a corner"), then **what it does**: only the results that moved, each with a bar that is green when better, red when worse. Results that did not change, need a value in each setup, or were measured on a different basis fold away into one line each. Tick *the workbench now* to compare before you save. Gearing, rollout, mass and measured lap averages remain neutral tradeoffs: a higher theoretical top speed does not automatically mean a faster car around your track.
 
 For example, save your current 9-tooth pinion setup, change it to 10 teeth and choose **Save as copy**. Compare the speed, torque and rollout of both configurations before testing the change on the track.
 
@@ -174,7 +174,7 @@ Open **Testing & planning** from Telemetry's setup-input navigation for eleven o
 - **Braking & coast-down:** analyse measured speed/time traces, distance and deceleration.
 - **Measurement ranges:** see how entered measurement bounds affect calculated outputs.
 
-Save the inputs with a setup, then open **Analyze → Testing & planning** for tables and available graphs. Every tool has a formula guide and worked example under Settings. Unknown values stay blank; estimates are labelled and do not claim to predict grip or lap times. See the [measurement guide](docs/TESTING-AND-PLANNING.md) for input formats and assumptions.
+Save the inputs with a setup, then open **Setups → Testing & planning** for tables and available graphs. Every tool has a formula guide and worked example under Settings. Unknown values stay blank; estimates are labelled and do not claim to predict grip or lap times. See the [measurement guide](docs/TESTING-AND-PLANNING.md) for input formats and assumptions.
 
 ### Plan ballast, tyre wear and gear choices
 
@@ -260,9 +260,9 @@ Use **Export comparison report** when comparing two runs to save a self-containe
 
 ### Keep setups and lap libraries organised
 
-In **Library**, save named setups with notes, search and sort them, and load, rename, duplicate or delete entries. Open a setup directly in Analyze or Compare. Share individual configurations through **Export file / Open file**.
+In **Library**, save named setups with notes, search and sort them, and load, rename, duplicate or delete entries. Open a setup directly in Setups, or compare it there. Share individual configurations through **Export file / Open file**.
 
-The working draft is saved automatically on this computer. **Analyze uses saved setups**, so choose **Save setup** after changes you want to analyse. **Save as copy** preserves the original for comparison.
+The working draft is saved automatically on this computer. **Setups reads saved setups** (or *the workbench now* when comparing), so choose **Save setup** after changes you want to analyse. **Save as copy** preserves the original for comparison.
 
 <a id="keep-your-setups-safe"></a>
 
@@ -346,7 +346,7 @@ Some distributions need FUSE support for AppImages or have additional Electron s
 1. Open **Telemetry** and try the included example, or choose **Load example**.
 2. Name your setup and enter the pinion, driven gear and fitted rear tyre diameter.
 3. Add motor RPM and its test voltage; add torque and weight if known.
-4. Choose **Save setup**, add notes and open **Analyze** to explore the saved configuration.
+4. Choose **Save setup**, add notes and open **Setups** to explore the saved configuration.
 5. Make one change, choose **Save as copy** and compare the two setups. For actual track results, use **Add lap data** or connect to Paddock.
 
 ### Updating and moving to another computer
@@ -373,7 +373,7 @@ Open an **[issue on GitHub](https://github.com/theDutchmanJames/SlotForgeTelemet
 
 Do not post passwords or unredacted backups. Remove private notes and identifying details from examples. Feature suggestions are welcome—describe the task you want to make easier.
 
-**Before reporting a calculation issue:** a dash usually means missing or unsupported inputs. Power curves need confirmed brushed DC stall torque and matching positive rating voltages. If Analyze shows an older setup, save your changes first; it displays the saved library entry.
+**Before reporting a calculation issue:** a dash usually means missing or unsupported inputs. Power curves need confirmed brushed DC stall torque and matching positive rating voltages. If Setups shows an older setup, save your changes first; it displays the saved library entry.
 
 ## License and copyright
 

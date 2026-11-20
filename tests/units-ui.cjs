@@ -30,7 +30,8 @@ app.whenReady().then(async()=>{
   // Analyze and comparison follow the choice.
   await click('#save-library');await pause();await click('#library-editor-confirm');await pause();
   await run("location.hash='analyze'");await pause();assert.match(await text('#analysis-stats'),/mph/);assert.match(await text('#analysis-stats'),/oz·in/);
-  await run("location.hash='analyze/compare'");await pause();assert.match(await text('#comparison'),/Car weight · oz/);
+  await run("{const e=document.querySelector('[name=totalWeight]');e.value='3';e.dispatchEvent(new Event('input',{bubbles:true}));}");await pause();
+  await run("location.hash='analyze/compare'");await pause();assert.match(await text('#change-sheet'),/The workbench now/,'with one saved setup, the workbench is the second');assert.match(await text('#change-sheet .cs-chg'),/ oz → 3 oz$/);
   // The choice is remembered on this device.
   await win.loadFile(path.join(__dirname,'../renderer/index.html'));await pause();assert.equal(await value('rearDiameter'),'0.8');assert.match(await text('[data-performance-result=speedKmh]'),/mph/);
   // A custom mix: only speed in mph.
