@@ -1,0 +1,326 @@
+<!doctype html>
+<html lang="en" data-tone="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Track laps remake</title>
+<style>
+@font-face{font-family:'SF Mono';src:url('../../../renderer/fonts/robotomono/RobotoMono[wght].ttf') format('truetype');font-weight:100 700}
+@font-face{font-family:'SF Cond';src:url('../../../renderer/fonts/barlowcondensed/BarlowCondensed-Bold.ttf') format('truetype');font-weight:700}
+@font-face{font-family:'SF Cond';src:url('../../../renderer/fonts/barlowcondensed/BarlowCondensed-BoldItalic.ttf') format('truetype');font-weight:700;font-style:italic}
+:root{--bg:#171b21;--panel:#222831;--panel2:#1c2129;--raised:#2a313b;--ink:#e8e6e1;--ink2:#c4c8ce;--muted:#98a0ab;--faint:#6b7380;--line:#343b47;--line2:#2b313b;
+ --accent:#e5484d;--accent-text:#f06b6f;--good:#3ecf8e;--warn:#f2b705;--rec:#a855f7;--blue:#5aa9e6;--page:#0f1216;
+ --ui:'Segoe UI',system-ui,sans-serif;--cond:'SF Cond','Bahnschrift',sans-serif;--mono:'SF Mono',Consolas,monospace}
+[data-tone=light]{--bg:#f1efea;--panel:#ffffff;--panel2:#f7f5f1;--raised:#ecebe6;--ink:#1d2229;--ink2:#3a414b;--muted:#656c76;--faint:#8b929b;--line:#d9d6cf;--line2:#e6e3dd;
+ --accent:#d62828;--accent-text:#c21f1f;--good:#187a50;--warn:#956000;--rec:#7c3aed;--blue:#1f6fb2;--page:#e4e1da}
+*{box-sizing:border-box}
+body{margin:0;background:var(--page);color:var(--ink);font:13.5px/1.45 var(--ui)}
+.wrap{max-width:1460px;margin:0 auto;padding:26px 20px 90px}
+h1{font:italic 700 42px/1 var(--cond);text-transform:uppercase;margin:0 0 6px}
+.lead{color:var(--muted);margin:0 0 12px;max-width:110ch;font-size:14px}
+ul.why{margin:0 0 6px;padding-left:18px;color:var(--ink2);max-width:120ch;font-size:14px}ul.why li{margin:3px 0}
+.bar{position:sticky;top:0;z-index:20;display:flex;flex-wrap:wrap;align-items:center;gap:10px 18px;margin:14px -20px 18px;padding:12px 20px;background:color-mix(in srgb,var(--page) 88%,transparent);backdrop-filter:blur(6px);border-bottom:1px solid var(--line2)}
+.bar b{font:600 10.5px var(--ui);letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.sg{display:inline-flex;gap:2px;padding:2px;border:1px solid var(--line);border-radius:8px;background:var(--bg)}
+.sg button{height:30px;padding:0 14px;border:0;border-radius:6px;background:transparent;color:var(--muted);font:500 13px var(--ui);cursor:pointer}
+.sg button.on{background:color-mix(in srgb,var(--ink) 13%,var(--panel));color:var(--ink);font-weight:650}
+.opt-note{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:0 0 18px}
+.opt-note>div{border:1px solid var(--line);border-radius:10px;padding:14px 16px;background:var(--panel2)}
+.opt-note>div.on{border-color:var(--ink2)}
+.opt-note h3{margin:0 0 4px;font:italic 700 22px/1 var(--cond);text-transform:uppercase}
+.opt-note p{margin:0 0 6px;color:var(--muted)}.opt-note ul{margin:0;padding-left:18px;color:var(--ink2)}
+.mono{font-family:var(--mono)}
+/* the app frame */
+.app{border:1px solid var(--line);border-radius:12px;overflow:hidden;background:var(--bg)}
+.top{display:flex;align-items:center;gap:14px;height:56px;padding:0 16px;background:var(--panel2);border-bottom:1px solid var(--line)}
+.logo{display:flex;align-items:center;gap:9px;font:italic 700 21px/1 var(--cond);letter-spacing:.02em}
+.logo i{width:30px;height:30px;border-radius:8px;background:var(--accent)}
+.tabs{display:flex;gap:6px;margin-left:10px}
+.tabs span{display:inline-flex;gap:2px;padding:3px;border-radius:9px;background:rgba(0,0,0,.22)}
+[data-tone=light] .tabs span{background:rgba(0,0,0,.06)}
+.tabs a{padding:6px 11px;border-radius:7px;color:var(--muted);font-size:13px;text-decoration:none}
+.tabs a.on{background:color-mix(in srgb,var(--ink) 12%,transparent);color:var(--ink);font-weight:600}
+.lights{margin-left:auto;font-size:12px;color:var(--muted);display:flex;gap:6px;align-items:center}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--good);display:inline-block}
+.page{padding:22px 24px 28px}
+.eyebrow{font:600 11px var(--ui);letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.ph{display:flex;align-items:flex-end;gap:14px;margin-bottom:16px}
+.ph h2{font:italic 700 34px/1 var(--cond);text-transform:uppercase;margin:4px 0 0}
+.ph .grow{flex:1}
+.btn{display:inline-flex;align-items:center;gap:6px;height:34px;padding:0 13px;border:1px solid var(--line);border-radius:7px;background:var(--raised);color:var(--ink);font:500 13px var(--ui);cursor:pointer;white-space:nowrap}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:600}
+.btn.ghost{background:transparent}.btn.small{height:28px;padding:0 10px;font-size:12.5px}
+.chip{display:inline-flex;align-items:center;gap:5px;height:24px;padding:0 9px;border-radius:999px;border:1px solid var(--line);color:var(--ink2);font-size:12px;background:var(--panel2);white-space:nowrap}
+.chip.on{background:color-mix(in srgb,var(--ink) 12%,var(--panel));color:var(--ink);border-color:var(--ink2)}
+.tag{font:600 10.5px var(--ui);letter-spacing:.08em;text-transform:uppercase;padding:2px 7px;border-radius:5px;border:1px solid var(--line);color:var(--muted)}
+.tag.club{color:var(--blue);border-color:color-mix(in srgb,var(--blue) 45%,var(--line))}
+.tag.test{color:var(--warn);border-color:color-mix(in srgb,var(--warn) 45%,var(--line))}
+.tag.rec{color:var(--rec);border-color:color-mix(in srgb,var(--rec) 55%,var(--line))}
+.change{display:inline-flex;align-items:center;gap:5px;font-size:12px;color:var(--ink);background:color-mix(in srgb,var(--warn) 14%,transparent);border-radius:5px;padding:1px 7px}
+.change.none{background:transparent;color:var(--faint);padding:0}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:10px}
+.k{font:600 10.5px var(--ui);letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.big{font:600 26px/1.1 var(--mono)}
+.better{color:var(--good)}.worse{color:var(--accent-text)}
+.note-new{display:inline-block;font:700 9.5px var(--ui);letter-spacing:.1em;text-transform:uppercase;color:#fff;background:var(--rec);padding:1px 6px;border-radius:4px;vertical-align:2px;margin-left:6px}
+
+/* ---------- Option A: Run Log ---------- */
+.a-grid{display:grid;grid-template-columns:270px minmax(0,1fr);gap:18px}
+.lines{padding:10px}
+.lines h4{margin:6px 8px 8px}
+.line{display:block;padding:10px 10px;border-radius:8px;cursor:pointer;border:1px solid transparent}
+.line.on{background:color-mix(in srgb,var(--ink) 9%,var(--panel));border-color:var(--line)}
+.line b{display:block;font-size:13.5px}.line small{color:var(--muted);font-size:12px}
+.line .mini{display:flex;justify-content:space-between;margin-top:4px;font-size:12px;color:var(--ink2)}
+.lines .sep{height:1px;background:var(--line2);margin:8px 6px}
+.trend{padding:18px 20px;display:grid;grid-template-columns:repeat(3,auto) 1fr;gap:6px 34px;align-items:end}
+.trend .sv{grid-row:1/3;grid-column:4;height:96px}
+.runs{margin-top:14px;overflow:hidden}
+.runs table{width:100%;border-collapse:collapse}
+.runs th{text-align:left;font:600 10.5px var(--ui);letter-spacing:.12em;text-transform:uppercase;color:var(--muted);padding:10px 12px;border-bottom:1px solid var(--line)}
+.runs td{padding:11px 12px;border-bottom:1px solid var(--line2);vertical-align:middle}
+.runs tr.r{cursor:pointer}.runs tr.r:hover td{background:color-mix(in srgb,var(--ink) 4%,transparent)}
+.runs tr.sel td{background:color-mix(in srgb,var(--ink) 7%,var(--panel))}
+.runs td.n b{display:block}.runs td.n small{color:var(--muted)}
+.runs .num{font-family:var(--mono);white-space:nowrap}
+.cb{width:16px;height:16px;border:1.5px solid var(--muted);border-radius:4px;display:inline-block;vertical-align:middle}
+.cb.on{background:var(--ink);border-color:var(--ink);box-shadow:inset 0 0 0 3px var(--panel)}
+.sheet td{padding:0!important;background:var(--panel2)!important}
+.sheet-in{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:18px;padding:18px 20px;border-left:3px solid var(--ink2)}
+.sheet-in h5{margin:0 0 8px;font:italic 700 17px/1 var(--cond);text-transform:uppercase}
+.stints{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}
+.kv{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--line2);font-size:13px}.kv span{color:var(--muted)}
+.notes{width:100%;min-height:56px;border:1px dashed var(--line);border-radius:7px;padding:8px;color:var(--muted);font-size:12.5px;margin:10px 0}
+.cmpbar{position:sticky;bottom:12px;margin-top:14px;display:flex;align-items:center;gap:16px;padding:12px 16px;border-radius:10px;background:var(--ink);color:var(--bg);box-shadow:0 10px 40px #0006}
+.cmpbar .btn{background:var(--bg);color:var(--ink);border-color:var(--bg)}
+.cmpbar b{font-weight:650}
+
+/* ---------- Option B: Pace Wall ---------- */
+.cars{display:flex;gap:10px;margin-bottom:14px}
+.carT{flex:0 0 220px;padding:12px 14px;border-radius:10px;border:1px solid var(--line);background:var(--panel);cursor:pointer}
+.carT.on{border-color:var(--ink2);box-shadow:inset 0 -3px 0 var(--accent)}
+.carT b{font:italic 700 20px/1 var(--cond);text-transform:uppercase;display:block}
+.carT small{color:var(--muted)}
+.carT.add{flex:0 0 140px;display:grid;place-items:center;color:var(--muted);border-style:dashed;background:transparent}
+.scope{display:flex;gap:8px;align-items:center;margin-bottom:16px}
+.score{display:grid;grid-template-columns:repeat(4,1fr);gap:0;margin-bottom:16px;overflow:hidden}
+.score>div{padding:16px 20px;border-right:1px solid var(--line2)}.score>div:last-child{border:0}
+.score .v{font:700 44px/1 var(--cond);letter-spacing:.01em;margin:6px 0 4px}
+.score small{color:var(--muted)}
+.b-grid{display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:16px;align-items:start}
+.wall{padding:14px 16px 16px;overflow-x:auto}
+.wall-h{display:flex;align-items:center;gap:12px;margin-bottom:10px}
+.wall-h h5{margin:0;font:italic 700 19px/1 var(--cond);text-transform:uppercase}
+.wrow{display:grid;grid-template-columns:150px repeat(18,minmax(26px,1fr)) 78px;gap:3px;align-items:center;margin-bottom:3px}
+.wrow.head span{font:500 10.5px var(--mono);color:var(--faint);text-align:center}
+.wrow .who{font-size:12px;line-height:1.25;padding-right:6px;cursor:pointer}
+.wrow .who b{display:block;font-size:12.5px}.wrow .who small{color:var(--muted)}
+.cell{height:30px;border-radius:4px;display:grid;place-items:center;font:500 10px var(--mono);color:rgba(0,0,0,.72);position:relative}
+.cell.empty{background:transparent;border:1px dashed var(--line2)}
+.cell.best{outline:2px solid var(--ink);outline-offset:-2px}
+.cell.recd{outline:2px solid var(--rec);outline-offset:-2px;color:#fff;background:var(--rec)!important}
+.cell.out{background:repeating-linear-gradient(135deg,var(--line) 0 4px,transparent 4px 8px)!important;color:var(--muted)}
+.wrow .typ{font:600 12.5px var(--mono);text-align:right}
+.wrow.sel .who{color:var(--ink)}.wrow.sel{background:color-mix(in srgb,var(--ink) 7%,transparent);border-radius:6px}
+.legend{display:flex;align-items:center;gap:10px;margin-top:12px;font-size:12px;color:var(--muted)}
+.ramp{width:220px;height:10px;border-radius:3px;background:linear-gradient(90deg,#3ecf8e,#c9e265,#f2b705,#f08a4b,#e5484d)}
+.changes-strip{position:relative;margin:4px 0 8px 153px;height:22px}
+.drawer{padding:16px 18px;position:sticky;top:70px}
+.drawer h5{margin:2px 0 4px;font:italic 700 22px/1 var(--cond);text-transform:uppercase}
+.ledger{margin-top:16px;padding:16px 18px}
+.ledger h5{margin:0 0 10px;font:italic 700 19px/1 var(--cond);text-transform:uppercase}
+.lrow{display:grid;grid-template-columns:110px 1fr 120px 120px;gap:12px;align-items:center;padding:9px 0;border-top:1px solid var(--line2)}
+.gain{height:8px;border-radius:4px;background:var(--good)}
+.hidden{display:none!important}
+@media(max-width:1100px){.a-grid,.b-grid,.sheet-in{grid-template-columns:1fr}.score{grid-template-columns:1fr 1fr}.opt-note{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="wrap">
+ <div class="eyebrow">SlotForge Telemetry · remake preview 1 of 4</div>
+ <h1>Track laps, remade</h1>
+ <p class="lead">Today a run you drove lives on six pages: Track day, Analyze › Laps, Progress, Records, Library › Race results and the Garage. Each has its own filters and its own drop-down to pick the run. This remake gives every run one home, organised by <b>car, track and lane</b>, the only grouping where lap times can be compared.</p>
+ <ul class="why">
+  <li><b>Replaces:</b> Analyze › Laps, Compare (runs), Progress and Records, and Library › Race results. Track day stays as the place to <i>log</i> a run (its own remake comes later).</li>
+  <li><b>Kept:</b> every number the pages show today (best eligible lap, median, middle 50% spread, best 5 in a row, stints, excluded laps, what was raced), Paddock imports and manual runs, Analyze/Compare/Export.</li>
+  <li><b>New, each one for you to approve:</b> a note on every run, a tag (club night, test, race), the record marked where it was set, and "what changed" shown on the run itself.</li>
+ </ul>
+
+ <div class="bar">
+  <b>Option</b><div class="sg" id="opt"><button class="on" data-o="a">A · Run Log</button><button data-o="b">B · Pace Wall</button></div>
+  <b>Look</b><div class="sg" id="tone"><button class="on" data-t="dark">Dark</button><button data-t="light">Light</button></div>
+  <span style="color:var(--muted);font-size:12.5px">Example data: Club GT on the Club circuit, five club nights from Paddock and two Track day runs.</span>
+ </div>
+
+ <div class="opt-note">
+  <div id="noteA" class="on"><h3>A · Run Log</h3><p>Calm and list-first, like a logbook.</p>
+   <ul><li>Left: your <b>lines</b> (car · track · lane), with their record.</li><li>Top: the pace trend of that line, with the record and how much you gained.</li><li>Below: every run as one row; a run <b>opens in place</b> as a run sheet. Tick two runs to compare them.</li></ul></div>
+  <div id="noteB"><h3>B · Pace Wall</h3><p>Visual-first, like a timing screen: you see every lap at once.</p>
+   <ul><li>Top: pick the <b>car</b>, then the track and lane.</li><li>A scoreboard: record, pace now, gained, consistency.</li><li>The wall: one row per run, one square per lap, coloured by how close it was to the record. A run opens in the side panel.</li><li>Underneath, a <b>change ledger</b>: which setup change moved the pace, and by how much.</li></ul></div>
+ </div>
+
+ <div class="app">
+  <div class="top"><div class="logo"><i></i>TELEMETRY</div>
+   <div class="tabs"><span><a>Workbench</a><a>Track day</a></span><span><a class="on">Laps</a><a>Setups</a><a>Driver Feedback</a></span><span><a>Library</a><a>Settings</a></span></div>
+   <div class="lights"><span class="dot"></span>Paddock · 5 races</div>
+  </div>
+
+  <!-- OPTION A -->
+  <div class="page" id="A">
+   <div class="ph"><div class="grow"><div class="eyebrow">Every run you drove</div><h2>Laps</h2></div>
+    <input class="btn ghost" style="width:260px;cursor:text" placeholder="Find a car, track, driver or date">
+    <button class="btn">Refresh from Paddock</button><button class="btn primary">+ Add laps</button></div>
+   <div class="a-grid">
+    <div class="card lines">
+     <div class="k" style="margin:4px 8px 10px">Your lines · car, track, lane</div>
+     <div class="line on"><b>Club GT</b><small>Club circuit · lane 1</small><div class="mini"><span>7 runs</span><span class="mono" style="color:var(--rec)">9.810</span></div></div>
+     <div class="line"><b>Club GT</b><small>Club circuit · lane 2</small><div class="mini"><span>2 runs</span><span class="mono">10.214</span></div></div>
+     <div class="line"><b>Vintage Le Mans</b><small>Club circuit · lane 1</small><div class="mini"><span>3 runs</span><span class="mono">11.402</span></div></div>
+     <div class="sep"></div>
+     <div class="k" style="margin:8px 8px 6px">Show</div>
+     <div style="display:flex;flex-wrap:wrap;gap:6px;padding:0 8px 8px"><span class="chip on">All runs</span><span class="chip">Club nights</span><span class="chip">Tests</span><span class="chip">From Paddock</span><span class="chip">Typed in</span></div>
+    </div>
+    <div>
+     <div class="card trend">
+      <div class="k">Record</div><div class="k">Typical now</div><div class="k">Gained</div><div class="k" style="grid-column:4;grid-row:3;text-align:right;letter-spacing:.06em">typical lap per run (dots) · best lap (rings) · higher is quicker</div>
+      <div><div class="big" style="color:var(--rec)">9.810 s</div><small style="color:var(--muted)">20 Nov · Run 2 · pinion 9 → 10</small></div>
+      <div><div class="big">9.910 s</div><small style="color:var(--muted)">median of the last run</small></div>
+      <div><div class="big better">−0.50 s</div><small style="color:var(--muted)">since 18 Sep (10.41 s)</small></div>
+      <svg class="sv" id="aTrend" viewBox="0 0 520 96" preserveAspectRatio="none"></svg>
+     </div>
+     <div class="card runs"><table id="aRuns"></table></div>
+     <div class="cmpbar"><span class="cb on" style="border-color:var(--bg);background:var(--bg);box-shadow:inset 0 0 0 3px var(--ink)"></span><span><b>2 runs ticked:</b> Run 2 · pinion 9 → 10 vs Run 1 · no change</span><span class="mono">typical −0.114 s · best −0.130 s</span><span style="flex:1"></span><button class="btn small">Clear</button><button class="btn small">Compare side by side</button></div>
+    </div>
+   </div>
+  </div>
+
+  <!-- OPTION B -->
+  <div class="page hidden" id="B">
+   <div class="ph"><div class="grow"><div class="eyebrow">Pace by car</div><h2>Laps</h2></div>
+    <button class="btn">Refresh from Paddock</button><button class="btn primary">+ Add laps</button></div>
+   <div class="cars">
+    <div class="carT on"><b>Club GT</b><small>Home build · 9 runs · 2 tracks</small></div>
+    <div class="carT"><b>Vintage Le Mans</b><small>Kit · 3 runs</small></div>
+    <div class="carT"><b>Rally special</b><small>Home build · no runs yet</small></div>
+    <div class="carT add">All cars ▾</div>
+   </div>
+   <div class="scope"><span class="k" style="margin-right:4px">Track · lane</span><span class="chip on">Club circuit · lane 1 · 7 runs</span><span class="chip">Club circuit · lane 2 · 2 runs</span>
+    <span style="flex:1"></span><span class="k">Colour</span><div class="sg"><button class="on">vs record</button><button>vs own median</button></div></div>
+   <div class="card score">
+    <div><div class="k">Record</div><div class="v" style="color:var(--rec)">9.810</div><small>20 Nov · Track day · Run 2</small></div>
+    <div><div class="k">Pace now</div><div class="v">9.97</div><small>median of the last 3 runs</small></div>
+    <div><div class="k">Gained</div><div class="v better">−0.50</div><small>since the first run, 18 Sep</small></div>
+    <div><div class="k">Consistency</div><div class="v">0.11</div><small>middle 50% spread, last run · was 0.09</small></div>
+   </div>
+   <div class="b-grid">
+    <div>
+     <div class="card wall">
+      <div class="wall-h"><h5>Every lap, every run</h5><span style="color:var(--muted);font-size:12.5px">Newest on top · a square per lap · outlined: best lap of the run</span><span style="flex:1"></span><span class="chip">Show excluded laps</span></div>
+      <div id="wall"></div>
+      <div class="legend"><span>record</span><span class="ramp"></span><span>+0.6 s slower</span><span style="margin-left:14px" class="chip"><span class="cell out" style="width:14px;height:12px"></span>excluded or pit</span><span class="chip"><span class="cell recd" style="width:14px;height:12px"></span>record lap</span></div>
+     </div>
+     <div class="card ledger">
+      <h5>What moved the pace <span class="note-new">New</span></h5>
+      <div style="color:var(--muted);font-size:12.5px;margin-bottom:6px">Each setup change on this line, with the typical lap before and after. Same car, track and lane; driver and conditions can still differ.</div>
+      <div class="lrow"><span class="k">Date</span><span class="k">Change</span><span class="k">Typical lap</span><span class="k">Effect</span></div>
+      <div class="lrow"><span>9 Oct</span><span><span class="change">gear 27 → 28</span></span><span class="mono">10.297 → 10.193</span><span><div class="gain" style="width:62%"></div><small class="better mono">−0.104 s</small></span></div>
+      <div class="lrow"><span>20 Nov</span><span><span class="change">pinion 9 → 10</span></span><span class="mono">10.024 → 9.910</span><span><div class="gain" style="width:68%"></div><small class="better mono">−0.114 s</small></span></div>
+      <div class="lrow"><span>25 Sep, 2 Oct</span><span><span class="change none">no recorded change</span></span><span class="mono">10.409 → 10.297</span><span><small style="color:var(--muted)">practice, −0.11 s over two nights</small></span></div>
+     </div>
+    </div>
+    <div class="card drawer" id="drawer"></div>
+   </div>
+  </div>
+ </div>
+ <p class="lead" style="margin-top:16px">Both options open a run the same way: its laps as a chart, stints, what was raced (gearing, motor, tyres, weight), a note and the actions (Compare with the run before, Open the setup on the workbench, Export, and for runs you typed in: Edit and Delete). Paddock runs stay read-only, as today.</p>
+</div>
+<script>
+// Example data: steady pace with small variation, the odd slow lap.
+function laps(typical,count,seed){let s=seed;const r=()=>((s=(s*16807)%2147483647)/2147483647);return Array.from({length:count},(_,i)=>+(typical+(r()-0.5)*0.24+(i%7===5?0.55:0)).toFixed(3));}
+const runs=[
+ {id:7,date:'20 Nov',when:'20 Nov 2026 · 01:00',name:'Run 2',tag:'test',src:'Track day · typed in',change:'pinion 9 → 10',l:laps(9.93,10,89),cfg:['10 / 27','21.5k','20 mm','80 g']},
+ {id:6,date:'20 Nov',when:'20 Nov 2026 · 00:58',name:'Run 1',tag:'test',src:'Track day · typed in',change:'',l:laps(10.06,10,71),cfg:['9 / 27','21.5k','20 mm','80 g']},
+ {id:5,date:'16 Oct',when:'16 Oct 2026 · 21:30',name:'Club night',tag:'club',src:'Paddock · Home collection',change:'',l:laps(10.08,18,53),cfg:['9 / 28','21.5k','—','—']},
+ {id:4,date:'9 Oct',when:'9 Oct 2026 · 21:30',name:'Club night',tag:'club',src:'Paddock · Home collection',change:'gear 27 → 28',l:laps(10.14,18,41),cfg:['9 / 28','21.5k','—','—']},
+ {id:3,date:'2 Oct',when:'2 Oct 2026 · 21:30',name:'Club night',tag:'club',src:'Paddock · Home collection',change:'',l:laps(10.26,18,37),cfg:['9 / 27','21.5k','—','—']},
+ {id:2,date:'25 Sep',when:'25 Sep 2026 · 21:30',name:'Club night',tag:'club',src:'Paddock · Home collection',change:'',l:laps(10.31,18,23),cfg:['9 / 27','21.5k','—','—']},
+ {id:1,date:'18 Sep',when:'18 Sep 2026 · 21:30',name:'Club night',tag:'club',src:'Paddock · Home collection',change:'',l:laps(10.42,18,11),cfg:['9 / 27','21.5k','—','—']}];
+const med=a=>{const s=[...a].sort((x,y)=>x-y),m=s.length>>1;return s.length%2?s[m]:(s[m-1]+s[m])/2;};
+const q=(a,p)=>{const s=[...a].sort((x,y)=>x-y),i=(s.length-1)*p,lo=Math.floor(i);return s[lo]+(s[Math.ceil(i)]-s[lo])*(i-lo);};
+for(const r of runs){r.best=Math.min(...r.l);r.typ=med(r.l);r.spread=q(r.l,.75)-q(r.l,.25);}
+const record=Math.min(...runs.map(r=>r.best));
+const f3=v=>v.toFixed(3);
+const tagHtml=r=>`<span class="tag ${r.tag}">${r.tag==='club'?'Club night':'Test'}</span>`;
+const chg=r=>r.change?`<span class="change">${r.change}</span>`:'<span class="change none">no change</span>';
+
+// A lap chart for a run sheet or drawer.
+function lapChart(r,w=520,h=150){
+ // Lower is better: a bar is the lap time above the record, so short bars are quick laps. Slow laps are capped and hatched.
+ const cap=r.typ+0.3,lo=record-0.03,top=h-20,x=i=>16+i*(w-32)/(r.l.length-1),y=v=>top-(Math.min(v,cap)-lo)/(cap-lo)*(top-14);
+ const bw=Math.max(6,Math.min(26,(w-32)/r.l.length-6));
+ let s=`<svg viewBox="0 0 ${w} ${h}" style="width:100%;height:${h}px">`;
+ r.l.forEach((v,i)=>{const slow=v>cap;s+=`<rect x="${x(i)-bw/2}" y="${y(v)}" width="${bw}" height="${top-y(v)}" rx="2" fill="${slow?'url(#hatch)':v===record?'var(--rec)':v===r.best?'var(--good)':'var(--blue)'}" opacity="${slow?1:.85}"/>`;
+  if(slow)s+=`<text x="${x(i)}" y="${y(v)-3}" text-anchor="middle" fill="var(--muted)" font-size="9" font-family="monospace">${f3(v)}</text>`;
+  s+=`<text x="${x(i)}" y="${h-5}" text-anchor="middle" fill="var(--faint)" font-size="9" font-family="monospace">${i+1}</text>`;});
+ s+=`<line x1="0" x2="${w}" y1="${y(r.typ)}" y2="${y(r.typ)}" stroke="var(--ink2)" stroke-dasharray="3 4"/><text x="${w-2}" y="${y(r.typ)-4}" text-anchor="end" fill="var(--ink2)" font-size="10" font-family="monospace">typical ${f3(r.typ)}</text>`;
+ s+=`<defs><pattern id="hatch" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="6" height="6" fill="var(--line2)"/><line x1="0" y1="0" x2="0" y2="6" stroke="var(--line)" stroke-width="3"/></pattern></defs>`;
+ return s+'</svg>';
+}
+function sheetBody(r,compact){
+ const prev=runs[runs.indexOf(r)+1];const d=prev?r.typ-prev.typ:0;
+ return `${compact?'':'<div>'}<div style="display:flex;gap:10px;align-items:center;margin-bottom:6px"><span class="k">Laps</span><span style="color:var(--muted);font-size:12px">${r.l.length} laps · best <b class="mono">${f3(r.best)}</b> · typical <b class="mono">${f3(r.typ)}</b> · spread <b class="mono">${f3(r.spread)}</b> · best 5 in a row <b class="mono">${f3(Math.min(...r.l.slice(0,-4).map((_,i)=>r.l.slice(i,i+5).reduce((a,b)=>a+b)/5)))}</b></span></div>
+ ${lapChart(r,compact?330:620,compact?130:160)}
+ <div class="stints"><span class="chip on">Stint 1 · laps 1–${r.l.length}</span><span class="chip">Heat 1 · 0:00–${Math.floor(r.l.reduce((a,b)=>a+b)/60)}:${String(Math.round(r.l.reduce((a,b)=>a+b)%60)).padStart(2,'0')}</span>${r.l.some(v=>v>r.typ+0.35)?'<span class="chip">2 slow laps, still counted</span>':''}</div>
+ ${prev?`<div style="font-size:13px">Against the run before (${prev.date}): typical <b class="mono ${d<0?'better':'worse'}">${d<0?'−':'+'}${f3(Math.abs(d))} s</b>, best <b class="mono ${r.best<prev.best?'better':'worse'}">${r.best<prev.best?'−':'+'}${f3(Math.abs(r.best-prev.best))} s</b>${r.change?` after <span class="change">${r.change}</span>`:''}</div>`:''}
+ ${compact?'':'</div><div>'}
+ <h5 style="margin-top:${compact?14:0}px">Raced with</h5>
+ ${['Gearing','Motor','Rear tyre','Weight'].map((k,i)=>`<div class="kv"><span>${k}</span><b class="mono" style="font-weight:500">${r.cfg[i]==='—'?'<span style="color:var(--faint)">not recorded</span>':r.cfg[i]}</b></div>`).join('')}
+ <div class="notes">Add a note: track conditions, how the car felt… <span class="note-new">New</span></div>
+ <div style="display:flex;flex-wrap:wrap;gap:6px"><button class="btn small">Compare with run before</button><button class="btn small">Open setup</button><button class="btn small">Export</button>${r.src.includes('typed')?'<button class="btn small">Edit laps</button><button class="btn small ghost" style="color:var(--accent-text)">Delete</button>':''}</div>
+ ${compact?'':'</div>'}`;
+}
+
+// Option A
+let openA=7;
+function renderA(){
+ const t=document.getElementById('aRuns');
+ let h=`<tr><th style="width:34px"></th><th>Run</th><th>Changed</th><th>Laps</th><th>Best</th><th>Typical</th><th>Spread</th><th></th></tr>`;
+ for(const r of runs){
+  const spark=`<svg viewBox="0 0 90 22" width="90" height="22">${r.l.map((v,i)=>{const hh=Math.max(2,20-(v-record)*26);return `<rect x="${i*90/r.l.length}" y="${22-hh}" width="${90/r.l.length-1}" height="${hh}" fill="${v===r.best?'var(--good)':'var(--muted)'}" opacity=".7"/>`;}).join('')}</svg>`;
+  h+=`<tr class="r ${openA===r.id?'sel':''}" data-id="${r.id}"><td><span class="cb ${r.id>=6?'on':''}"></span></td><td class="n"><b>${r.date} · ${r.name} ${tagHtml(r)}</b><small>${r.src}</small></td><td>${chg(r)}</td><td>${spark}</td>
+  <td class="num">${r.best===record?`<span style="color:var(--rec)">${f3(r.best)} ★</span>`:f3(r.best)}</td><td class="num">${f3(r.typ)}</td><td class="num">${f3(r.spread)}</td><td style="color:var(--muted)">${openA===r.id?'▴':'▾'}</td></tr>`;
+  if(openA===r.id)h+=`<tr class="sheet"><td colspan="8"><div class="sheet-in">${sheetBody(r,false)}</div></td></tr>`;
+ }
+ t.innerHTML=h;
+ for(const tr of t.querySelectorAll('tr.r'))tr.onclick=()=>{openA=openA===+tr.dataset.id?null:+tr.dataset.id;renderA();};
+ // trend: typical per run (oldest left) and best, with the record line
+ const o=[...runs].reverse(),w=520,hh=96,lo=record-0.05,hi=Math.max(...o.map(r=>r.typ))+0.05,x=i=>16+i*(w-32)/(o.length-1),y=v=>8+(v-lo)/(hi-lo)*(hh-20);
+ let s=`<line x1="0" x2="${w}" y1="${y(record)}" y2="${y(record)}" stroke="var(--rec)" stroke-dasharray="4 4"/>`;
+ s+=`<polyline fill="none" stroke="var(--blue)" stroke-width="2" points="${o.map((r,i)=>x(i)+','+y(r.typ)).join(' ')}"/>`;
+ o.forEach((r,i)=>{s+=`<circle cx="${x(i)}" cy="${y(r.typ)}" r="4" fill="var(--blue)"/><circle cx="${x(i)}" cy="${y(r.best)}" r="3" fill="none" stroke="${r.best===record?'var(--rec)':'var(--good)'}" stroke-width="1.5"/>`;if(r.change)s+=`<text x="${x(i)}" y="${hh-1}" text-anchor="${i===o.length-1?'end':'middle'}" font-size="9" fill="var(--warn)" font-family="monospace">${r.change}</text>`;});
+ document.getElementById('aTrend').innerHTML=s;
+}
+// Option B
+let openB=7;
+function colour(v){const t=Math.max(0,Math.min(1,(v-record)/0.6));const stops=[[62,207,142],[201,226,101],[242,183,5],[240,138,75],[229,72,77]];const p=t*4,i=Math.min(3,Math.floor(p)),k=p-i;const c=stops[i].map((a,j)=>Math.round(a+(stops[i+1][j]-a)*k));return `rgb(${c})`;}
+function renderB(){
+ let h=`<div class="wrow head"><span></span>${Array.from({length:18},(_,i)=>`<span>${i+1}</span>`).join('')}<span style="text-align:right">typical</span></div>`;
+ for(const r of runs){
+  if(r.change)h+=`<div style="margin:6px 0 4px 0;font-size:11.5px;color:var(--warn)">▼ changed: <span class="change">${r.change}</span></div>`;
+  h+=`<div class="wrow ${openB===r.id?'sel':''}" data-id="${r.id}"><div class="who"><b>${r.date} · ${r.name}</b><small>${r.tag==='club'?'Club night · Paddock':'Test · typed in'}</small></div>`;
+  for(let i=0;i<18;i++){const v=r.l[i];if(v===undefined){h+='<div class="cell empty"></div>';continue;}const slow=v>r.typ+0.35;h+=`<div class="cell ${slow?'out':''} ${v===record?'recd':v===r.best?'best':''}" style="background:${colour(v)}" title="Lap ${i+1}: ${f3(v)} s">${(v%1).toFixed(2).slice(1)}</div>`;}
+  h+=`<div class="typ">${f3(r.typ)}</div></div>`;
+ }
+ const wall=document.getElementById('wall');wall.innerHTML=h;
+ for(const row of wall.querySelectorAll('.wrow[data-id]'))row.onclick=()=>{openB=+row.dataset.id;renderB();};
+ const r=runs.find(x=>x.id===openB);
+ document.getElementById('drawer').innerHTML=`<div class="eyebrow">${r.when}</div><h5>${r.name} ${tagHtml(r)}</h5><div style="color:var(--muted);font-size:12.5px;margin-bottom:12px">${r.src} · Club circuit · lane 1 · Alex</div>${sheetBody(r,true)}`;
+}
+renderA();renderB();
+for(const b of document.querySelectorAll('#opt button'))b.onclick=()=>{for(const x of document.querySelectorAll('#opt button'))x.classList.toggle('on',x===b);const a=b.dataset.o==='a';document.getElementById('A').classList.toggle('hidden',!a);document.getElementById('B').classList.toggle('hidden',a);document.getElementById('noteA').classList.toggle('on',a);document.getElementById('noteB').classList.toggle('on',!a);};
+for(const b of document.querySelectorAll('#tone button'))b.onclick=()=>{for(const x of document.querySelectorAll('#tone button'))x.classList.toggle('on',x===b);document.documentElement.dataset.tone=b.dataset.t;};
+const o=new URLSearchParams(location.search).get('o');if(o==='b')document.querySelector('#opt [data-o=b]').click();
+if(new URLSearchParams(location.search).get('t')==='light')document.querySelector('#tone [data-t=light]').click();
+</script>
+</body>
+</html>
