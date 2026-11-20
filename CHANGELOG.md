@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+### Connect to Paddock: the Status Card (rework)
+
+- **One card says where you stand:** a light, "Connected to Home collection" (or Not connected, or Paddock needs attention) in big type, and the one action you need now: *Connect*, *Refresh now* and *Disconnect*, or *Fix it*.
+- **What you have from Paddock** on the same card: races, cars, photos and the last import.
+- **Where is Paddock?** *This computer* (one button, no password) or *Another computer*, which is now three short steps in a row: turn on Dealership Mode in Paddock, find it here (or type the address), enter the password.
+- **Import history:** the last eight imports, with what came in and anything left out (kept on this device).
+- The connection itself is unchanged: read-only, the password only in memory, and a failed import never touches what you already have.
+
 ### The workbench: Paired Rows (rework)
 
 - **One row per topic below the setup bar:** what you enter on the left, what it does on the right. Gearing sits beside its speed, rollout and power figures; Motor beside the drivetrain picture; Rear tyres beside clearance and wear; Weight & ballast (with chassis geometry) beside balance and the ballast planner; and so on for magnets, gear finder, lap speed and testing.

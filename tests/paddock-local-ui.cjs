@@ -21,6 +21,14 @@ app.whenReady().then(async()=>{
   assert.match(await run("document.querySelector('#paddock-local-message').textContent"),/2 session\(s\), 2 new or changed/);
   assert.match(await run("document.querySelector('#paddock-global-status').textContent"),/Paddock on this computer · Home collection/);
   assert.equal(await run("document.querySelector('#paddock-local-connect').hidden"),true);
+  // Status Card: connected, what came in, the one action, and the import history.
+  assert.match(await run("document.querySelector('#pd-title').textContent"),/Connected to Home collection/);assert.equal(await run("document.querySelector('#pd-lamp').dataset.state"),'on');
+  assert.match(await run("document.querySelector('#pd-facts').textContent"),/Races2/);assert.deepEqual(await run("[...document.querySelectorAll('#pd-actions button')].map(b=>b.textContent)"),['Disconnect','Refresh now']);
+  assert.match(await run("document.querySelector('#pd-history').textContent"),/2 session\(s\), 2 new or changed.*this computer/);
+  fs.writeFileSync(path.join(output,'paddock-status-card.png'),(await win.webContents.capturePage()).toPNG());
+  await run("document.querySelector('[data-pd-where=network]').click()");assert.equal(await run("document.querySelector('[data-pd-pane=network]').hidden"),false);assert.equal(await run("document.querySelector('#paddock-local').offsetParent"),null);
+  fs.writeFileSync(path.join(output,'paddock-network-steps.png'),(await win.webContents.capturePage()).toPNG());
+  await run("document.querySelector('[data-pd-where=local]').click()");
   // The Shared-library race is now analysable like any other.
   await route('laps/run');
   assert.ok(await run(`[...document.querySelectorAll('#race-run option')].some(o=>o.textContent.includes(${JSON.stringify(raceName)}))`),'history-v1 race listed in Lap analysis');
