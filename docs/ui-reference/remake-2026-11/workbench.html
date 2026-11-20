@@ -1,0 +1,195 @@
+<!doctype html>
+<html lang="en" data-tone="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Workbench rework</title>
+<style>
+@font-face{font-family:'SF Mono';src:url('../../../renderer/fonts/robotomono/RobotoMono[wght].ttf') format('truetype');font-weight:100 700}
+@font-face{font-family:'SF Cond';src:url('../../../renderer/fonts/barlowcondensed/BarlowCondensed-Bold.ttf') format('truetype');font-weight:700}
+@font-face{font-family:'SF Cond';src:url('../../../renderer/fonts/barlowcondensed/BarlowCondensed-BoldItalic.ttf') format('truetype');font-weight:700;font-style:italic}
+:root{--bg:#171b21;--panel:#222831;--panel2:#1c2129;--raised:#2a313b;--ink:#e8e6e1;--ink2:#c4c8ce;--muted:#98a0ab;--faint:#6b7380;--line:#343b47;--line2:#2b313b;
+ --accent:#e5484d;--accent-text:#f06b6f;--good:#3ecf8e;--warn:#f2b705;--rec:#a855f7;--blue:#5aa9e6;--page:#0f1216;
+ --ui:'Segoe UI',system-ui,sans-serif;--cond:'SF Cond','Bahnschrift',sans-serif;--mono:'SF Mono',Consolas,monospace}
+[data-tone=light]{--bg:#f1efea;--panel:#ffffff;--panel2:#f7f5f1;--raised:#ecebe6;--ink:#1d2229;--ink2:#3a414b;--muted:#656c76;--faint:#8b929b;--line:#d9d6cf;--line2:#e6e3dd;
+ --accent:#d62828;--accent-text:#c21f1f;--good:#187a50;--warn:#956000;--rec:#7c3aed;--blue:#1f6fb2;--page:#e4e1da}
+*{box-sizing:border-box}
+body{margin:0;background:var(--page);color:var(--ink);font:13.5px/1.45 var(--ui)}
+.wrap{max-width:1460px;margin:0 auto;padding:26px 20px 90px}
+h1{font:italic 700 42px/1 var(--cond);text-transform:uppercase;margin:0 0 6px}
+.lead{color:var(--muted);margin:0 0 12px;max-width:110ch;font-size:14px}
+ul.why{margin:0 0 6px;padding-left:18px;color:var(--ink2);max-width:120ch;font-size:14px}ul.why li{margin:3px 0}
+.bar{position:sticky;top:0;z-index:20;display:flex;flex-wrap:wrap;align-items:center;gap:10px 18px;margin:14px -20px 18px;padding:12px 20px;background:color-mix(in srgb,var(--page) 88%,transparent);backdrop-filter:blur(6px);border-bottom:1px solid var(--line2)}
+.bar b{font:600 10.5px var(--ui);letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.sg{display:inline-flex;gap:2px;padding:2px;border:1px solid var(--line);border-radius:8px;background:var(--bg)}
+.sg button{height:30px;padding:0 14px;border:0;border-radius:6px;background:transparent;color:var(--muted);font:500 13px var(--ui);cursor:pointer}
+.sg button.on{background:color-mix(in srgb,var(--ink) 13%,var(--panel));color:var(--ink);font-weight:650}
+.opt-note{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:0 0 18px}
+.opt-note>div{border:1px solid var(--line);border-radius:10px;padding:14px 16px;background:var(--panel2)}
+.opt-note>div.on{border-color:var(--ink2)}
+.opt-note h3{margin:0 0 4px;font:italic 700 22px/1 var(--cond);text-transform:uppercase}
+.opt-note p{margin:0 0 6px;color:var(--muted)}.opt-note ul{margin:0;padding-left:18px;color:var(--ink2)}
+.mono{font-family:var(--mono)}
+/* the app frame */
+.app{border:1px solid var(--line);border-radius:12px;overflow:hidden;background:var(--bg)}
+.top{display:flex;align-items:center;gap:14px;height:56px;padding:0 16px;background:var(--panel2);border-bottom:1px solid var(--line)}
+.logo{display:flex;align-items:center;gap:9px;font:italic 700 21px/1 var(--cond);letter-spacing:.02em}
+.logo i{width:30px;height:30px;border-radius:8px;background:var(--accent)}
+.tabs{display:flex;gap:6px;margin-left:10px}
+.tabs span{display:inline-flex;gap:2px;padding:3px;border-radius:9px;background:rgba(0,0,0,.22)}
+[data-tone=light] .tabs span{background:rgba(0,0,0,.06)}
+.tabs a{padding:6px 11px;border-radius:7px;color:var(--muted);font-size:13px;text-decoration:none}
+.tabs a.on{background:color-mix(in srgb,var(--ink) 12%,transparent);color:var(--ink);font-weight:600}
+.lights{margin-left:auto;font-size:12px;color:var(--muted);display:flex;gap:6px;align-items:center}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--good);display:inline-block}
+.page{padding:22px 24px 28px}
+.eyebrow{font:600 11px var(--ui);letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.ph{display:flex;align-items:flex-end;gap:14px;margin-bottom:16px}
+.ph h2{font:italic 700 34px/1 var(--cond);text-transform:uppercase;margin:4px 0 0}
+.ph .grow{flex:1}
+.btn{display:inline-flex;align-items:center;gap:6px;height:34px;padding:0 13px;border:1px solid var(--line);border-radius:7px;background:var(--raised);color:var(--ink);font:500 13px var(--ui);cursor:pointer;white-space:nowrap}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:600}
+.btn.ghost{background:transparent}.btn.small{height:28px;padding:0 10px;font-size:12.5px}
+.chip{display:inline-flex;align-items:center;gap:5px;height:24px;padding:0 9px;border-radius:999px;border:1px solid var(--line);color:var(--ink2);font-size:12px;background:var(--panel2);white-space:nowrap}
+.chip.on{background:color-mix(in srgb,var(--ink) 12%,var(--panel));color:var(--ink);border-color:var(--ink2)}
+.tag{font:600 10.5px var(--ui);letter-spacing:.08em;text-transform:uppercase;padding:2px 7px;border-radius:5px;border:1px solid var(--line);color:var(--muted)}
+.tag.club{color:var(--blue);border-color:color-mix(in srgb,var(--blue) 45%,var(--line))}
+.tag.test{color:var(--warn);border-color:color-mix(in srgb,var(--warn) 45%,var(--line))}
+.tag.rec{color:var(--rec);border-color:color-mix(in srgb,var(--rec) 55%,var(--line))}
+.change{display:inline-flex;align-items:center;gap:5px;font-size:12px;color:var(--ink);background:color-mix(in srgb,var(--warn) 14%,transparent);border-radius:5px;padding:1px 7px}
+.change.none{background:transparent;color:var(--faint);padding:0}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:10px}
+.k{font:600 10.5px var(--ui);letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.big{font:600 26px/1.1 var(--mono)}
+.better{color:var(--good)}.worse{color:var(--accent-text)}
+.note-new{display:inline-block;font:700 9.5px var(--ui);letter-spacing:.1em;text-transform:uppercase;color:#fff;background:var(--rec);padding:1px 6px;border-radius:4px;vertical-align:2px;margin-left:6px}
+
+.hidden{display:none!important}
+.h5{margin:0 0 6px;font:italic 700 19px/1.1 var(--cond);text-transform:uppercase}
+.sub{color:var(--muted);font-size:12.5px;margin:0 0 12px}
+.fld{display:grid;gap:4px;font-size:12px;color:var(--muted)}
+.fld .in{height:36px;border:1px solid var(--line);border-radius:7px;background:var(--bg);color:var(--ink);padding:7px 10px;font:500 14px var(--mono)}
+.fld .in.ch{border-color:var(--warn);box-shadow:0 0 0 1px var(--warn)}
+.fld small{font-size:11px;color:var(--faint)}
+.lv{display:flex;gap:4px;margin:0 0 14px;padding:3px;border:1px solid var(--line);border-radius:10px;background:var(--panel)}
+.lv span{padding:7px 14px;border-radius:8px;font-size:13px;color:var(--muted)}.lv span.on{background:color-mix(in srgb,var(--ink) 11%,var(--panel));color:var(--ink);font-weight:600}
+.num{font:600 22px var(--mono)}.num small{font:500 12px var(--ui);color:var(--muted);margin-left:4px}
+.delta{font:600 11.5px var(--mono);padding:1px 6px;border-radius:4px}
+.delta.up{background:color-mix(in srgb,var(--good) 18%,transparent);color:var(--good)}.delta.dn{background:color-mix(in srgb,var(--accent) 18%,transparent);color:var(--accent-text)}.delta.nt{background:color-mix(in srgb,var(--ink) 9%,transparent);color:var(--ink2)}
+/* ---------- A: Paired Rows ---------- */
+.pair{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.25fr);gap:0;margin-bottom:12px;overflow:hidden}
+.pair .lft{padding:14px 16px;border-right:1px solid var(--line2)}
+.pair .rgt{padding:14px 16px;background:color-mix(in srgb,var(--ink) 2.5%,var(--panel))}
+.pair .hd{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.pair .hd b{font:italic 700 19px/1 var(--cond);text-transform:uppercase}
+.pair .hd small{color:var(--muted);font-size:12px}
+.pair .hd .tg{margin-left:auto;color:var(--muted);font-size:12px}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.figs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.figs div{border:1px solid var(--line2);border-radius:8px;padding:8px 10px}
+.figs span{display:block;font-size:11px;color:var(--muted)}.figs span.delta{display:inline-block}
+.pair.closed .lft,.pair.closed .rgt{padding-top:10px;padding-bottom:10px}
+.pair.closed .summary{display:flex;gap:18px;font-size:13px;color:var(--ink2)}.pair.closed .summary b{font-family:var(--mono)}
+.gearmini{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;margin-top:10px}
+.gearmini span{height:22px;border-radius:4px;background:color-mix(in srgb,var(--ink) 7%,transparent);font:500 10px var(--mono);display:grid;place-items:center;color:var(--muted)}
+.gearmini span.m{background:color-mix(in srgb,var(--good) 30%,transparent);color:var(--ink)}.gearmini span.c{outline:2px solid var(--ink);outline-offset:-2px;color:var(--ink)}
+.next{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:6px}
+.next div{padding:12px 14px;border:1px dashed var(--line);border-radius:10px;font-size:12.5px;color:var(--muted)}
+.next b{display:block;color:var(--ink);font-size:13.5px;margin-bottom:2px}
+/* ---------- B: Cockpit ---------- */
+.dash{position:sticky;top:0;z-index:3;display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:0;margin-bottom:14px;overflow:hidden}
+.dash>div{padding:12px 14px;border-right:1px solid var(--line2);cursor:pointer}
+.dash>div:last-child{border-right:0}
+.dash>div.lit{background:color-mix(in srgb,var(--warn) 10%,var(--panel));box-shadow:inset 0 -3px 0 var(--warn)}
+.dash>div.open{box-shadow:inset 0 -3px 0 var(--ink)}
+.dash .lbl{font:600 10.5px var(--ui);letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.dash .num{display:block;margin:4px 0 3px;font-size:24px}
+.since{display:flex;align-items:center;gap:8px;margin:-4px 0 12px;font-size:12.5px;color:var(--muted)}
+.chg{display:inline-block;font:12px var(--mono);background:color-mix(in srgb,var(--warn) 16%,transparent);padding:1px 7px;border-radius:5px;color:var(--ink)}
+.c-grid{display:grid;grid-template-columns:minmax(0,1fr) 380px;gap:14px;align-items:start}
+.form{padding:14px 16px}
+.fsec{display:grid;grid-template-columns:150px minmax(0,1fr);gap:14px;padding:12px 0;border-top:1px solid var(--line2)}
+.fsec:first-child{border-top:0;padding-top:0}
+.fsec .sh b{display:block;font:italic 700 17px/1 var(--cond);text-transform:uppercase}.fsec .sh small{color:var(--muted);font-size:11.5px}
+.g4{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.drawer{padding:16px;position:sticky;top:96px}
+.drawer h5{margin:0 0 2px;font:italic 700 20px/1 var(--cond);text-transform:uppercase}
+.kv{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--line2);font-size:13px}.kv span{color:var(--muted)}.kv b{font:500 13px var(--mono)}
+.why{font-size:12px;color:var(--muted);margin-top:10px;line-height:1.5}
+.uses{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.uses span{font-size:11.5px;padding:2px 8px;border-radius:999px;border:1px solid var(--line);color:var(--ink2)}
+@media(max-width:1100px){.pair,.c-grid{grid-template-columns:1fr}.dash{grid-template-columns:repeat(3,1fr)}.g4{grid-template-columns:1fr 1fr}.fsec{grid-template-columns:1fr}.next{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="wrap">
+ <div class="eyebrow">SlotForge Telemetry · rework preview 6</div>
+ <h1>The workbench, below the setup bar</h1>
+ <p class="lead">The setup bar and the four view tabs were redone earlier. Below them the workbench still has two lists that do not touch: <b>Setup inputs</b> on the left as folders, <b>Live results</b> on the right as other folders with Pin buttons. You type a pinion on the left and look for its effect in a different folder on the right. At the bottom, "Ready to look deeper?" and "How does your car behave?" are adverts for other pages.</p>
+ <ul class="why">
+  <li><b>Replaces:</b> the two lists (input folders and live result folders with Pin), the drivetrain picture, the "useful starting point" note and the two advert cards.</li>
+  <li><b>Kept:</b> every input and every result, the view tabs (Quick setup, Measure the car, Plan &amp; test, Everything), the help next to each input, the gear chart, and "How are these numbers calculated".</li>
+  <li><b>New, each one for you to approve:</b> each input shown next to what it changes, and what changed since you last saved, as figures ("+3.00 km/h since saved").</li>
+ </ul>
+ <div class="bar">
+  <b>Option</b><div class="sg" id="opt"><button class="on" data-o="a">A · Paired Rows</button><button data-o="b">B · Cockpit</button></div>
+  <b>Look</b><div class="sg" id="tone"><button class="on" data-t="dark">Dark</button><button data-t="light">Light</button></div>
+  <span style="color:var(--muted);font-size:12.5px">Example: Club GT · technical, the pinion just changed from 9 to 10 (not saved yet).</span>
+ </div>
+ <div class="opt-note">
+  <div id="noteA" class="on"><h3>A · Paired Rows</h3><p>One row per topic: what you enter on the left, what it does on the right.</p>
+   <ul><li><b>Gearing</b>: pinion and gear left; ratio, rollout, top speed and a small gear chart right.</li><li>The same for motor, tyres, weight, and the measuring topics.</li><li>A row closes to one summary line, so the page stays short.</li><li>At the bottom: what to do next, as three quiet tiles with your own data in them.</li></ul></div>
+  <div id="noteB"><h3>B · Cockpit</h3><p>A strip of the six figures that matter, always in view while you type.</p>
+   <ul><li>A <b>dashboard</b> at the top: ratio, top speed, pull, power-to-weight, weight, clearance. The figures your typing changes light up, with the change since you saved.</li><li>Inputs below as one tidy <b>form</b>, a section per topic.</li><li>Click a figure for the <b>detail</b> on the right: how it is made, the full table, which inputs feed it.</li></ul></div>
+ </div>
+
+ <div class="app">
+  <div class="top"><div class="logo"><i></i>TELEMETRY</div>
+   <div class="tabs"><span><a class="on">Workbench</a><a>Track day</a></span><span><a>Laps</a><a>Setups</a><a>Driver Feedback</a></span><span><a>Library</a><a>Settings</a></span></div>
+   <div class="lights"><span class="dot"></span>Local workspace</div></div>
+
+  <!-- A -->
+  <div class="page" id="A">
+   <p class="sub" style="margin-bottom:10px">(The setup bar with name, car and Save sits above, unchanged.)</p>
+   <div class="lv"><span class="on">Quick setup</span><span>Measure the car</span><span>Plan &amp; test</span><span>Everything</span></div>
+   <div class="card pair"><div class="lft"><div class="hd"><b>Gearing</b><small>what you fit</small></div><div class="g2"><label class="fld">Pinion · teeth<span class="in ch">10</span><small>was 9 when saved</small></label><label class="fld">Driven gear · teeth<span class="in">27</span><small>on the axle</small></label></div></div>
+    <div class="rgt"><div class="hd"><b>What it does</b><span class="tg">since saved</span></div>
+     <div class="figs"><div><span>Gear ratio</span><b class="num">2.700<small>:1</small></b> <span class="delta nt">−0.300</span></div><div><span>Top speed · no load</span><b class="num">30.02<small>km/h</small></b> <span class="delta up">+3.00</span></div><div><span>Rollout</span><b class="num">23.27<small>mm/rev</small></b> <span class="delta nt">+2.33</span></div></div>
+     <div class="gearmini"><span>8/27</span><span>9/27</span><span class="c m">10/27</span><span class="m">10/28</span><span>11/28</span><span>11/29</span><span>12/31</span></div><p class="sub" style="margin:6px 0 0">Gear chart: green is near your target rollout, the outline is your gearing. Full chart in Plan &amp; test.</p></div></div>
+   <div class="card pair"><div class="lft"><div class="hd"><b>Motor</b><small>its rating</small></div><div class="g2"><label class="fld">No-load RPM<span class="in">21,500</span><small>at 12 V</small></label><label class="fld">Stall torque · gf·cm<span class="in">285</span><small>at 12 V</small></label></div></div>
+    <div class="rgt"><div class="hd"><b>What it does</b></div><div class="figs"><div><span>Pull at the wheels</span><b class="num">7.55<small>N</small></b> <span class="delta dn">−0.83</span></div><div><span>Peak power</span><b class="num">15.73<small>W</small></b></div><div><span>Power / weight</span><b class="num">196.6<small>W/kg</small></b></div></div></div></div>
+   <div class="card pair closed"><div class="lft"><div class="hd"><b>Rear tyres</b><span class="tg">▸ open</span></div><div class="summary"><span>Diameter <b>20 mm</b></span><span>fitted</span></div></div><div class="rgt"><div class="summary"><span>Gear clearance <b>1.0 mm</b></span><span>Worn to 19 mm: <b>0.5 mm</b></span></div></div></div>
+   <div class="card pair closed"><div class="lft"><div class="hd"><b>Weight &amp; ballast</b><span class="tg">▸ open</span></div><div class="summary"><span>Car <b>80 g</b></span><span>Ballast <b>20 g</b></span></div></div><div class="rgt"><div class="summary"><span>Front / rear <b>40 / 60 %</b></span><span>With ballast <b>37 / 63 %</b></span></div></div></div>
+   <div class="next"><div><b>Compare with what you saved</b>Club GT · technical: the pinion change makes it 11% quicker on the straight and pull 10% less. <u>Open in Setups</u></div><div><b>Drive it</b>Take pinion 10 to Track day as your next run. <u>Track day</u></div><div><b>Something feels off?</b>Pick what the car does. <u>Driver Feedback</u></div></div>
+   <p class="sub" style="margin-top:12px"><u>How are these numbers calculated?</u></p>
+  </div>
+
+  <!-- B -->
+  <div class="page hidden" id="B">
+   <p class="sub" style="margin-bottom:10px">(The setup bar with name, car and Save sits above, unchanged.)</p>
+   <div class="card dash"><div class="lit"><span class="lbl">Ratio</span><b class="num">2.700<small>:1</small></b><span class="delta nt">−0.300</span></div><div class="lit open"><span class="lbl">Top speed</span><b class="num">30.02<small>km/h</small></b><span class="delta up">+3.00</span></div><div class="lit"><span class="lbl">Pull</span><b class="num">7.55<small>N</small></b><span class="delta dn">−0.83</span></div><div><span class="lbl">Power / weight</span><b class="num">196.6<small>W/kg</small></b><span class="sub">same</span></div><div><span class="lbl">Weight</span><b class="num">80<small>g</small></b><span class="sub">same</span></div><div><span class="lbl">Clearance</span><b class="num">1.0<small>mm</small></b><span class="sub">same</span></div></div>
+   <div class="since">Since you saved <b style="color:var(--ink)">Club GT · technical</b>: <span class="chg">pinion 9 → 10</span><span style="flex:1"></span><span class="lv" style="margin:0"><span class="on">Quick setup</span><span>Measure</span><span>Plan &amp; test</span><span>Everything</span></span></div>
+   <div class="c-grid">
+    <div class="card form">
+     <div class="fsec"><div class="sh"><b>Gearing</b><small>what you fit</small></div><div class="g4"><label class="fld">Pinion<span class="in ch">10</span></label><label class="fld">Driven gear<span class="in">27</span></label><label class="fld">Gear diameter · mm<span class="in">18</span></label><label class="fld">Target rollout<span class="in" style="color:var(--faint)">—</span></label></div></div>
+     <div class="fsec"><div class="sh"><b>Motor</b><small>its rating</small></div><div class="g4"><label class="fld">No-load RPM<span class="in">21,500</span></label><label class="fld">at · V<span class="in">12</span></label><label class="fld">Stall torque<span class="in">285</span></label><label class="fld">at · V<span class="in">12</span></label></div></div>
+     <div class="fsec"><div class="sh"><b>Rear tyres</b><small>fitted size</small></div><div class="g4"><label class="fld">Diameter · mm<span class="in">20</span></label><label class="fld">Worn · mm<span class="in">19</span></label></div></div>
+     <div class="fsec"><div class="sh"><b>Weight</b><small>ready to drive</small></div><div class="g4"><label class="fld">Total · g<span class="in">80</span></label><label class="fld">Ballast · g<span class="in">20</span></label><label class="fld">Front axle · g<span class="in">32</span></label><label class="fld">Rear axle · g<span class="in">48</span></label></div></div>
+    </div>
+    <div class="card drawer"><div class="lbl" style="font:600 10.5px var(--ui);letter-spacing:.1em;text-transform:uppercase;color:var(--muted)">Detail</div><h5>Top speed · no load</h5><p class="sub" style="margin:0 0 8px">How fast the car would go with no load on the motor: a ceiling, not a lap speed.</p>
+     <div class="kv"><span>Now</span><b>30.02 km/h</b></div><div class="kv"><span>When saved</span><b>27.02 km/h</b></div><div class="kv"><span>Axle speed</span><b>7,963 RPM</b></div><div class="kv"><span>Rollout</span><b>23.27 mm/rev</b></div>
+     <p class="why">= motor RPM ÷ gear ratio × tyre circumference. Real speed is lower: drivetrain losses, grip and load.</p>
+     <div class="uses"><span>pinion</span><span>driven gear</span><span>no-load RPM</span><span>rear tyre</span></div>
+     <p class="sub" style="margin-top:12px"><u>How this is calculated</u></p></div>
+   </div>
+  </div>
+ </div>
+ <p class="lead" style="margin-top:16px">Both options calculate exactly what the workbench calculates now; only where the inputs and results sit changes. The view tabs keep deciding which topics show.</p>
+</div>
+<script>
+for(const b of document.querySelectorAll('#opt button'))b.onclick=()=>{for(const x of document.querySelectorAll('#opt button'))x.classList.toggle('on',x===b);const a=b.dataset.o==='a';document.getElementById('A').classList.toggle('hidden',!a);document.getElementById('B').classList.toggle('hidden',a);document.getElementById('noteA').classList.toggle('on',a);document.getElementById('noteB').classList.toggle('on',!a);};
+for(const b of document.querySelectorAll('#tone button'))b.onclick=()=>{for(const x of document.querySelectorAll('#tone button'))x.classList.toggle('on',x===b);document.documentElement.dataset.tone=b.dataset.t;};
+const q=new URLSearchParams(location.search);if(q.get('o')==='b')document.querySelector('#opt [data-o=b]').click();if(q.get('t')==='light')document.querySelector('#tone [data-t=light]').click();
+</script>
+</body>
+</html>
