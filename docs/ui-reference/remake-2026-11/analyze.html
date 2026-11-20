@@ -1,0 +1,279 @@
+<!doctype html>
+<html lang="en" data-tone="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Analyze remake</title>
+<style>
+@font-face{font-family:'SF Mono';src:url('../../../renderer/fonts/robotomono/RobotoMono[wght].ttf') format('truetype');font-weight:100 700}
+@font-face{font-family:'SF Cond';src:url('../../../renderer/fonts/barlowcondensed/BarlowCondensed-Bold.ttf') format('truetype');font-weight:700}
+@font-face{font-family:'SF Cond';src:url('../../../renderer/fonts/barlowcondensed/BarlowCondensed-BoldItalic.ttf') format('truetype');font-weight:700;font-style:italic}
+:root{--bg:#171b21;--panel:#222831;--panel2:#1c2129;--raised:#2a313b;--ink:#e8e6e1;--ink2:#c4c8ce;--muted:#98a0ab;--faint:#6b7380;--line:#343b47;--line2:#2b313b;
+ --accent:#e5484d;--accent-text:#f06b6f;--good:#3ecf8e;--warn:#f2b705;--rec:#a855f7;--blue:#5aa9e6;--page:#0f1216;
+ --ui:'Segoe UI',system-ui,sans-serif;--cond:'SF Cond','Bahnschrift',sans-serif;--mono:'SF Mono',Consolas,monospace}
+[data-tone=light]{--bg:#f1efea;--panel:#ffffff;--panel2:#f7f5f1;--raised:#ecebe6;--ink:#1d2229;--ink2:#3a414b;--muted:#656c76;--faint:#8b929b;--line:#d9d6cf;--line2:#e6e3dd;
+ --accent:#d62828;--accent-text:#c21f1f;--good:#187a50;--warn:#956000;--rec:#7c3aed;--blue:#1f6fb2;--page:#e4e1da}
+*{box-sizing:border-box}
+body{margin:0;background:var(--page);color:var(--ink);font:13.5px/1.45 var(--ui)}
+.wrap{max-width:1460px;margin:0 auto;padding:26px 20px 90px}
+h1{font:italic 700 42px/1 var(--cond);text-transform:uppercase;margin:0 0 6px}
+.lead{color:var(--muted);margin:0 0 12px;max-width:110ch;font-size:14px}
+ul.why{margin:0 0 6px;padding-left:18px;color:var(--ink2);max-width:120ch;font-size:14px}ul.why li{margin:3px 0}
+.bar{position:sticky;top:0;z-index:20;display:flex;flex-wrap:wrap;align-items:center;gap:10px 18px;margin:14px -20px 18px;padding:12px 20px;background:color-mix(in srgb,var(--page) 88%,transparent);backdrop-filter:blur(6px);border-bottom:1px solid var(--line2)}
+.bar b{font:600 10.5px var(--ui);letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.sg{display:inline-flex;gap:2px;padding:2px;border:1px solid var(--line);border-radius:8px;background:var(--bg)}
+.sg button{height:30px;padding:0 14px;border:0;border-radius:6px;background:transparent;color:var(--muted);font:500 13px var(--ui);cursor:pointer}
+.sg button.on{background:color-mix(in srgb,var(--ink) 13%,var(--panel));color:var(--ink);font-weight:650}
+.opt-note{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:0 0 18px}
+.opt-note>div{border:1px solid var(--line);border-radius:10px;padding:14px 16px;background:var(--panel2)}
+.opt-note>div.on{border-color:var(--ink2)}
+.opt-note h3{margin:0 0 4px;font:italic 700 22px/1 var(--cond);text-transform:uppercase}
+.opt-note p{margin:0 0 6px;color:var(--muted)}.opt-note ul{margin:0;padding-left:18px;color:var(--ink2)}
+.mono{font-family:var(--mono)}
+/* the app frame */
+.app{border:1px solid var(--line);border-radius:12px;overflow:hidden;background:var(--bg)}
+.top{display:flex;align-items:center;gap:14px;height:56px;padding:0 16px;background:var(--panel2);border-bottom:1px solid var(--line)}
+.logo{display:flex;align-items:center;gap:9px;font:italic 700 21px/1 var(--cond);letter-spacing:.02em}
+.logo i{width:30px;height:30px;border-radius:8px;background:var(--accent)}
+.tabs{display:flex;gap:6px;margin-left:10px}
+.tabs span{display:inline-flex;gap:2px;padding:3px;border-radius:9px;background:rgba(0,0,0,.22)}
+[data-tone=light] .tabs span{background:rgba(0,0,0,.06)}
+.tabs a{padding:6px 11px;border-radius:7px;color:var(--muted);font-size:13px;text-decoration:none}
+.tabs a.on{background:color-mix(in srgb,var(--ink) 12%,transparent);color:var(--ink);font-weight:600}
+.lights{margin-left:auto;font-size:12px;color:var(--muted);display:flex;gap:6px;align-items:center}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--good);display:inline-block}
+.page{padding:22px 24px 28px}
+.eyebrow{font:600 11px var(--ui);letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.ph{display:flex;align-items:flex-end;gap:14px;margin-bottom:16px}
+.ph h2{font:italic 700 34px/1 var(--cond);text-transform:uppercase;margin:4px 0 0}
+.ph .grow{flex:1}
+.btn{display:inline-flex;align-items:center;gap:6px;height:34px;padding:0 13px;border:1px solid var(--line);border-radius:7px;background:var(--raised);color:var(--ink);font:500 13px var(--ui);cursor:pointer;white-space:nowrap}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:600}
+.btn.ghost{background:transparent}.btn.small{height:28px;padding:0 10px;font-size:12.5px}
+.chip{display:inline-flex;align-items:center;gap:5px;height:24px;padding:0 9px;border-radius:999px;border:1px solid var(--line);color:var(--ink2);font-size:12px;background:var(--panel2);white-space:nowrap}
+.chip.on{background:color-mix(in srgb,var(--ink) 12%,var(--panel));color:var(--ink);border-color:var(--ink2)}
+.tag{font:600 10.5px var(--ui);letter-spacing:.08em;text-transform:uppercase;padding:2px 7px;border-radius:5px;border:1px solid var(--line);color:var(--muted)}
+.tag.club{color:var(--blue);border-color:color-mix(in srgb,var(--blue) 45%,var(--line))}
+.tag.test{color:var(--warn);border-color:color-mix(in srgb,var(--warn) 45%,var(--line))}
+.tag.rec{color:var(--rec);border-color:color-mix(in srgb,var(--rec) 55%,var(--line))}
+.change{display:inline-flex;align-items:center;gap:5px;font-size:12px;color:var(--ink);background:color-mix(in srgb,var(--warn) 14%,transparent);border-radius:5px;padding:1px 7px}
+.change.none{background:transparent;color:var(--faint);padding:0}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:10px}
+.k{font:600 10.5px var(--ui);letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.big{font:600 26px/1.1 var(--mono)}
+.better{color:var(--good)}.worse{color:var(--accent-text)}
+.note-new{display:inline-block;font:700 9.5px var(--ui);letter-spacing:.1em;text-transform:uppercase;color:#fff;background:var(--rec);padding:1px 6px;border-radius:4px;vertical-align:2px;margin-left:6px}
+
+.hidden{display:none!important}
+/* ---------- shared for this preview ---------- */
+.dot3{display:inline-block;width:10px;height:10px;border-radius:50%;vertical-align:0}
+.cA{--c:#5aa9e6}.cB{--c:#e5a43a}.cC{--c:#3ecf8e}.cW{--c:#c4c8ce}
+[data-tone=light] .cA{--c:#1f6fb2}[data-tone=light] .cB{--c:#b86e00}[data-tone=light] .cC{--c:#187a50}[data-tone=light] .cW{--c:#656c76}
+.dot3{background:var(--c)}
+.h5{margin:0 0 6px;font:italic 700 19px/1.1 var(--cond);text-transform:uppercase}
+.sub{color:var(--muted);font-size:12.5px;margin:0 0 12px}
+/* ---------- Option A: Change Sheet ---------- */
+.a-grid{display:grid;grid-template-columns:280px minmax(0,1fr);gap:18px;align-items:start}
+.shelf{padding:12px}
+.carhead{display:flex;justify-content:space-between;align-items:baseline;margin:10px 6px 6px}
+.carhead b{font:italic 700 17px/1 var(--cond);text-transform:uppercase}
+.carhead small{color:var(--muted);font-size:11.5px}
+.su{display:grid;grid-template-columns:22px 1fr auto;gap:8px;align-items:center;padding:8px 8px;border-radius:8px;border:1px solid transparent;cursor:pointer}
+.su:hover{background:color-mix(in srgb,var(--ink) 5%,transparent)}
+.su.on{background:color-mix(in srgb,var(--ink) 9%,var(--panel));border-color:var(--line)}
+.su b{display:block;font-size:13px;font-weight:600}.su small{color:var(--muted);font-size:11.5px}
+.role{font:700 10px var(--ui);letter-spacing:.08em;text-transform:uppercase;padding:2px 6px;border-radius:4px}
+.role.base{background:var(--ink);color:var(--bg)}.role.vs{border:1px solid var(--line);color:var(--muted)}
+.mark{width:18px;height:18px;border-radius:5px;border:1.5px solid var(--muted);display:grid;place-items:center;font-size:11px;color:var(--bg)}
+.mark.on{background:var(--c);border-color:var(--c)}
+.live{margin:10px 6px 4px;padding:10px;border:1px dashed var(--line);border-radius:8px;font-size:12.5px;color:var(--ink2)}
+.cols3{display:grid;grid-template-columns:200px repeat(3,minmax(0,1fr));gap:0}
+.colhead{display:grid;grid-template-columns:200px repeat(3,minmax(0,1fr));padding:14px 18px;gap:12px;align-items:end;border-bottom:1px solid var(--line)}
+.colhead .who b{display:block;font:italic 700 18px/1.05 var(--cond);text-transform:uppercase}
+.colhead .who small{color:var(--muted);font-size:11.5px}
+.colhead .who{border-top:3px solid var(--c);padding-top:8px}
+.verdict{padding:16px 18px;border-bottom:1px solid var(--line);display:grid;grid-template-columns:200px repeat(2,minmax(0,1fr));gap:12px;align-items:start}
+.verdict p{margin:0;font-size:14px;line-height:1.5}
+.verdict p b{font-weight:650}
+.sect{padding:6px 18px 12px}
+.sect .h5{margin:12px 0 4px}
+.drow{display:grid;grid-template-columns:200px repeat(3,minmax(0,1fr));gap:12px;align-items:center;padding:8px 0;border-top:1px solid var(--line2);font-size:13px}
+.drow .lab{color:var(--ink2)}.drow .lab small{display:block;color:var(--faint);font-size:11px}
+.val{font-family:var(--mono)}
+.chg{display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:12.5px;background:color-mix(in srgb,var(--warn) 16%,transparent);padding:1px 7px;border-radius:5px}
+.same{color:var(--faint);font-size:12px}
+.mv{display:grid;grid-template-columns:auto 1fr;gap:8px;align-items:center}
+.bar2{position:relative;height:8px;border-radius:4px;background:var(--line2)}
+.bar2 i{position:absolute;top:0;bottom:0;border-radius:4px}
+.bar2 i.up{left:50%;background:var(--good)}.bar2 i.down{right:50%;background:var(--accent-text)}
+.bar2::after{content:'';position:absolute;left:50%;top:-3px;bottom:-3px;width:1px;background:var(--muted)}
+.fold{margin:4px 18px 16px;padding:10px 12px;border:1px solid var(--line2);border-radius:8px;color:var(--muted);font-size:12.5px;display:flex;gap:10px;align-items:center}
+.fold b{color:var(--ink2)}
+/* ---------- Option B: Dyno Room ---------- */
+.b-top{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-bottom:14px}
+.pick{display:inline-flex;align-items:center;gap:8px;height:34px;padding:0 12px 0 10px;border-radius:999px;border:1px solid var(--line);background:var(--panel);font-size:13px}
+.pick.off{opacity:.45}
+.pick.ghost{border-style:dashed}
+.pick small{color:var(--muted);font-family:var(--mono);font-size:11.5px}
+.b-grid{display:grid;grid-template-columns:minmax(0,1fr) 330px;gap:14px;align-items:start}
+.dyno{padding:16px 18px}
+.dyno-h{display:flex;align-items:baseline;gap:12px;margin-bottom:6px}
+.dyno svg{width:100%;height:auto;display:block}
+.axis{fill:var(--muted);font:10.5px var(--mono)}
+.grid line{stroke:var(--line2)}
+.readout{position:absolute}
+.cross{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:10px}
+.cross div{border:1px solid var(--line2);border-left:3px solid var(--c);border-radius:8px;padding:8px 10px;font-size:12px;color:var(--muted)}
+.cross b{display:block;color:var(--ink);font:600 15px var(--mono)}
+.wins{padding:16px 18px}
+.win{display:grid;grid-template-columns:120px 1fr;gap:10px;align-items:center;padding:8px 0;border-top:1px solid var(--line2);font-size:12.5px}
+.win:first-of-type{border-top:0}
+.stack{display:grid;gap:3px}
+.stack span{display:grid;grid-template-columns:14px 1fr 70px;gap:6px;align-items:center;font-family:var(--mono);font-size:11.5px}
+.stack i{display:block;height:7px;border-radius:3px;background:var(--c)}
+.stack em{font-style:normal;text-align:right}
+.crown{color:var(--warn)}
+.cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:14px}
+.scard{padding:14px 16px;border-top:3px solid var(--c)}
+.scard b.t{display:block;font:italic 700 19px/1.05 var(--cond);text-transform:uppercase}
+.scard .kv{display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--line2);font-size:12.5px}
+.scard .kv span{color:var(--muted)}.scard .kv b{font:500 12.5px var(--mono)}
+.scard .kv.diff b{background:color-mix(in srgb,var(--warn) 16%,transparent);padding:0 5px;border-radius:4px}
+.slider{display:flex;align-items:center;gap:10px;margin-top:8px;font-size:12px;color:var(--muted)}
+.slider input{flex:1;accent-color:var(--ink)}
+@media(max-width:1100px){.a-grid,.b-grid{grid-template-columns:1fr}.cards,.cross{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="wrap">
+ <div class="eyebrow">SlotForge Telemetry · remake preview 2 of 4</div>
+ <h1>Analyze, remade</h1>
+ <p class="lead">Analyze has two halves today. <b>Analysis</b> shows a saved setup's results again, the same numbers the workbench shows live, behind a picker and eight topics. <b>Compare</b> is a 20-row table of two setups where 13 rows read "Unavailable", and you have to work out yourself what you changed. This remake makes Analyze about one question: <b>what does this change do?</b></p>
+ <ul class="why">
+  <li><b>Replaces:</b> Analyze › Analysis and Analyze › Compare, and Library's "Compare with…". The tab becomes <b>Setups</b>. A single setup's results stay on the workbench (all eight topics, live), and "Analyze" on a saved setup opens it there read-only.</li>
+  <li><b>Kept:</b> every comparison number of today (speed, pulling force, rollout, ratio, power, power-to-weight, weight, lap speed, magnetic downforce, chassis geometry and balance), the "same basis" rules (no comparing power across different test voltages), and the torque and power curves.</li>
+  <li><b>New, each one for you to approve:</b> up to three setups at once, <b>the workbench as it is now</b> as one of them (compare before you save), setups grouped by car, and what you changed listed first.</li>
+ </ul>
+ <div class="bar">
+  <b>Option</b><div class="sg" id="opt"><button class="on" data-o="a">A · Change Sheet</button><button data-o="b">B · Dyno Room</button></div>
+  <b>Look</b><div class="sg" id="tone"><button class="on" data-t="dark">Dark</button><button data-t="light">Light</button></div>
+  <span style="color:var(--muted);font-size:12.5px">Example: Club GT · technical (9/27, 80 g) against · fast circuit (10/27) and · light (10/27, 72 g).</span>
+ </div>
+ <div class="opt-note">
+  <div id="noteA" class="on"><h3>A · Change Sheet</h3><p>Words and numbers, like an engineer's change note.</p>
+   <ul><li>Left: your setups <b>by car</b>. Pin one as the base, tick up to two more, or the workbench now.</li><li>On top: <b>what you changed</b>, input by input.</li><li>Then a plain verdict, and <b>what it does</b>: only the results that moved, with a bar for up or down.</li><li>Unchanged results and ones that need measurements fold away into one line each.</li></ul></div>
+  <div id="noteB"><h3>B · Dyno Room</h3><p>Chart-first, like a rolling road: you see the setups pull.</p>
+   <ul><li>On top: the setups as coloured chips; switch them on and off. The workbench now is a dashed line.</li><li>The <b>dyno chart</b>: how hard each setup pulls its own weight at every speed, a crosshair you slide to read them at any speed.</li><li>Beside it, <b>where each one wins</b>: top speed, pull out of a corner, power-to-weight.</li><li>Below: a spec card per setup, with the values that differ marked.</li></ul></div>
+ </div>
+
+ <div class="app">
+  <div class="top"><div class="logo"><i></i>TELEMETRY</div>
+   <div class="tabs"><span><a>Workbench</a><a>Track day</a></span><span><a>Laps</a><a class="on">Setups</a><a>Driver Feedback</a></span><span><a>Library</a><a>Settings</a></span></div>
+   <div class="lights"><span class="dot"></span>Local workspace</div></div>
+
+  <!-- OPTION A -->
+  <div class="page" id="A">
+   <div class="ph"><div class="grow"><div class="eyebrow">What does this change do?</div><h2>Setups</h2></div><button class="btn">Setup sheet</button><button class="btn">Export comparison</button></div>
+   <div class="a-grid">
+    <div class="card shelf">
+     <div class="k" style="margin:4px 6px">Compare · base and up to two more</div>
+     <div class="carhead"><b>Club GT</b><small>3 setups</small></div>
+     <div class="su on cA"><span class="mark on">✓</span><div><b>Club GT · technical</b><small>9 / 27 · 80 g · saved 20 Nov</small></div><span class="role base">Base</span></div>
+     <div class="su on cB"><span class="mark on">✓</span><div><b>Club GT · fast circuit</b><small>10 / 27 · 80 g · saved 20 Nov</small></div><span class="role vs">B</span></div>
+     <div class="su on cC"><span class="mark on">✓</span><div><b>Club GT · light</b><small>10 / 27 · 72 g · saved 21 Nov</small></div><span class="role vs">C</span></div>
+     <div class="carhead"><b>Vintage Le Mans</b><small>1 setup</small></div>
+     <div class="su"><span class="mark"></span><div><b>Le Mans · baseline</b><small>11 / 32 · 96 g</small></div><span></span></div>
+     <div class="live"><span class="mark" style="display:inline-grid;vertical-align:-4px;margin-right:6px"></span><b>The workbench now</b> · unsaved: pinion 11<br><small style="color:var(--muted)">Compare before you save it.</small></div>
+    </div>
+    <div class="card">
+     <div class="colhead"><span class="k">Base, then each change</span>
+      <div class="who cA"><b>Technical</b><small>base · 9/27 · 80 g</small></div><div class="who cB"><b>Fast circuit</b><small>B · 1 change</small></div><div class="who cC"><b>Light</b><small>C · 2 changes</small></div></div>
+     <div class="verdict"><span class="k">In short</span>
+      <p><b>B</b> is <b class="better">quicker on the straight</b> (+3.00 km/h, +11%) but <b class="worse">pulls 10% less</b> out of a corner. Same motor and weight, so only the gearing moved.</p>
+      <p><b>C</b> adds to that: <b class="better">8 g lighter</b>, so power-to-weight is <b class="better">+11%</b> and it wins back the pull per kg: it accelerates as hard as the base, and is quicker on the straight. Ride height and magnetic downforce were not measured for it.</p></div>
+     <div class="sect"><div class="h5">What you changed</div>
+      <div class="drow"><span class="lab">Pinion<small>Gearing</small></span><span class="val">9</span><span><span class="chg">9 → 10</span></span><span><span class="chg">9 → 10</span></span></div>
+      <div class="drow"><span class="lab">Total weight<small>Weight &amp; ballast</small></span><span class="val">80 g</span><span class="same">same</span><span><span class="chg">80 → 72 g</span></span></div>
+      <div class="drow"><span class="lab">Ballast<small>Weight &amp; ballast</small></span><span class="val">20 g</span><span class="same">same</span><span><span class="chg">20 → 12 g</span></span></div>
+     </div>
+     <div class="sect"><div class="h5">What it does</div><p class="sub" style="margin:0 0 4px">Only the results that moved. Green is better for that result, red worse; neutral results (ratio, rollout) have no colour.</p>
+      <div id="aRows"></div>
+     </div>
+     <div class="fold"><span>▸</span><span><b>5 results did not change</b> · peak mechanical power, measured lap speed, guide angle, guide span, rear contact spacing</span></div>
+     <div class="fold"><span>▸</span><span><b>8 results need a measurement in each setup</b> · magnetic pull, motor-to-rail clearance, measured axle loads and balance. <u>Measure them on the workbench</u></span></div>
+    </div>
+   </div>
+  </div>
+
+  <!-- OPTION B -->
+  <div class="page hidden" id="B">
+   <div class="ph"><div class="grow"><div class="eyebrow">Your setups, side by side</div><h2>Setups</h2></div><button class="btn">+ Add a setup</button><button class="btn">Export comparison</button></div>
+   <div class="b-top">
+    <span class="pick cA"><span class="dot3"></span>Club GT · technical <small>9/27 · 80 g</small></span>
+    <span class="pick cB"><span class="dot3"></span>Club GT · fast circuit <small>10/27 · 80 g</small></span>
+    <span class="pick cC"><span class="dot3"></span>Club GT · light <small>10/27 · 72 g</small></span>
+    <span class="pick ghost cW"><span class="dot3"></span>Workbench now <small>11/27 · unsaved</small></span>
+    <span class="pick off"><span class="dot3" style="background:var(--faint)"></span>Le Mans · baseline</span>
+    <span style="flex:1"></span><span class="k">Show</span><div class="sg"><button class="on">Pull per kg</button><button>Pulling force</button><button>Power</button></div>
+   </div>
+   <div class="b-grid">
+    <div class="card dyno">
+     <div class="dyno-h"><div class="h5">Dyno · pull per kg over speed</div><span class="sub" style="margin:0">How hard each setup accelerates its own weight: ideal motor model at the wheels, before losses. Slide to read them at one speed.</span></div>
+     <svg id="dyno" viewBox="0 0 760 340"></svg>
+     <div class="slider"><span>Read at</span><input type="range" id="at" min="0" max="34" step="0.5" value="8"><b class="mono" id="atv">8.0 km/h</b><span>· leaving a hairpin on a 20 m club track</span></div>
+     <div class="cross" id="cross"></div>
+    </div>
+    <div>
+     <div class="card wins"><div class="h5">Where each one wins</div><p class="sub">Longest bar wins; the crown marks it.</p><div id="wins"></div></div>
+    </div>
+   </div>
+   <div class="cards" id="cards"></div>
+  </div>
+ </div>
+ <p class="lead" style="margin-top:16px">Both options keep the "same basis" rule of today: power is only compared when both setups use the same motor test voltage, magnetic pull only with the same measuring conditions. Results that cannot be compared say why in one line instead of a row of "Unavailable".</p>
+</div>
+<script>
+const S=[
+ {k:'A',c:'cA',name:'Technical',pin:9,gear:27,mass:80,vmax:27.02,f0:8.38,ratio:3.0,roll:20.94,p:15.73,pw:196.6,lap:14.4},
+ {k:'B',c:'cB',name:'Fast circuit',pin:10,gear:27,mass:80,vmax:30.02,f0:7.55,ratio:2.7,roll:23.27,p:15.73,pw:196.6,lap:14.4},
+ {k:'C',c:'cC',name:'Light',pin:10,gear:27,mass:72,vmax:30.02,f0:7.55,ratio:2.7,roll:23.27,p:15.73,pw:218.5,lap:14.4},
+ {k:'W',c:'cW',name:'Workbench now',pin:11,gear:27,mass:80,vmax:33.02,f0:6.86,ratio:2.455,roll:25.6,p:15.73,pw:196.6,lap:null,ghost:true}];
+// Option A rows: base value, then each change with a diverging bar.
+const rows=[['No-load speed','km/h','vmax',1,'better higher'],['Pulling force out of a corner','N','f0',1,'ideal force at rated torque, before losses'],['Power-to-weight','W/kg','pw',1,'estimated peak motor power per kg'],['Pull per kg','N/kg','pg',1,'how hard it accelerates its own weight'],['Gear ratio',':1','ratio',0,'neutral: depends on the track'],['Rollout','mm/rev','roll',0,'neutral: depends on the track'],['Car weight','g','mass',0,'']];
+for(const s of S)s.pg=+(s.f0/s.mass*1000).toFixed(1);
+let a='';
+for(const [label,unit,key,good,small] of rows){
+ const base=S[0][key];let cells='';
+ for(const s of S.slice(1,3)){const v=s[key],d=v-base,pct=d/base*100;
+  if(Math.abs(d)<1e-9){cells+='<span class="same">same</span>';continue;}
+  const tone=good===0?'':(d*good>0?'better':'worse'),w=Math.min(48,Math.abs(pct)*3);
+  cells+=`<span class="mv"><span class="val ${tone}">${v}${unit.startsWith(':')?':1':''} <small style="color:var(--muted)">${d>0?'+':'−'}${Math.abs(pct).toFixed(1)}%</small></span><span class="bar2"><i class="${d>0?'up':'down'}" style="width:${w}%;${good===0?'background:var(--muted)':''}"></i></span></span>`;}
+ a+=`<div class="drow"><span class="lab">${label}<small>${small}</small></span><span class="val">${base}${unit===':1'?':1':' '+unit}</span>${cells}</div>`;
+}
+document.getElementById('aRows').innerHTML=a;
+// Option B: dyno chart.
+const W=760,H=340,L=46,R=W-14,T=16,B=H-34,maxV=34,maxF=120;
+const x=v=>L+v/maxV*(R-L),y=f=>B-f/maxF*(B-T);
+function dyno(at){
+ let s='<g class="grid">';for(let f=0;f<=120;f+=20)s+=`<line x1="${L}" x2="${R}" y1="${y(f)}" y2="${y(f)}"/><text class="axis" x="${L-6}" y="${y(f)+4}" text-anchor="end">${f}</text>`;
+ for(let v=0;v<=34;v+=5)s+=`<text class="axis" x="${x(v)}" y="${B+16}" text-anchor="middle">${v}</text>`;
+ s+=`</g><text class="axis" x="${L}" y="${T-4}">N/kg</text><text class="axis" x="${R}" y="${B+30}" text-anchor="end">km/h</text>`;
+ for(const st of S){s+=`<line class="${st.c}" x1="${x(0)}" y1="${y(st.pg)}" x2="${x(st.vmax)}" y2="${y(0)}" stroke="var(--c)" stroke-width="${st.ghost?2:3}" ${st.ghost?'stroke-dasharray="6 5"':''}/><text class="${st.c}" x="${x(st.vmax)}" y="${y(0)-8}" text-anchor="middle" fill="var(--c)" font-size="11" font-family="monospace">${st.vmax}</text>`;}
+ s+=`<line x1="${x(at)}" x2="${x(at)}" y1="${T}" y2="${B}" stroke="var(--ink)" stroke-dasharray="3 3"/>`;
+ for(const st of S){const f=Math.max(0,st.pg*(1-at/st.vmax));s+=`<circle class="${st.c}" cx="${x(at)}" cy="${y(f)}" r="5" fill="var(--c)" stroke="var(--panel)" stroke-width="2"/>`;}
+ document.getElementById('dyno').innerHTML=s;
+ document.getElementById('atv').textContent=(+at).toFixed(1)+' km/h';
+ const best=Math.max(...S.slice(0,3).map(st=>st.pg*(1-at/st.vmax)));
+ document.getElementById('cross').innerHTML=S.slice(0,3).map(st=>{const f=Math.max(0,st.pg*(1-at/st.vmax));return `<div class="${st.c}">${st.name}<b>${f.toFixed(1)} N/kg ${f===best?'<span class="crown">♛</span>':''}</b>${(f*st.mass/1000).toFixed(2)} N pull · ${st.mass} g</div>`;}).join('');
+}
+dyno(8);document.getElementById('at').oninput=e=>dyno(+e.target.value);
+const wins=[['Top speed','km/h','vmax'],['Pull out of a corner','N','f0'],['Pull per kg','N/kg','pg'],['Power-to-weight','W/kg','pw']];
+document.getElementById('wins').innerHTML=wins.map(([lab,u,k])=>{const vals=S.slice(0,3).map(s=>s[k]),mx=Math.max(...vals),mn=Math.min(...vals)*0.9;return `<div class="win"><span>${lab}<br><small style="color:var(--muted)">${u}</small></span><div class="stack">${S.slice(0,3).map(s=>`<span class="${s.c}"><span>${s[k]===mx?'<span class="crown">♛</span>':''}</span><i style="width:${10+(s[k]-mn)/(mx-mn)*90}%"></i><em>${s[k]}</em></span>`).join('')}</div></div>`;}).join('')+`<div class="win"><span>Measured lap<br><small style="color:var(--muted)">km/h</small></span><span style="color:var(--muted);font-size:12px">Same for all three: the lap speed was measured once. Log runs on Track day to compare real laps.</span></div>`;
+const spec=[['Gearing',s=>s.pin+' / '+s.gear,'pin'],['Ratio',s=>s.ratio+':1','ratio'],['Weight',s=>s.mass+' g','mass'],['No-load speed',s=>s.vmax+' km/h','vmax'],['Pull',s=>s.f0+' N','f0'],['Power-to-weight',s=>s.pw+' W/kg','pw'],['Rollout',s=>s.roll+' mm/rev','roll']];
+document.getElementById('cards').innerHTML=S.slice(0,3).map((s,i)=>`<div class="card scard ${s.c}"><b class="t">${s.name}</b><small style="color:var(--muted)">Club GT · ${i?'differs from Technical':'the base'}</small><div style="margin-top:8px">${spec.map(([l,f,k])=>`<div class="kv ${i&&s[k]!==S[0][k]?'diff':''}"><span>${l}</span><b>${f(s)}</b></div>`).join('')}</div><div style="display:flex;gap:6px;margin-top:10px"><button class="btn small">Open on workbench</button><button class="btn small">Setup sheet</button></div></div>`).join('');
+for(const b of document.querySelectorAll('#opt button'))b.onclick=()=>{for(const x of document.querySelectorAll('#opt button'))x.classList.toggle('on',x===b);const a=b.dataset.o==='a';document.getElementById('A').classList.toggle('hidden',!a);document.getElementById('B').classList.toggle('hidden',a);document.getElementById('noteA').classList.toggle('on',a);document.getElementById('noteB').classList.toggle('on',!a);};
+for(const b of document.querySelectorAll('#tone button'))b.onclick=()=>{for(const x of document.querySelectorAll('#tone button'))x.classList.toggle('on',x===b);document.documentElement.dataset.tone=b.dataset.t;};
+const q=new URLSearchParams(location.search);if(q.get('o')==='b')document.querySelector('#opt [data-o=b]').click();if(q.get('t')==='light')document.querySelector('#tone [data-t=light]').click();
+</script>
+</body>
+</html>
