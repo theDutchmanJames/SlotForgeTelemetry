@@ -1,0 +1,213 @@
+<!doctype html>
+<html lang="en" data-tone="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Paddock connection rework</title>
+<style>
+@font-face{font-family:'SF Mono';src:url('../../../renderer/fonts/robotomono/RobotoMono[wght].ttf') format('truetype');font-weight:100 700}
+@font-face{font-family:'SF Cond';src:url('../../../renderer/fonts/barlowcondensed/BarlowCondensed-Bold.ttf') format('truetype');font-weight:700}
+@font-face{font-family:'SF Cond';src:url('../../../renderer/fonts/barlowcondensed/BarlowCondensed-BoldItalic.ttf') format('truetype');font-weight:700;font-style:italic}
+:root{--bg:#171b21;--panel:#222831;--panel2:#1c2129;--raised:#2a313b;--ink:#e8e6e1;--ink2:#c4c8ce;--muted:#98a0ab;--faint:#6b7380;--line:#343b47;--line2:#2b313b;
+ --accent:#e5484d;--accent-text:#f06b6f;--good:#3ecf8e;--warn:#f2b705;--rec:#a855f7;--blue:#5aa9e6;--page:#0f1216;
+ --ui:'Segoe UI',system-ui,sans-serif;--cond:'SF Cond','Bahnschrift',sans-serif;--mono:'SF Mono',Consolas,monospace}
+[data-tone=light]{--bg:#f1efea;--panel:#ffffff;--panel2:#f7f5f1;--raised:#ecebe6;--ink:#1d2229;--ink2:#3a414b;--muted:#656c76;--faint:#8b929b;--line:#d9d6cf;--line2:#e6e3dd;
+ --accent:#d62828;--accent-text:#c21f1f;--good:#187a50;--warn:#956000;--rec:#7c3aed;--blue:#1f6fb2;--page:#e4e1da}
+*{box-sizing:border-box}
+body{margin:0;background:var(--page);color:var(--ink);font:13.5px/1.45 var(--ui)}
+.wrap{max-width:1460px;margin:0 auto;padding:26px 20px 90px}
+h1{font:italic 700 42px/1 var(--cond);text-transform:uppercase;margin:0 0 6px}
+.lead{color:var(--muted);margin:0 0 12px;max-width:110ch;font-size:14px}
+ul.why{margin:0 0 6px;padding-left:18px;color:var(--ink2);max-width:120ch;font-size:14px}ul.why li{margin:3px 0}
+.bar{position:sticky;top:0;z-index:20;display:flex;flex-wrap:wrap;align-items:center;gap:10px 18px;margin:14px -20px 18px;padding:12px 20px;background:color-mix(in srgb,var(--page) 88%,transparent);backdrop-filter:blur(6px);border-bottom:1px solid var(--line2)}
+.bar b{font:600 10.5px var(--ui);letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.sg{display:inline-flex;gap:2px;padding:2px;border:1px solid var(--line);border-radius:8px;background:var(--bg)}
+.sg button{height:30px;padding:0 14px;border:0;border-radius:6px;background:transparent;color:var(--muted);font:500 13px var(--ui);cursor:pointer}
+.sg button.on{background:color-mix(in srgb,var(--ink) 13%,var(--panel));color:var(--ink);font-weight:650}
+.opt-note{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:0 0 18px}
+.opt-note>div{border:1px solid var(--line);border-radius:10px;padding:14px 16px;background:var(--panel2)}
+.opt-note>div.on{border-color:var(--ink2)}
+.opt-note h3{margin:0 0 4px;font:italic 700 22px/1 var(--cond);text-transform:uppercase}
+.opt-note p{margin:0 0 6px;color:var(--muted)}.opt-note ul{margin:0;padding-left:18px;color:var(--ink2)}
+.mono{font-family:var(--mono)}
+/* the app frame */
+.app{border:1px solid var(--line);border-radius:12px;overflow:hidden;background:var(--bg)}
+.top{display:flex;align-items:center;gap:14px;height:56px;padding:0 16px;background:var(--panel2);border-bottom:1px solid var(--line)}
+.logo{display:flex;align-items:center;gap:9px;font:italic 700 21px/1 var(--cond);letter-spacing:.02em}
+.logo i{width:30px;height:30px;border-radius:8px;background:var(--accent)}
+.tabs{display:flex;gap:6px;margin-left:10px}
+.tabs span{display:inline-flex;gap:2px;padding:3px;border-radius:9px;background:rgba(0,0,0,.22)}
+[data-tone=light] .tabs span{background:rgba(0,0,0,.06)}
+.tabs a{padding:6px 11px;border-radius:7px;color:var(--muted);font-size:13px;text-decoration:none}
+.tabs a.on{background:color-mix(in srgb,var(--ink) 12%,transparent);color:var(--ink);font-weight:600}
+.lights{margin-left:auto;font-size:12px;color:var(--muted);display:flex;gap:6px;align-items:center}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--good);display:inline-block}
+.page{padding:22px 24px 28px}
+.eyebrow{font:600 11px var(--ui);letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.ph{display:flex;align-items:flex-end;gap:14px;margin-bottom:16px}
+.ph h2{font:italic 700 34px/1 var(--cond);text-transform:uppercase;margin:4px 0 0}
+.ph .grow{flex:1}
+.btn{display:inline-flex;align-items:center;gap:6px;height:34px;padding:0 13px;border:1px solid var(--line);border-radius:7px;background:var(--raised);color:var(--ink);font:500 13px var(--ui);cursor:pointer;white-space:nowrap}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:600}
+.btn.ghost{background:transparent}.btn.small{height:28px;padding:0 10px;font-size:12.5px}
+.chip{display:inline-flex;align-items:center;gap:5px;height:24px;padding:0 9px;border-radius:999px;border:1px solid var(--line);color:var(--ink2);font-size:12px;background:var(--panel2);white-space:nowrap}
+.chip.on{background:color-mix(in srgb,var(--ink) 12%,var(--panel));color:var(--ink);border-color:var(--ink2)}
+.tag{font:600 10.5px var(--ui);letter-spacing:.08em;text-transform:uppercase;padding:2px 7px;border-radius:5px;border:1px solid var(--line);color:var(--muted)}
+.tag.club{color:var(--blue);border-color:color-mix(in srgb,var(--blue) 45%,var(--line))}
+.tag.test{color:var(--warn);border-color:color-mix(in srgb,var(--warn) 45%,var(--line))}
+.tag.rec{color:var(--rec);border-color:color-mix(in srgb,var(--rec) 55%,var(--line))}
+.change{display:inline-flex;align-items:center;gap:5px;font-size:12px;color:var(--ink);background:color-mix(in srgb,var(--warn) 14%,transparent);border-radius:5px;padding:1px 7px}
+.change.none{background:transparent;color:var(--faint);padding:0}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:10px}
+.k{font:600 10.5px var(--ui);letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.big{font:600 26px/1.1 var(--mono)}
+.better{color:var(--good)}.worse{color:var(--accent-text)}
+.note-new{display:inline-block;font:700 9.5px var(--ui);letter-spacing:.1em;text-transform:uppercase;color:#fff;background:var(--rec);padding:1px 6px;border-radius:4px;vertical-align:2px;margin-left:6px}
+
+.hidden{display:none!important}
+.h5{margin:0 0 6px;font:italic 700 19px/1.1 var(--cond);text-transform:uppercase}
+.sub{color:var(--muted);font-size:12.5px;margin:0 0 12px}
+.set{display:grid;grid-template-columns:230px minmax(0,1fr);gap:18px;align-items:start}
+.rail{padding:10px}
+.rail a{display:block;padding:9px 10px;border-radius:8px;font-size:13px;color:var(--ink);text-decoration:none}
+.rail a small{display:block;color:var(--muted);font-size:11.5px}
+.rail a.on{background:color-mix(in srgb,var(--ink) 9%,var(--panel))}
+.lamp{display:inline-block;width:9px;height:9px;border-radius:50%;background:var(--good);box-shadow:0 0 0 4px color-mix(in srgb,var(--good) 20%,transparent)}
+.lamp.off{background:var(--faint);box-shadow:none}.lamp.bad{background:var(--accent);box-shadow:0 0 0 4px color-mix(in srgb,var(--accent) 20%,transparent)}
+.kv{display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--line2);font-size:13px}.kv span{color:var(--muted)}
+/* ---------- A: One Status Card ---------- */
+.status{padding:20px 22px;display:grid;grid-template-columns:auto 1fr auto;gap:16px;align-items:center}
+.status .st b{display:block;font:italic 700 26px/1.05 var(--cond);text-transform:uppercase}
+.status .st small{color:var(--muted);font-size:13px}
+.facts{display:grid;grid-template-columns:repeat(4,1fr);gap:0;border-top:1px solid var(--line2);margin:0 -22px -20px;grid-column:1/-1}
+.facts div{padding:12px 22px;border-right:1px solid var(--line2)}.facts div:last-child{border:0}
+.facts span{display:block;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;font-weight:600}.facts b{font:600 17px var(--mono)}
+.where{margin-top:16px;padding:16px 18px}
+.where .seg{display:inline-flex;gap:2px;padding:3px;border:1px solid var(--line);border-radius:9px;background:var(--bg);margin-bottom:14px}
+.where .seg span{padding:7px 14px;border-radius:7px;font-size:13px;color:var(--muted)}.where .seg span.on{background:color-mix(in srgb,var(--ink) 12%,var(--panel));color:var(--ink);font-weight:600}
+.steps3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.s3{border:1px solid var(--line2);border-radius:10px;padding:12px}
+.s3 .n{display:inline-grid;place-items:center;width:22px;height:22px;border-radius:50%;background:var(--ink);color:var(--bg);font:700 11px var(--mono);margin-right:6px}
+.s3.done .n{background:var(--good);color:#06150e}
+.s3 b{font-size:13.5px}.s3 p{margin:6px 0 0;font-size:12.5px;color:var(--muted)}
+.host{display:flex;align-items:center;gap:8px;padding:8px 10px;border:1px solid var(--ink2);border-radius:8px;margin-top:8px;font-size:13px}
+.inp{height:34px;border:1px solid var(--line);border-radius:7px;background:var(--bg);display:flex;align-items:center;padding:0 10px;color:var(--muted);font-size:13px;margin-top:8px}
+.log{margin-top:16px;padding:14px 18px}
+.lrow{display:grid;grid-template-columns:120px 1fr auto;gap:12px;padding:7px 0;border-top:1px solid var(--line2);font-size:13px}
+.lrow:first-of-type{border-top:0}.lrow span:first-child{color:var(--muted)}
+/* ---------- B: Connection Map ---------- */
+.map{padding:20px 22px}
+.map svg{width:100%;height:auto;display:block}
+.node rect{fill:var(--panel2);stroke:var(--line);stroke-width:1.5}
+.node text{fill:var(--ink);font:700 15px var(--ui)}.node .s{fill:var(--muted);font:500 12px var(--ui)}
+.flow{stroke:var(--good);stroke-width:4;stroke-dasharray:10 8}
+.flow.off{stroke:var(--line);stroke-dasharray:4 6}
+.pill rect{fill:color-mix(in srgb,var(--good) 18%,var(--panel));stroke:color-mix(in srgb,var(--good) 50%,var(--line))}
+.pill text{fill:var(--ink);font:600 12px var(--mono)}
+.b-grid{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:14px;margin-top:14px;align-items:start}
+.checks{padding:14px 18px}
+.ck{display:grid;grid-template-columns:24px 1fr auto;gap:10px;align-items:center;padding:9px 0;border-top:1px solid var(--line2);font-size:13px}
+.ck:first-of-type{border-top:0}
+.ck i{width:20px;height:20px;border-radius:50%;display:grid;place-items:center;font-style:normal;font-size:11px;font-weight:700}
+.ck i.ok{background:var(--good);color:#06150e}.ck i.no{background:var(--accent);color:#fff}.ck i.na{border:1.5px solid var(--faint)}
+.ck small{display:block;color:var(--muted);font-size:12px}
+.side{padding:14px 16px}
+@media(max-width:1100px){.set,.b-grid{grid-template-columns:1fr}.facts,.steps3{grid-template-columns:1fr 1fr}}
+</style>
+</head>
+<body>
+<div class="wrap">
+ <div class="eyebrow">SlotForge Telemetry · rework preview 7</div>
+ <h1>Connect to Paddock, remade</h1>
+ <p class="lead">Connect to Paddock is plumbing shown as a form: "Paddock on this computer" with a button and a grey "Not connected." box, then "Paddock on another computer" with three numbered steps, Find on this network, an address field, a password field and four buttons (Connect, Disconnect, Import / refresh results, and an archive button when something breaks), and three paragraphs about formats, ports and passwords. What you want to know (am I connected, is my data up to date, what do I do if not) has no place of its own.</p>
+ <ul class="why">
+  <li><b>Replaces:</b> the Settings › Connect to Paddock page and its status line.</li>
+  <li><b>Kept:</b> both ways in (this computer without a password; another computer with Dealership Mode and the password), finding Paddock on the network, the remembered collection, never saving the password, refresh, disconnect and rebuilding an unreadable cache.</li>
+  <li><b>New, each one for you to approve:</b> what came in (races, cars, photos) with counts and when, a short import history, and plain "fix it" steps when it does not work.</li>
+ </ul>
+ <div class="bar">
+  <b>Option</b><div class="sg" id="opt"><button class="on" data-o="a">A · Status Card</button><button data-o="b">B · Connection Map</button></div>
+  <b>Look</b><div class="sg" id="tone"><button class="on" data-t="dark">Dark</button><button data-t="light">Light</button></div>
+  <span style="color:var(--muted);font-size:12.5px">Example: connected to Paddock on this computer (Home collection); the network way shown as it would be set up.</span>
+ </div>
+ <div class="opt-note">
+  <div id="noteA" class="on"><h3>A · Status Card</h3><p>One card that answers "am I connected?", with one button.</p>
+   <ul><li>On top: the <b>status</b> in big type, a light, and one button that does what is needed now: Connect, Refresh, or Fix it.</li><li>What you have from Paddock: races, cars, photos, last import.</li><li><b>Where is Paddock?</b> This computer / Another computer. The network way is three short steps in a row, not a form.</li><li>A short <b>import history</b>.</li></ul></div>
+  <div id="noteB"><h3>B · Connection Map</h3><p>A picture of the link, and checks that say what is wrong.</p>
+   <ul><li>A <b>map</b>: Telemetry, the link, Paddock. The line is green and moving when connected, grey when not; what comes over it is written on it.</li><li><b>Checks</b> below run by themselves: is Paddock running, is "Paddock on this computer" on, is the collection readable. A failed check says what to do.</li><li>The network way and the connection details sit on the right.</li></ul></div>
+ </div>
+
+ <div class="app">
+  <div class="top"><div class="logo"><i></i>TELEMETRY</div>
+   <div class="tabs"><span><a>Workbench</a><a>Track day</a></span><span><a>Laps</a><a>Setups</a><a>Driver Feedback</a></span><span><a>Library</a><a class="on">Settings</a></span></div>
+   <div class="lights"><span class="dot"></span>Paddock · Home collection</div></div>
+
+  <!-- A -->
+  <div class="page" id="A">
+   <div class="ph"><div class="grow"><div class="eyebrow">Make it your workbench</div><h2>Settings</h2></div></div>
+   <div class="set">
+    <div class="card rail"><a>Appearance<small>Dark</small></a><a>Units<small>Metric</small></a><a>Calculations explained</a><a class="on">Connect to Paddock<small>This computer · Home collection</small></a><a>Backups<small>Today, 09:12</small></a><a>Updates<small>0.14.0</small></a></div>
+    <div>
+     <div class="card status"><span class="lamp"></span><div class="st"><b>Connected to Home collection</b><small>Paddock on this computer · no password needed · checks again when you come back to Telemetry</small></div><div style="display:flex;gap:8px"><button class="btn ghost">Disconnect</button><button class="btn primary">Refresh now</button></div>
+      <div class="facts"><div><span>Races</span><b>5</b></div><div><span>Cars</span><b>3</b></div><div><span>Photos</span><b>2</b></div><div><span>Last import</span><b>20 Nov 09:40</b></div></div></div>
+     <div class="card where"><div class="h5">Where is Paddock?</div>
+      <div class="seg"><span>This computer</span><span class="on">Another computer</span></div>
+      <div class="steps3">
+       <div class="s3 done"><span class="n">✓</span><b>On that computer</b><p>In Paddock: Connections → Dealership Mode, on.</p></div>
+       <div class="s3 done"><span class="n">✓</span><b>Pick it here</b><p>Found on this network:</p><div class="host"><span class="lamp"></span>Club Timing PC · 192.168.1.42:48210</div></div>
+       <div class="s3"><span class="n">3</span><b>Enter the password</b><p>The Dealership password. Never saved.</p><div class="inp">••••••••</div><button class="btn primary small" style="margin-top:8px">Connect</button></div>
+      </div>
+      <p class="sub" style="margin:12px 0 0">Over the network Paddock shares races in its older format; races saved to a Shared library come in only through Paddock on this computer.</p></div>
+     <div class="card log"><div class="h5">Import history</div>
+      <div class="lrow"><span>20 Nov 09:40</span><span>Up to date · 0 new or changed</span><span style="color:var(--muted)">this computer</span></div>
+      <div class="lrow"><span>19 Nov 21:05</span><span>2 new races, 1 corrected</span><span style="color:var(--muted)">this computer</span></div>
+      <div class="lrow"><span>16 Oct 22:10</span><span>1 race left out: newer format than this Telemetry</span><span style="color:var(--warn)">needs an update</span></div>
+     </div>
+    </div>
+   </div>
+  </div>
+
+  <!-- B -->
+  <div class="page hidden" id="B">
+   <div class="ph"><div class="grow"><div class="eyebrow">Make it your workbench</div><h2>Settings</h2></div></div>
+   <div class="set">
+    <div class="card rail"><a>Appearance<small>Dark</small></a><a>Units<small>Metric</small></a><a>Calculations explained</a><a class="on">Connect to Paddock<small>This computer · Home collection</small></a><a>Backups<small>Today, 09:12</small></a><a>Updates<small>0.14.0</small></a></div>
+    <div>
+     <div class="card map">
+      <svg viewBox="0 0 860 200">
+       <g class="node"><rect x="10" y="50" width="220" height="100" rx="14"/><text x="34" y="92">Telemetry</text><text class="s" x="34" y="116">this computer</text></g>
+       <g class="node"><rect x="630" y="50" width="220" height="100" rx="14"/><text x="654" y="92">Paddock</text><text class="s" x="654" y="116">Home collection · this computer</text></g>
+       <line class="flow" x1="240" y1="100" x2="620" y2="100"/>
+       <g class="pill"><rect x="300" y="62" width="76" height="26" rx="13"/><text x="314" y="80">5 races</text></g>
+       <g class="pill"><rect x="392" y="62" width="70" height="26" rx="13"/><text x="406" y="80">3 cars</text></g>
+       <g class="pill"><rect x="478" y="62" width="84" height="26" rx="13"/><text x="490" y="80">2 photos</text></g>
+       <text x="430" y="132" text-anchor="middle" fill="var(--muted)" font-size="12">read only · last import 20 Nov 09:40</text>
+      </svg>
+      <div style="display:flex;gap:8px;justify-content:center;margin-top:8px"><button class="btn primary">Refresh now</button><button class="btn ghost">Disconnect</button></div>
+     </div>
+     <div class="b-grid">
+      <div class="card checks"><div class="h5">Checks</div><p class="sub">Run by themselves when you open this page.</p>
+       <div class="ck"><i class="ok">✓</i><div>Paddock is running on this computer<small>found Home collection</small></div><span></span></div>
+       <div class="ck"><i class="ok">✓</i><div>"Paddock on this computer" is on<small>Paddock → Connections</small></div><span></span></div>
+       <div class="ck"><i class="ok">✓</i><div>The imported races are readable<small>5 races, last changed 19 Nov</small></div><span></span></div>
+       <div class="ck"><i class="no">!</i><div>1 race needs a newer Telemetry<small>Saved by a newer Timing; it is left out until you update.</small></div><button class="btn small">Check for updates</button></div>
+       <div class="ck"><i class="na"></i><div>Another computer<small>not set up · optional</small></div><span></span></div>
+      </div>
+      <div class="card side"><div class="h5">Another computer</div><p class="sub">For Paddock on a club or laptop PC, with Dealership Mode on.</p>
+       <div class="kv"><span>Found on this network</span><b>Club Timing PC</b></div><div class="kv"><span>Address</span><b class="mono">192.168.1.42:48210</b></div>
+       <div class="inp">Dealership password</div><button class="btn small" style="margin-top:8px">Connect</button>
+       <p class="sub" style="margin-top:10px">The password is never saved. Over the network, older-format races only.</p></div>
+     </div>
+    </div>
+   </div>
+  </div>
+ </div>
+ <p class="lead" style="margin-top:16px">Both options keep the connection itself exactly as it is: read-only, the password only in memory, and a failed import never touching what you already have.</p>
+</div>
+<script>
+for(const b of document.querySelectorAll('#opt button'))b.onclick=()=>{for(const x of document.querySelectorAll('#opt button'))x.classList.toggle('on',x===b);const a=b.dataset.o==='a';document.getElementById('A').classList.toggle('hidden',!a);document.getElementById('B').classList.toggle('hidden',a);document.getElementById('noteA').classList.toggle('on',a);document.getElementById('noteB').classList.toggle('on',!a);};
+for(const b of document.querySelectorAll('#tone button'))b.onclick=()=>{for(const x of document.querySelectorAll('#tone button'))x.classList.toggle('on',x===b);document.documentElement.dataset.tone=b.dataset.t;};
+const q=new URLSearchParams(location.search);if(q.get('o')==='b')document.querySelector('#opt [data-o=b]').click();if(q.get('t')==='light')document.querySelector('#tone [data-t=light]').click();
+</script>
+</body>
+</html>
