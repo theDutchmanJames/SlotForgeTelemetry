@@ -1,6 +1,6 @@
 const fs=require('node:fs'),path=require('node:path'),crypto=require('node:crypto');
 const {validatePayload}=require('./paddock-validation.cjs');
-const schema=require('./paddock-schema.cjs');
+const schema=require('./paddock-schema.cjs'),{atomicWrite}=require('./data-files.cjs');
 const MAX_BYTES=9*1024*1024,MAX_CACHE=200*1024*1024,MAX_SESSIONS=10000;
 const id=x=>typeof x==='string'&&/^[a-zA-Z0-9_-]{1,100}$/.test(x);
 const int=x=>Number.isSafeInteger(x)&&x>=0;
@@ -56,7 +56,7 @@ class PaddockClient{
  view(){return {data:this.data,error:this.loadError,remembered:this.remembered,connection:this.connection?{id:this.connection.id,name:this.connection.name,address:this.connection.address,notifications:!!this.connection.changes,readyToWatch:!!this.connection.token}:null};}
  remember(c){
   const value={version:1,id:c.id,name:c.name,address:c.address,savedAt:new Date().toISOString()};
-  try{fs.mkdirSync(path.dirname(this.rememberFile),{recursive:true});fs.writeFileSync(this.rememberFile,JSON.stringify(value));this.remembered={id:c.id,name:c.name,address:c.address};}catch{/* Convenience only; connecting still works. */}
+  try{atomicWrite(this.rememberFile,JSON.stringify(value));this.remembered={id:c.id,name:c.name,address:c.address};}catch{/* Convenience only; connecting still works. */}
  }
  forget(){try{fs.rmSync(this.rememberFile,{force:true});}catch{/* Nothing to remove. */}this.remembered=null;return this.view();}
  async request(base,password,route,expected,signal,timeout=this.timeout){
@@ -128,7 +128,7 @@ class PaddockClient{
    return {supported:true,changed:result.changed};
   }finally{this.watching=false;}
  }
- persist(data){const text=JSON.stringify(data);if(Buffer.byteLength(text)>MAX_CACHE)throw Error('Result library exceeds 200 MiB.');fs.mkdirSync(path.dirname(this.file),{recursive:true});const temp=this.file+'.'+crypto.randomUUID()+'.tmp';let fd;try{fd=fs.openSync(temp,'wx');fs.writeFileSync(fd,text);fs.fsyncSync(fd);fs.closeSync(fd);fd=undefined;fs.renameSync(temp,this.file);}catch(e){if(fd!==undefined)fs.closeSync(fd);try{fs.unlinkSync(temp);}catch{}throw Error('Could not save imported results. Existing results are unchanged. '+e.message);}}
+ persist(data){const text=JSON.stringify(data);if(Buffer.byteLength(text)>MAX_CACHE)throw Error('Result library exceeds 200 MiB.');try{atomicWrite(this.file,text);}catch(e){throw Error('Could not save imported results. Existing results are unchanged. '+e.message);}}
  rebuild(){if(this.busy)throw Error('Wait for the import to finish.');if(!this.loadError)throw Error('The cache is readable; rebuilding is unnecessary.');const backup=this.file+'.unreadable-'+Date.now();if(fs.existsSync(this.file))fs.renameSync(this.file,backup);this.data={version:1,hosts:[]};this.loadError='';return {...this.view(),backup};}
 }
 module.exports={PaddockClient,address,verify,hash,checkCache};

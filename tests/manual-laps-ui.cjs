@@ -26,6 +26,10 @@ app.whenReady().then(async()=>{
   await set('manual-text','10.235\n10,200\n9.900\n9.850\n10.000\n9.700\n9.650\n9.600\n9.550\n9.500');await click('#manual-review');assert.equal(await run("document.querySelectorAll('#manual-preview-rows tr').length"),10);
   await run("document.querySelector('[data-manual-status=\"1\"]').value='pit';document.querySelector('[data-manual-status=\"1\"]').dispatchEvent(new Event('change',{bubbles:true}))");
   await run("document.getElementById('manual-preview').scrollIntoView({block:'center'})");await pause();fs.writeFileSync(path.join(output,'manual-laps-preview.png'),(await win.webContents.capturePage()).toPNG());
+  // A setup value the browser rejects, in the closed optional section: Save opens that section instead of doing nothing.
+  await set('manual-pinion','9.5');await run("document.querySelector('#manual-form details').open=false");await click('#manual-save');
+  assert.equal(await run("document.querySelector('#manual-form details').open"),true,'the section with the bad value opens');assert.equal(await run("document.getElementById('manual-editor').open"),true);
+  await set('manual-pinion','');
   await click('#manual-save');await pause();assert.equal(await run("document.getElementById('manual-editor').open"),false);
   // Saved laps open on the wall, with the run selected; the full lap analysis is one click away.
   assert.equal(await run('location.hash'),'#laps');assert.match(await run("document.getElementById('lw-drawer').textContent"),/Notebook <b>practice<\/b>/);assert.equal(await run("document.querySelectorAll('#lw-drawer b').length>0&&!document.querySelector('#lw-drawer h2 b')"),true,'names are shown as text');

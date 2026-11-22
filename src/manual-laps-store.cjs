@@ -1,4 +1,4 @@
-const fs=require('node:fs'),path=require('node:path'),crypto=require('node:crypto'),model=require('../renderer/manual-laps-model.js');
+const fs=require('node:fs'),crypto=require('node:crypto'),{atomicWrite}=require('./data-files.cjs'),model=require('../renderer/manual-laps-model.js');
 const MAX_BYTES=50*1024*1024,MAX_SESSIONS=1000,id=x=>typeof x==='string'&&/^[a-zA-Z0-9_-]{1,100}$/.test(x),hash=value=>crypto.createHash('sha256').update(JSON.stringify(value)).digest('hex');
 function readBackup(input){if(typeof input!=='string'||Buffer.byteLength(input)>MAX_BYTES)throw Error('Choose a manual lap backup smaller than 50 MiB.');return validate(JSON.parse(input));}
 function validate(data){
@@ -11,7 +11,7 @@ function validate(data){
 class ManualLapsStore{
  constructor(file){this.file=file;this.error='';this.data={format:'slotforge-manual-laps',version:1,id:crypto.randomUUID(),sessions:[]};try{if(fs.existsSync(file)){if(fs.statSync(file).size>MAX_BYTES)throw Error('Too large');this.data=validate(JSON.parse(fs.readFileSync(file,'utf8')));}}catch{this.error='The manual lap library is unreadable and has been preserved. Export it for recovery; no manual sessions will be overwritten.';}}
  view(){return {data:this.data,error:this.error};}
- persist(next){if(this.error)throw Error(this.error);next=validate(next);const json=JSON.stringify(next);if(Buffer.byteLength(json)>MAX_BYTES)throw Error('Manual library exceeds 50 MiB.');if(next.sessions.length>MAX_SESSIONS)throw Error('Manual library limit is 1,000 sessions.');fs.mkdirSync(path.dirname(this.file),{recursive:true});const temp=this.file+'.'+crypto.randomUUID()+'.tmp';let fd;try{fd=fs.openSync(temp,'wx');fs.writeFileSync(fd,json);fs.fsyncSync(fd);fs.closeSync(fd);fd=undefined;fs.renameSync(temp,this.file);}catch(e){if(fd!==undefined)fs.closeSync(fd);try{fs.unlinkSync(temp);}catch{}throw Error('Could not save manual laps. Existing data is unchanged. '+e.message);}this.data=next;return this.view();}
+ persist(next){if(this.error)throw Error(this.error);next=validate(next);const json=JSON.stringify(next);if(Buffer.byteLength(json)>MAX_BYTES)throw Error('Manual library exceeds 50 MiB.');if(next.sessions.length>MAX_SESSIONS)throw Error('Manual library limit is 1,000 sessions.');try{atomicWrite(this.file,json);}catch(e){throw Error('Could not save manual laps. Existing data is unchanged. '+e.message);}this.data=next;return this.view();}
  save(input){
   if(this.error)throw Error(this.error);const old=input?.id?this.data.sessions.find(r=>r.id===input.id):null;if(input?.id&&(!old||old.revision!==input.revision))throw Error('This session changed or was deleted. Reopen it before saving.');
   const values=model.normalize(input?.values),now=new Date().toISOString(),canonical=s=>s.normalize('NFKC').trim().toLowerCase();

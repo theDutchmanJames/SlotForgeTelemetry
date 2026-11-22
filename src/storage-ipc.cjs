@@ -2,10 +2,11 @@
 // Setup files and backups for the renderer. Only the app's own page may call these.
 const {ipcMain,dialog,shell,app}=require('electron');
 const path=require('node:path'),fs=require('node:fs'),{pathToFileURL}=require('node:url');
-const {DataFiles}=require('./data-files.cjs'),{Backups}=require('./backups.cjs');
+const {DataFiles}=require('./data-files.cjs'),{Backups,recover}=require('./backups.cjs');
 const page=()=>pathToFileURL(path.join(__dirname,'../renderer/index.html')).href;
 const trusted=event=>event.senderFrame&&event.senderFrame===event.sender.mainFrame&&event.senderFrame.url.split('#')[0]===page();
 function registerStorage(profile,{version='0.0.0',relaunch=()=>{const portable=process.env.PORTABLE_EXECUTABLE_FILE;app.relaunch(portable?{execPath:portable,args:[]}:undefined);app.exit(0);},schedule=true,confirm=null}={}){
+ recover(profile);// Also done by main.cjs before anything opens; here for test harnesses.
  const files=new DataFiles(profile),backups=new Backups(profile,{version});
  // Synchronous on purpose: the library keeps its synchronous rules; files are small and local.
  for(const [name,fn] of Object.entries({get:k=>files.get(k),set:p=>files.set(p?.key,p?.text),remove:k=>files.remove(k)}))

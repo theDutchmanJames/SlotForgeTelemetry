@@ -80,3 +80,15 @@ test('historical history-v1 gaps stay unknown instead of becoming numbers',()=>{
  assert.equal(model.chartPoints(runs.find(r=>r.laps.some(l=>l.id===lap.id)).laps,'',true).some(x=>x.lap.id===lap.id),false,'unknown times are never plotted');
  const broken=structuredClone(bundle);broken.race.participants[0].laps[0].durationMs='fast';assert.throws(()=>projection.checkBundle(broken),/Unsupported history-v1/);
 });
+test('a network cut halfway through an import from Paddock on this computer never saves an import with races missing',async t=>{
+ const {s,client,make}=await host(t);await client.connect({databaseId:DB});await client.sync();const count=client.data.hosts[0].sessions.length;
+ for(const part of ['/v1/shared-history/sessions','/laps/']){
+  // Nothing saved yet (a first import), so every race is downloaded and the cut lands in the middle of one.
+  fs.rmSync(client.file,{force:true});const again=make();t.after(()=>again.disconnect());await again.connect({databaseId:DB});
+  s.cut=url=>url.pathname.includes(part);
+  await assert.rejects(()=>again.sync(),/interrupted|invalid JSON|reach Paddock/);s.cut=null;
+  assert.equal(fs.existsSync(client.file),false,'nothing saved after a cut in '+part);assert.equal(again.busy,false);
+  assert.deepEqual(fs.readdirSync(path.dirname(client.file)).filter(n=>n.endsWith('.tmp')),[]);
+  const r=await again.sync();assert.equal(r.skipped,0);assert.equal(again.data.hosts[0].sessions.length,count,'every race is there after the next import');
+ }
+});

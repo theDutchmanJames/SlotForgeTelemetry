@@ -50,7 +50,14 @@ test('gear, tyre, mass and operating-point variations conserve power and static 
 test('large Unicode backups obey the byte limit without mutating saved entries',()=>{
   const item=L.save([],{setup:{...C.EXAMPLE,name:'Race'},newId:'one',now:'2026-11-01T00:00:00Z'})[0];
   const list=Array.from({length:500},(_,i)=>({...item,id:'setup-'+i,notes:'🛞'.repeat(1000)}));
-  assert.throws(()=>L.encode(list),/2 MB/);
+  assert.throws(()=>L.encode(list),/4 MB/);
   assert.equal(list[0].notes.length,2000);
   assert.equal(item.notes,'');
+});
+
+test('500 setups with ordinary notes fit in the library (it used to fill up at about 300)',()=>{
+  const item=L.save([],{setup:{...C.EXAMPLE,name:'Race'},newId:'one',now:'2026-11-01T00:00:00Z'})[0];
+  const list=Array.from({length:500},(_,i)=>({...item,id:'setup-'+i,setup:{...item.setup,name:'Race '+i,pinion:String(8+i%5)},notes:'Track notes '.repeat(20)}));
+  const text=L.encode(list);assert.deepEqual(L.decode(text),list);
+  const t=Date.now();for(let i=0;i<5;i++)L.decode(text);assert.ok((Date.now()-t)/5<150,'reading 500 checked setups again is quick');
 });

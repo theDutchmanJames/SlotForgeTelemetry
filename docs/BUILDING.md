@@ -31,7 +31,7 @@ The interface and drivetrain icons use Paddock's original SVG paths, bundled in 
 
 The draft autosaves independently from the library. Editing it never changes saved analysis until you explicitly save. Loading a library entry asks before replacing the draft. New setup, Load example and Open file also confirm before discarding unsaved work. Export file/Open file preserve the existing individual setup JSON format, normalizing numeric strings to display safely in native inputs. A legacy reference field remains round-trippable for compatibility; the new comparison view uses full library entries.
 
-Library backups are validated completely before import; imports create copies. Limits are 500 entries, 2 MB and 2,000 characters per note. Invalid stored libraries are left untouched, and failed writes never report success. Export a backup before clearing app data or moving devices.
+Library backups are validated completely before import; imports create copies. Limits are 500 entries, 4 MB and 2,000 characters per note. Invalid stored libraries are left untouched, and failed writes never report success. Export a backup before clearing app data or moving devices.
 
 The existing storage keys and desktop profile directory, SlotForge Calculator, are retained. No Paddock database, account, server or network service is required.
 
@@ -50,6 +50,13 @@ Lap average uses measured lane distance and time. Scale speed is a simple size c
 ## Verification and packaging
 
 `npm test` runs model tests; `npm run check` checks JavaScript syntax. `npm run test:ui` exercises all four pages in an isolated Electron profile under test-results, including saved-only analysis, comparisons, library lifecycle, backup/import, failed storage, theme preferences and narrow layouts. Screenshots are saved there.
+
+Deeper checks, each optional:
+
+- `npm run coverage`: the model tests with a map of the lines and branches they never run.
+- `npm test` also runs two kinds of stress test. `tests/storage-sequences.test.cjs` sends random sequences of actions (add, edit, delete, star, import, stale edits, a failing or briefly locked disk, reopening) through every store that saves, checking each step against a simple model. `tests/crash.test.cjs` kills a separate process while it saves, backs up, restores or imports, then checks that everything reopens cleanly, nothing reported saved is lost and a restore is never left half done. The network tests cut Paddock's answer halfway.
+- `npm run test:long`: the same with thousands of actions per store and 40 kills per kind (about 45 minutes).
+- `npm run monkey`: clicks, types, picks and navigates at random in the real app for 10 minutes on a heavy example library (`-- --minutes 60` for an hour, `-- --real` for a copy of your own data, `-- --seed <n>` to repeat a run). Every console error, failed request, stray window or hang is written to `test-results/monkey-<time>/report.md` with the actions that led to it.
 
 `npm run dist` builds both Windows packages: the portable executable and the Setup installer. `npm run pack` builds an unpacked application.
 

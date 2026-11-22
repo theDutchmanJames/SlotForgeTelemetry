@@ -1,3 +1,6 @@
+// A form field the browser rejects (a pinion of 9.5, say) inside a closed section would silently block its form: the
+// browser cannot show the message on a field it cannot see. Open every section around it first.
+document.addEventListener('invalid',e=>{for(let d=e.target.closest?.('details');d;d=d.parentElement?.closest('details'))d.open=true;},true);
 let analysisId=null,analysisTopic='performance',selectedLibraryId=null;
 function liveStats(input){
   const m=TelemetryModel.calculate(input);

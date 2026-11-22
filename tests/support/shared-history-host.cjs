@@ -27,6 +27,8 @@ async function createHost({sessions=sessionsFromFixtures(),pageSize=1,lapPageSiz
   if(req.headers.origin!==undefined)return send(403,{code:'BROWSER_ORIGIN_FORBIDDEN',error:'Browser access is not supported.'});
   if(req.headers.authorization!=='Bearer '+s.token)return send(401,{code:'UNAUTHENTICATED',error:'Incorrect credential.'});
   if(req.headers['x-slotforge-instance']!==s.instanceId)return send(409,{code:'INSTANCE_CHANGED',error:'Rediscover.'});
+  // A network cut halfway through a response (Wi-Fi dropped, Paddock closed): headers, part of the body, then nothing.
+  if(s.cut?.(url)){res.writeHead(200,{'Content-Type':'application/json','Content-Length':'100000'});res.write('{"version":1,"databaseId":');setTimeout(()=>res.destroy(),30);return;}
   if(url.pathname==='/v1/status'){const st=read('history-status');return send(200,{protocol:2,id:DB,revision:1,name:'Home collection',localInstanceId:s.instanceId,permissions:{browse:true,submit:false,timingResults:true,localImport:true},capabilities:{...(req.headers['x-slotforge-extensions']==='shared-history-v1'?{sharedHistory:{...st.capability,formats:['timing-v1','history-v1']}}:{}),telemetry:{version:1}}});}
   if(req.headers['x-slotforge-database']!==DB)return send(409,{code:'DATABASE_MISMATCH',error:'Wrong database.'});
   if(s.hook)await s.hook(url);

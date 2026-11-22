@@ -74,3 +74,41 @@ test('a save retries when Windows briefly holds the file, then gives up',t=>{
  finally{fs.renameSync=rename;}
  assert.deepEqual(fs.readdirSync(dir).filter(f=>f.endsWith('.tmp')),[]);
 });
+test('a restore stopped part-way by a locked file is finished at the next start, never left as a mix',t=>{
+ const {recover,finishRestore,JOURNAL}=require('../src/backups.cjs'),{retry}=require('../src/data-files.cjs');
+ const dir=profile(t),files=seed(dir),b=new Backups(dir,{now:clock()});const backup=b.readFile(b.write(b.dir,'manual','manual').file);
+ files.set('active','');files.set('runnotes','{"version":1,"runs":{"r":{"note":"after the backup"}}}');
+ const real=fs.renameSync;let renames=0;retry.ms=0;
+ fs.renameSync=(...a)=>{if(String(a[1]).endsWith('.json')&&!String(a[1]).includes('backups')&&!String(a[1]).includes(JOURNAL)&&++renames>1)throw Object.assign(Error('EBUSY: resource busy (test)'),{code:'EBUSY'});return real(...a);};
+ let error;try{b.restore(backup);}catch(e){error=e;}finally{fs.renameSync=real;retry.ms=25;}
+ assert.equal(error?.partial,true);assert.match(error.message,/finishes it/);assert.ok(fs.existsSync(path.join(dir,JOURNAL)),'the journal stays for the next start');
+ assert.deepEqual(recover(dir),{finished:true});assert.equal(fs.existsSync(path.join(dir,JOURNAL)),false);
+ for(const [name,f] of Object.entries(backup.bundle.files))assert.equal(fs.readFileSync(path.join(dir,name),'utf8'),f.text,name+' is the backup\'s');
+ assert.equal(fs.existsSync(path.join(dir,'run-notes-v1.json')),false,'a file the backup did not have is removed');
+ assert.deepEqual(fs.readdirSync(dir).filter(n=>n.endsWith('.tmp')),[]);assert.equal(finishRestore(dir),false,'running it again does nothing');
+});
+test('start-up clears leftovers of cut-off saves, ignores a damaged journal and leaves other files alone',t=>{
+ const {recover,JOURNAL}=require('../src/backups.cjs'),dir=profile(t);seed(dir);fs.mkdirSync(path.join(dir,'backups'));
+ const left=[path.join(dir,'garage-v1.json.0f8fad5b-d9cb-469f-a165-70867728950e.tmp'),path.join(dir,'backups','auto-x.json.7c9e6679-7425-40de-944b-e07fc1f90ae7.tmp')];
+ for(const f of left)fs.writeFileSync(f,'{"half":');fs.writeFileSync(path.join(dir,'notes.tmp'),'mine');fs.writeFileSync(path.join(dir,JOURNAL),'{"version":1,"files":{"../outside.json":"x.tmp","garage-v1.json":"../../evil.tmp"}}');
+ recover(dir);for(const f of left)assert.equal(fs.existsSync(f),false);assert.equal(fs.readFileSync(path.join(dir,'notes.tmp'),'utf8'),'mine','only Telemetry\'s own temporary files');
+ assert.equal(fs.existsSync(path.join(dir,JOURNAL)),false);assert.doesNotThrow(()=>JSON.parse(fs.readFileSync(path.join(dir,'garage-v1.json'),'utf8')),'the journal could not touch the garage');
+ fs.writeFileSync(path.join(dir,JOURNAL),'{"vers');recover(dir);assert.equal(fs.existsSync(path.join(dir,JOURNAL)),false,'a half-written journal (killed before the swap began) is dropped');
+});
+test('a briefly locked file is retried; a file that stays locked fails the save and changes nothing',t=>{
+ const {retry,atomicWrite}=require('../src/data-files.cjs'),dir=profile(t),f=new DataFiles(dir);f.set('active','one');
+ const real=fs.renameSync;let fail=0;retry.ms=0;fs.renameSync=(...a)=>{if(fail>0){fail--;throw Object.assign(Error('EPERM (test)'),{code:'EPERM'});}return real(...a);};
+ try{fail=3;f.set('active','two');assert.equal(f.get('active'),'two');
+  fail=99;assert.throws(()=>f.set('active','three'),/Nothing was changed/);assert.equal(f.get('active'),'two');
+  fail=0;fs.renameSync=()=>{throw Object.assign(Error('ENOSPC (test)'),{code:'ENOSPC'});};assert.throws(()=>atomicWrite(path.join(dir,'x.json'),'{}'),/ENOSPC/);
+ }finally{fs.renameSync=real;retry.ms=25;}
+ assert.deepEqual(fs.readdirSync(dir).filter(n=>n.endsWith('.tmp')),[]);
+ assert.throws(()=>f.set('active',5),/4 MiB/);assert.throws(()=>f.file('nope'),/Unknown/);
+ fs.writeFileSync(f.file('library'),'x'.repeat(4*1024*1024+1));assert.throws(()=>f.get('library'),/too large/);
+});
+test('automatic backups: an unavailable extra folder is reported and cleared once it works again',t=>{
+ const dir=profile(t);seed(dir);const b=new Backups(dir,{now:clock()}),extra=path.join(dir,'usb');
+ b.settings.extraFolder=extra;assert.ok(b.auto().file);assert.match(b.status().lastError,/extra backup folder is not available/);
+ fs.mkdirSync(extra);new DataFiles(dir).set('active','');const r=b.auto();assert.equal(r.copied,extra);assert.equal(b.status().lastError,'');assert.equal(fs.readdirSync(extra).length,1);
+ assert.equal(b.auto().skipped,'unchanged');const again=new Backups(dir,{now:clock()});assert.equal(again.settings.extraFolder,extra,'the folder is remembered');
+});

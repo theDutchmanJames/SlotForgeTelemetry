@@ -2,6 +2,18 @@
 
 ## Unreleased
 
+### Stress tests, and what they found
+
+New tests run thousands of random actions through every store that saves, kill Telemetry in the middle of saves, backups, restores and imports, cut the network halfway through an import, and click through the whole app at random (`npm run test:long`, `npm run monkey`, `npm run coverage`). What they found is fixed:
+
+- A restore that was stopped during its last step (Telemetry killed, power lost, a file held by Windows) could leave a mix of old and restored files. A restore now keeps a short journal, and the next start finishes it.
+- If the connection to Paddock on this computer dropped while a race was downloading, that race was left out and the import was saved without it. An interrupted import now changes nothing and says the connection was interrupted.
+- Leftovers of cut-off saves are cleared at start. Every store (garage, laps, races, the Paddock you used last) now saves the same safe way, and tries again when Windows briefly holds a file.
+- The Library held about 300 setups, not 500: each setup took 6.6 KB in a 2 MB file. It is stored compactly now, with room for 4 MB, so 500 setups with notes fit.
+- Reading and saving a large library is much quicker: setups already checked are not checked again (500 setups: 410 ms → 65 ms to read).
+- The source links under Driver Feedback advice did nothing when clicked. They open in your browser.
+- "Save session & analyze" in Add lap data did nothing, without a word, when a setup value in the closed "Setup and notes" section was not accepted (a pinion of 9.5, say). That section now opens and shows the problem; the same holds in every form.
+
 ### Fixes and speed (full review)
 
 **Your data**

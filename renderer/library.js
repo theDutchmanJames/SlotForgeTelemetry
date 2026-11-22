@@ -156,7 +156,7 @@ function initializeLibrary() {
   $('#library-file').onchange=async event=>{
     const file=event.target.files[0];if(!file)return;
     try{
-      if(file.size>LibraryModel.MAX_BYTES)throw Error('Choose a library backup smaller than 2 MB.');
+      if(file.size>LibraryModel.MAX_BYTES)throw Error('Choose a library backup smaller than 4 MB.');
       const incoming=LibraryModel.decode(await file.text());
       if(libraryError){
         openLibraryTask('restore');libraryTask.entries=incoming;

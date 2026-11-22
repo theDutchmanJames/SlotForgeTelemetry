@@ -6,6 +6,7 @@
 // paddock-local-discovery.js so both clients apply the same rules.
 const fs=require('node:fs'),fsp=require('node:fs/promises'),path=require('node:path'),os=require('node:os'),crypto=require('node:crypto'),{execFile}=require('node:child_process');
 const {validatePayload}=require('./paddock-validation.cjs');
+const {atomicWrite}=require('./data-files.cjs');
 const projection=require('./shared-history-projection.cjs');
 
 const ID=/^[A-Za-z0-9_-]{1,100}$/,KEY=/^[a-f0-9]{64}\.json$/,HEX=/^[a-f0-9]{64}$/;
@@ -152,7 +153,7 @@ class LocalHistoryClient{
   const cap=status.capabilities?.sharedHistory;
   if(cap?.version!==1||cap.features?.historyReads!==true||cap.sessions!=='/v1/shared-history/sessions')throw Error('This Paddock version cannot share its race history yet. Update Paddock.');
   c.name=status.name;this.connection=c;this.selected={databaseId:c.databaseId,name:c.name};
-  try{fs.mkdirSync(path.dirname(this.settingsFile),{recursive:true});fs.writeFileSync(this.settingsFile,JSON.stringify({version:1,...this.selected}));}catch{/* Convenience only. */}
+  try{atomicWrite(this.settingsFile,JSON.stringify({version:1,...this.selected}));}catch{/* Convenience only. */}
   return this.status();
  }
  disconnect(){this.abort.abort();this.abort=new AbortController();this.generation++;this.connection=null;return this.status();}
@@ -165,8 +166,11 @@ class LocalHistoryClient{
   if(Number(response.headers.get('content-length'))>MAX_BYTES){await response.body?.cancel();throw Error('Paddock response exceeds the size limit.');}
   if(!response.body)throw Error('Paddock returned an empty response.');
   const reader=response.body.getReader(),chunks=[];let size=0;
-  try{while(true){const {done,value}=await reader.read();if(done)break;size+=value.length;if(size>MAX_BYTES){await reader.cancel();throw Error('Paddock response exceeds the size limit.');}chunks.push(Buffer.from(value));}}finally{reader.releaseLock();}
-  let result;try{result=JSON.parse(new TextDecoder('utf-8',{fatal:true}).decode(Buffer.concat(chunks)));}catch{throw Error('Paddock returned invalid JSON.');}
+  // A connection cut halfway through a response is a transfer problem, never a reason to leave a race out of the import.
+  const interrupted=()=>Object.assign(Error('The connection to Paddock was interrupted. Existing races are unchanged; try again.'),{transport:true});
+  try{while(true){let part;try{part=await reader.read();}catch(e){if(e?.name==='AbortError'||e?.name==='TimeoutError')throw e;throw interrupted();}const {done,value}=part;if(done)break;size+=value.length;if(size>MAX_BYTES){await reader.cancel();throw Error('Paddock response exceeds the size limit.');}chunks.push(Buffer.from(value));}}finally{reader.releaseLock();}
+  const length=Number(response.headers.get('content-length'));if(response.headers.has('content-length')&&size!==length)throw interrupted();
+  let result;try{result=JSON.parse(new TextDecoder('utf-8',{fatal:true}).decode(Buffer.concat(chunks)));}catch{throw Object.assign(Error('Paddock returned invalid JSON.'),{transport:true});}
   if(!response.ok){
    const e=Error(typeof result?.error==='string'?result.error.slice(0,500):'Paddock request failed ('+response.status+').');e.httpStatus=response.status;e.apiCode=result?.code;
    // Paddock rotates the credential on every restart: rediscover instead of failing.
@@ -217,7 +221,7 @@ class LocalHistoryClient{
    let entry;
    if(prior&&prior.format===e.format&&sameAccepted(prior.accepted,e.accepted))entry=prior;
    else if(e.accepted.state==='withdrawn')entry={format:e.format,sourceId:e.sourceId,sessionId:e.sessionId,accepted:e.accepted,body:null};
-   else{try{entry=await this.download(c,e,get);downloaded++;}catch(err){if(err.retry||err.rediscover||err.apiCode==='SNAPSHOT_CHANGED'||err.name==='AbortError'||err.name==='TimeoutError'||err.httpStatus>=500)throw err;skipped++;continue;}}
+   else{try{entry=await this.download(c,e,get);downloaded++;}catch(err){if(err.retry||err.rediscover||err.transport||err.apiCode==='SNAPSHOT_CHANGED'||err.name==='AbortError'||err.name==='TimeoutError'||err.httpStatus>=500)throw err;skipped++;continue;}}
    bytes+=Buffer.byteLength(JSON.stringify(entry));if(bytes>MAX_CACHE)throw Error('Imported races exceed 200 MiB.');
    sessions.push(entry);
   }
@@ -283,7 +287,7 @@ class LocalHistoryClient{
   if(!HEX.test(hash||'')||!this.cars.hosts.some(h=>h.cars.some(c=>c.photo?.hash===hash)))return null;
   try{const uri=fs.readFileSync(path.join(this.photoDir,hash+'.txt'),'utf8');return PHOTO.test(uri)&&crypto.createHash('sha256').update(uri).digest('hex')===hash?uri:null;}catch{return null;}
  }
- writeJson(file,value,json=true){const text=json?JSON.stringify(value):value;const temp=file+'.'+crypto.randomUUID()+'.tmp';let fd;try{fd=fs.openSync(temp,'wx');fs.writeFileSync(fd,text);fs.fsyncSync(fd);fs.closeSync(fd);fd=undefined;fs.renameSync(temp,file);}catch(e){if(fd!==undefined)fs.closeSync(fd);try{fs.unlinkSync(temp);}catch{}throw e;}}
+ writeJson(file,value,json=true){atomicWrite(file,json?JSON.stringify(value):value);}
  async download(c,e,get){
   const base='/v1/shared-history/sessions/'+e.sourceId+'/'+e.sessionId;
   const head=await get(base);
@@ -307,7 +311,7 @@ class LocalHistoryClient{
   if(hash(value)!==e.accepted.contentHash)throw Error('Downloaded session does not match its Paddock content hash.');
   return checkEntry({format:e.format,sourceId:e.sourceId,sessionId:e.sessionId,accepted:e.accepted,body:value},c.databaseId);
  }
- persist(data){const text=JSON.stringify(data);if(Buffer.byteLength(text)>MAX_CACHE)throw Error('Imported races exceed 200 MiB.');fs.mkdirSync(path.dirname(this.file),{recursive:true});const temp=this.file+'.'+crypto.randomUUID()+'.tmp';let fd;try{fd=fs.openSync(temp,'wx');fs.writeFileSync(fd,text);fs.fsyncSync(fd);fs.closeSync(fd);fd=undefined;fs.renameSync(temp,this.file);}catch(e){if(fd!==undefined)fs.closeSync(fd);try{fs.unlinkSync(temp);}catch{}throw Error('Could not save imported races. Existing races are unchanged. '+e.message);}}
+ persist(data){const text=JSON.stringify(data);if(Buffer.byteLength(text)>MAX_CACHE)throw Error('Imported races exceed 200 MiB.');try{atomicWrite(this.file,text);}catch(e){throw Error('Could not save imported races. Existing races are unchanged. '+e.message);}}
  rebuild(){if(this.busy)throw Error('Wait for the import to finish.');if(!this.loadError)throw Error('The saved races are readable; rebuilding is unnecessary.');const backup=this.file+'.unreadable-'+Date.now();if(fs.existsSync(this.file))fs.renameSync(this.file,backup);this.data={version:1,hosts:[]};this.loadError='';return {...this.status(),backup};}
 }
 module.exports={LocalHistoryClient,scan,directory,descriptor,checkCache,checkCars,hash};

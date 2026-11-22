@@ -1,6 +1,16 @@
 (function(root) {
   const C=typeof module==='object'&&module.exports?require('./calculator-model.js'):root.CalculatorModel;
-  const LIMIT=500,MAX_BYTES=2000000;
+  const LIMIT=500,MAX_BYTES=4000000;
+  // Checking a setup runs every workshop and chassis calculation, and the library checks all its setups on every read and
+  // save. Setups that were already checked are remembered by their exact contents (values are plain text and numbers).
+  const checked=new Map();
+  function cleanSetup(setup){
+    let key;try{key=JSON.stringify(setup);}catch{return C.cleanSetup(setup);}
+    const hit=checked.get(key);if(hit)return {...hit};
+    const out=C.cleanSetup(setup);if(checked.size>=2000)checked.clear();checked.set(key,{...out});
+    // A checked setup is already clean, so it reads back the same when the saved file is opened again.
+    checked.set(JSON.stringify(out),{...out});return out;
+  }
   function name(value) {
     if(typeof value!=='string'||!value.trim()||value.trim().length>100)throw Error('Give the setup a name (1–100 characters).');
     return value.trim();
@@ -10,7 +20,7 @@
     if(typeof value.id!=='string'||!/^[-a-zA-Z0-9_]{1,80}$/.test(value.id))throw Error('Invalid library identifier.');
     for(const key of ['createdAt','updatedAt'])if(typeof value[key]!=='string'||!Number.isFinite(Date.parse(value[key])))throw Error('Invalid library date.');
     if(typeof value.notes!=='string'||value.notes.length>2000)throw Error('Notes must be at most 2,000 characters.');
-    const setup=C.cleanSetup(value.setup);setup.name=name(setup.name);
+    const setup=cleanSetup(value.setup);setup.name=name(setup.name);
     if(value.favourite!==undefined&&typeof value.favourite!=='boolean')throw Error('Invalid favourite mark.');
     return {id:value.id,setup,notes:value.notes,createdAt:value.createdAt,updatedAt:value.updatedAt,...(value.favourite?{favourite:true}:{})};
   }
@@ -21,14 +31,15 @@
     return result;
   }
   function decode(text) {
-    if(typeof text!=='string'||new TextEncoder().encode(text).length>MAX_BYTES)throw Error('Choose a library backup smaller than 2 MB.');
+    if(typeof text!=='string'||new TextEncoder().encode(text).length>MAX_BYTES)throw Error('Choose a library backup smaller than 4 MB.');
     const data=JSON.parse(text);
     if(data?.format!=='slotforge-telemetry-library'||data.version!==1)throw Error('This is not a SlotForge Telemetry library backup.');
     return clean(data.entries);
   }
   function encode(entries) {
-    const text=JSON.stringify({format:'slotforge-telemetry-library',version:1,entries:clean(entries)},null,2);
-    if(new TextEncoder().encode(text).length>MAX_BYTES)throw Error('The library exceeds 2 MB. Shorten notes or export and remove entries before adding more.');
+    // Compact: indented, a setup takes half as much room again, and 500 of them would not fit.
+    const text=JSON.stringify({format:'slotforge-telemetry-library',version:1,entries:clean(entries)});
+    if(new TextEncoder().encode(text).length>MAX_BYTES)throw Error('The library exceeds 4 MB. Shorten notes or export and remove entries before adding more.');
     return text;
   }
   function save(entries,{id,setup,notes='',now,newId}) {

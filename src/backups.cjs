@@ -2,7 +2,7 @@
 // One backup file holds every Telemetry data file: setups, draft, manual laps, garage, imported races and caches.
 // Automatic backups are taken when something changed; every restore is validated first and preceded by a safety backup.
 const fs=require('node:fs'),path=require('node:path'),crypto=require('node:crypto');
-const {atomicWrite,writeTemp,renameRetry}=require('./data-files.cjs');
+const {atomicWrite,writeTemp,renameRetry,sweepTemps}=require('./data-files.cjs');
 const FORMAT='slotforge-telemetry-backup',KEEP=10,MAX_FILE=200*1024*1024,MAX_BUNDLE=600*1024*1024;
 const sha=t=>crypto.createHash('sha256').update(t).digest('hex');
 const json=t=>JSON.parse(t);
@@ -79,14 +79,35 @@ class Backups{
  }
  readFile(file){return this.read(fs.readFileSync(file,'utf8'));}
  // Replace all data with the backup's. A safety backup of the current data is written first; files the backup lacks are removed.
+ // Every new file is written in full first, then a journal lists them, then they are swapped in. If Telemetry is stopped
+ // during the swap (killed, power loss, a locked file), the journal lets the next start finish it: never a mix of old and new.
  restore(checked){
   const safety=this.write(this.dir,'before-restore','before restore'),names=Object.keys(this.validators),temps=new Map();
-  try{for(const name of names){const f=checked.bundle.files[name];if(f)temps.set(name,writeTemp(path.join(this.profile,name),f.text));}}
+  try{for(const name of names){const f=checked.bundle.files[name];if(f)temps.set(name,writeTemp(path.join(this.profile,name),f.text));}
+   atomicWrite(journalFile(this.profile),JSON.stringify({version:1,safety:path.basename(safety.file),files:Object.fromEntries(names.map(n=>[n,temps.has(n)?path.basename(temps.get(n)):null]))}));}
   catch(e){for(const t of temps.values())try{fs.unlinkSync(t);}catch{}throw Error('Nothing was restored: '+e.message);}
-  try{for(const name of names){const file=path.join(this.profile,name);if(temps.has(name)){renameRetry(temps.get(name),file);temps.delete(name);}else fs.rmSync(file,{force:true});}}
-  catch(e){for(const t of temps.values())try{fs.unlinkSync(t);}catch{}const error=Error(`The restore stopped part-way (${e.message}). Telemetry restarts; your previous data is in the backup ${path.basename(safety.file)}.`);error.partial=true;error.safety=safety.file;throw error;}
+  try{finishRestore(this.profile);}
+  catch(e){const error=Error(`The restore stopped part-way (${e.message}). Telemetry restarts and finishes it; your previous data is in the backup ${path.basename(safety.file)}.`);error.partial=true;error.safety=safety.file;throw error;}
   finally{this.settings.lastHash=null;this.saveSettings();}
   return {safety:safety.file};
  }
 }
-module.exports={Backups,knownFiles,LABELS,FORMAT,KEEP};
+const JOURNAL='restore-in-progress.json';
+const journalFile=profile=>path.join(profile,JOURNAL);
+// Completes a restore that was stopped during its swap. Safe to run again at any point: a file already swapped in
+// has no temporary file left. Returns true when there was one to finish.
+function finishRestore(profile){
+ const file=journalFile(profile);let j;
+ try{j=json(fs.readFileSync(file,'utf8'));}catch(e){if(e.code==='ENOENT')return false;fs.rmSync(file,{force:true});return false;}
+ const known=new Set(Object.keys(LABELS));
+ if(j?.version!==1||!j.files||typeof j.files!=='object'){fs.rmSync(file,{force:true});return false;}
+ for(const [name,temp] of Object.entries(j.files)){
+  if(!known.has(name)||temp!==null&&(typeof temp!=='string'||path.basename(temp)!==temp||!temp.startsWith(name+'.')||!temp.endsWith('.tmp')))continue;
+  const target=path.join(profile,name);
+  if(temp===null)fs.rmSync(target,{force:true});else if(fs.existsSync(path.join(profile,temp)))renameRetry(path.join(profile,temp),target);
+ }
+ fs.rmSync(file,{force:true});return true;
+}
+// At start, before any store opens its file: finish an interrupted restore, then clear leftovers of interrupted saves.
+function recover(profile){let finished=false;try{finished=finishRestore(profile);}catch{/* Left for the next start; the safety backup holds the old data. */}if(!fs.existsSync(journalFile(profile)))sweepTemps(profile);return {finished};}
+module.exports={Backups,knownFiles,finishRestore,recover,LABELS,FORMAT,KEEP,JOURNAL};

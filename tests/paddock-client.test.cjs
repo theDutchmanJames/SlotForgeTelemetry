@@ -14,6 +14,7 @@ async function setup(t){
   else if(url.pathname==='/v1/telemetry/results'){value=read(state.stage+'-index');}
   else {value=read(state.stage+'-detail');}
   if(state.mutate)value=state.mutate(value,url)||value;
+  if(state.cut?.(url)){res.writeHead(200,{'Content-Length':'100000'});res.write('{"version":1,"payload":');setTimeout(()=>res.destroy(),30);return;}
   if(state.delayDetail&&url.pathname.includes('/timing-demo/')){state.detailStarted?.();setTimeout(()=>res.end(JSON.stringify(value)),100);}
   else res.end(JSON.stringify(value));
  });await new Promise(r=>server.listen(0,'127.0.0.1',r));t.after(()=>{server.closeAllConnections();server.close();});
@@ -142,4 +143,15 @@ test('a full notification queue does not lock out the host; unreachable hosts ge
  assert.equal(busy.cooldowns.size,0);
  const closed=http.createServer();await new Promise(r=>closed.listen(0,'127.0.0.1',r));const port=closed.address().port;await new Promise(r=>closed.close(r));
  await assert.rejects(()=>new PaddockClient(client.file).connect({address:'127.0.0.1:'+port,password:'test-password'}),/Dealership Mode/);
+});
+test('a network cut halfway through a download keeps the cache whole, and the next sync completes',async t=>{
+ const {state,client,connect}=await setup(t);await connect();await client.sync();const original=fs.readFileSync(client.file,'utf8'),before=structuredClone(client.data);
+ state.stage='corrected';
+ for(const where of ['/v1/telemetry/results/','/v1/telemetry/results'])for(let i=0;i<2;i++){
+  state.cut=url=>url.pathname.startsWith(where)&&(where.endsWith('/')||url.pathname===where);
+  await assert.rejects(()=>client.sync(),/interrupted|invalid JSON|reach Paddock|terminated/i);
+  assert.equal(fs.readFileSync(client.file,'utf8'),original,'the saved cache is untouched');assert.deepEqual(client.data,before);assert.equal(client.busy,false,'not stuck as busy');
+  assert.deepEqual(fs.readdirSync(path.dirname(client.file)).filter(n=>n.endsWith('.tmp')),[]);
+ }
+ state.cut=null;assert.equal((await client.sync()).downloaded,1);assert.notEqual(fs.readFileSync(client.file,'utf8'),original);
 });

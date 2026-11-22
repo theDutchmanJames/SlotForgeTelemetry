@@ -9,8 +9,7 @@ function createWindow() {
     title: 'SlotForge Telemetry', backgroundColor: '#171b21', icon: path.join(__dirname, process.platform === 'win32' ? '../assets/icon.ico' : '../assets/icon.png'),
     webPreferences: { contextIsolation: true, nodeIntegration: false, sandbox: true, preload: path.join(__dirname,'preload.cjs') }
   });
-  win.webContents.setWindowOpenHandler(() => ({ action: 'deny' }));
-  win.webContents.on('will-navigate', event => event.preventDefault());
+  require('./links.cjs').guardLinks(win.webContents);
   win.loadFile(path.join(__dirname, '../renderer/index.html'));
 }
 // A second process must not silently overwrite the first process's draft.
@@ -24,6 +23,8 @@ app.on('second-instance', () => {
 app.whenReady().then(() => {
   // The window starts loading first; checking stored races and laps then overlaps with it. Both happen in this
   // same synchronous step, so every handler exists before the page can send its first request.
+  // A restore or save that was cut off last time is finished or cleared before any store reads its file.
+  require('./backups.cjs').recover(app.getPath('userData'));
   createWindow();
   const paddock=require('./paddock-ipc.cjs').registerPaddock(app.getPath('userData'));
   require('./storage-ipc.cjs').registerStorage(app.getPath('userData'),{version:app.getVersion()});

@@ -1,7 +1,7 @@
 'use strict';
 // Telemetry's own garage: cars that are not in Paddock, and tracks with their lanes.
 // Paddock remains the owner of its cars; those are cached separately by paddock-local.cjs.
-const fs=require('node:fs'),path=require('node:path'),crypto=require('node:crypto');
+const fs=require('node:fs'),crypto=require('node:crypto'),{atomicWrite}=require('./data-files.cjs');
 const ID=/^[A-Za-z0-9_-]{1,100}$/,MAX_CARS=500,MAX_TRACKS=200,MAX_BYTES=4*1024*1024;
 function check(ok,message){if(!ok)throw Error(message);}
 function text(v,name,max,required=true){check(typeof v==='string'&&v.length<=max,`${name} must be text of at most ${max} characters.`);const s=v.trim();check(!required||s,`Enter a ${name.toLowerCase()}.`);return s;}
@@ -46,9 +46,8 @@ class GarageStore{
  reset(){check(this.error,'The garage can be read; there is nothing to recover.');const backup=this.file+'.unreadable-'+Date.now();if(fs.existsSync(this.file))fs.renameSync(this.file,backup);this.data={version:1,cars:[],tracks:[]};this.error='';return {...this.view(),backup};}
  persist(next){
   validate(structuredClone(next));const text=JSON.stringify(next);check(Buffer.byteLength(text)<=MAX_BYTES,'Garage file too large.');
-  fs.mkdirSync(path.dirname(this.file),{recursive:true});const temp=this.file+'.'+crypto.randomUUID()+'.tmp';let fd;
-  try{fd=fs.openSync(temp,'wx');fs.writeFileSync(fd,text);fs.fsyncSync(fd);fs.closeSync(fd);fd=undefined;fs.renameSync(temp,this.file);}
-  catch(e){if(fd!==undefined)fs.closeSync(fd);try{fs.unlinkSync(temp);}catch{}throw Error('Could not save the garage. Nothing was changed. '+e.message);}
+  try{atomicWrite(this.file,text);}
+  catch(e){throw Error('Could not save the garage. Nothing was changed. '+e.message);}
   this.data=next;
  }
 }
