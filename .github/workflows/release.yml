@@ -73,7 +73,13 @@ jobs:
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           npm run test:result-folders-ui
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-          npm run test:race-progress-ui
+          npm run test:laps-ui
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          npm run test:setups-ui
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          npm run test:binder-ui
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          npm run test:calc-map-ui
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           npm run test:paddock-local-ui
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }

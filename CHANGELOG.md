@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.15.0 — 22 November 2026 · Laps, Setups and the new look
 
 ### Stress tests, and what they found
 
